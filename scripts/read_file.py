@@ -1,11 +1,13 @@
 # importing pandas library
 import json
 import csv
+import os
 
 # paths of the different files
 path_of_file_input  = '../logs/connections.log'
 path_of_file_output = '../logs/connections.tsv'
 path_of_file_json   = '../logs/connections.json'
+path_of_temp_json_file = '../logs/connection_'
 
 # start of the lines to be totally removed
 lines_to_remove = [
@@ -106,6 +108,15 @@ with open(path_of_file_output, "r") as f:
         f_out.write(json.dumps(conn_temp))
 '''
 
+def tsv_line_to_dict(row, keys):
+    # creating object to be dumped and writteon on disk
+    conn_temp = {}
+    for i in range(len(keys)):
+        conn_temp[keys[i]] = row[i]
+
+    return conn_temp
+
+'''
 # memory efficient but with ordered data
 with open(path_of_file_output, "r") as f_in:
     with open(path_of_file_json, "w") as f_out:
@@ -141,14 +152,75 @@ with open(path_of_file_output, "r") as f_in:
                 # if it's hasn't changed, just print the ", "
                 f_out.write(', ')
             
-            # creating object to be dumped and writteon on disk
-            conn_temp = {}
-            for i in range(len(keys)):
-                conn_temp[keys[i]] = row[i]
+            conn_temp = tsv_line_to_dict(row, keys)
 
             # dumping in json
             f_out.write(json.dumps(conn_temp))
 
         # writing the end of the file
         f_out.write(']}')
+'''
             
+# memory efficient with non ordered data
+# (using more file to be then regrouped into one)
+with open(path_of_file_output, "r") as f_in:
+    connections_keys = []
+
+    # create reader and start of the json file
+    reader = csv.reader(f_in, delimiter="\t")
+
+    # get the header
+    keys = []
+    for row in reader:
+        keys = row
+        break
+
+    # cycle the lines in the tsv file
+    for row in reader:
+        # get the key
+        key = row[0] + " " + row[1]
+        
+        # open the corrispondent file of the key
+        with open(path_of_temp_json_file + key + '.json', 'a') as f_temp:
+
+            # check if the key hasn't been found before
+            if key not in connections_keys:
+                # append the list of keys found
+                connections_keys.append(key)
+
+                # write the start of the list if key is new
+                f_temp.write('[')
+            else:
+                # if it's hasn't changed, just print the ", "
+                f_temp.write(',\n')
+
+            conn_temp = tsv_line_to_dict(row, keys)
+
+            # dumping in json
+            f_temp.write(json.dumps(conn_temp))
+
+with open(path_of_file_json, "w") as f_out:
+    # writing the start of the JSON
+    f_out.write('{')
+
+    # reading from all the files to create the main file
+    # with all the connections (deleting the files one at a time)
+    count = 0
+    for key in connections_keys:
+        path = path_of_temp_json_file + key + '.json'
+
+        with open(path, 'r') as f:
+            if count > 0:
+                f_out.write("], ")
+            count += 1
+
+            # writing the key
+            f_out.write("\"" + key + "\": ")
+            for line in f:
+                f_out.write(line)
+        
+        # removing file from disk after reading it
+        os.remove(path)
+
+    # writing the end of the file
+    f_out.write(']}')

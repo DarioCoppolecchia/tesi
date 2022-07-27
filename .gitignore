@@ -1,2 +1,3 @@
 *.log
-!connections.log
+*.tsv
+*.json

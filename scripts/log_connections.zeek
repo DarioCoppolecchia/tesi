@@ -88,61 +88,76 @@ event connection_timeout(c: connection) {
     local conn = conn_to_ConnInfo(c, TIMEOUT);
 
     # logging on the console the connection
-    #print_conn(conn);
-    add connections[conn];
+    Log::write( 
+        SaveConn::LOG_CONN, 
+        [ 
+            $orig = conn$socket$orig_h,
+            $resp = conn$socket$resp_h,
+            $connection = conn
+        ]
+    );
+    #add connections[conn];
 }
 
 event connection_state_remove(c: connection) {
     # converting
     local conn = conn_to_ConnInfo(c, REMOVED);
 
-    add connections[conn];
+    Log::write( 
+        SaveConn::LOG_CONN, 
+        [ 
+            $orig = conn$socket$orig_h,
+            $resp = conn$socket$resp_h,
+            $connection = conn
+        ]
+    );
+    #add connections[conn];
 }
 
 event zeek_done() {
-    local i: count = 0;
-    local conn_visited: table[addr, addr] of bool;
-    local connections_grouped: table[addr, addr] of set[ConnInfo]; 
-
-    for (c in connections) {
-        conn_visited[c$socket$orig_h, c$socket$resp_h] = F;
-    }
-
-    for (c in connections) {
-        if (!conn_visited[c$socket$orig_h, c$socket$resp_h]) {
-            connections_grouped[c$socket$orig_h, c$socket$resp_h] = set();
-            conn_visited[c$socket$orig_h, c$socket$resp_h] = T;
-        }
-        add connections_grouped[c$socket$orig_h, c$socket$resp_h][c];
-    }
-
-    for ( [orig, resp], set_con in connections_grouped ) {
-        local output: string = "";
-
-        print "logging: ";
-        print fmt(" %s to %s: ", cat(orig), cat(resp));
-
-        for (c in set_con) {
-            print "    " + cat(c) + ",";
-        }
-        print "]";
-
-        for (c in set_con) {
-
-            Log::write( 
-                SaveConn::LOG_CONN, 
-                [ 
-                    $orig = orig,
-                    $resp = resp,
-                    $connection = c
-                    #$orig_port = c$socket$orig_p,
-                    #$resp_port = c$socket$resp_p,
-                    #$ts = c$ts,
-                    #$uid = c$uid,
-                    #$services = c$services,
-                    #$state = stateOut
-                ]
-            );
-        }
-    }
+    #local i: count = 0;
+    #local conn_visited: table[addr, addr] of bool;
+    #local connections_grouped: table[addr, addr] of set[ConnInfo]; 
+#
+    #for (c in connections) {
+    #    conn_visited[c$socket$orig_h, c$socket$resp_h] = F;
+    #}
+#
+    #for (c in connections) {
+    #    if (!conn_visited[c$socket$orig_h, c$socket$resp_h]) {
+    #        connections_grouped[c$socket$orig_h, c$socket$resp_h] = set();
+    #        conn_visited[c$socket$orig_h, c$socket$resp_h] = T;
+    #    }
+    #    add connections_grouped[c$socket$orig_h, c$socket$resp_h][c];
+    #}
+#
+    #for ( [orig, resp], set_con in connections_grouped ) {
+    #    local output: string = "";
+#
+    #    print "logging: ";
+    #    print fmt(" %s to %s: ", cat(orig), cat(resp));
+#
+    #    for (c in set_con) {
+    #        print "    " + cat(c) + ",";
+    #    }
+    #    print "]";
+#
+    #    for (c in set_con) {
+#
+    #        Log::write( 
+    #            SaveConn::LOG_CONN, 
+    #            [ 
+    #                $orig = orig,
+    #                $resp = resp,
+    #                $connection = c
+    #                #$orig_port = c$socket$orig_p,
+    #                #$resp_port = c$socket$resp_p,
+    #                #$ts = c$ts,
+    #                #$uid = c$uid,
+    #                #$services = c$services,
+    #                #$state = stateOut
+    #            ]
+    #        );
+    #    }
+    #}
 }
