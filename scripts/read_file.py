@@ -217,6 +217,7 @@ with open(path_of_file_json, "w") as f_out:
             # writing the key
             f_out.write("\"" + key + "\": ")
             for line in f:
+                line = line.replace('\n', '')
                 f_out.write(line)
         
         # removing file from disk after reading it
