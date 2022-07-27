@@ -23,6 +23,8 @@ lines_to_remove_ash = [
 
 strings_to_filter_rows = [
     'SaveConn::',
+    '(empty)',
+    'connection.',
 ]
 
 # normalizing lines
@@ -93,14 +95,36 @@ with open(path_of_file_output, "r") as f_in:
         reader = csv.reader(f_in, delimiter="\t")
         f_out.write('{')
 
-        keys = list(reader)[0] # get the header
-        next(reader, None)  # skip the header
+        # get the header
+        keys = []
+        for row in reader:
+            keys = row
+            break
 
+        count = 0
         prev_key = '' # used to know when a new connection is incoming
-        for row in reader: # TODO continuare la scrittura
-            f_out.write()
+        for row in reader:
+            key = row[0] + " " + row[1]
+            if prev_key != key:
+                prev_key = key
+                if count > 0:
+                    f_out.write("], ")
+                count += 1
 
-        f_out.write('}')
+                f_out.write("\"" + key + "\": [")
+            else:
+                f_out.write(', ')
+            
+            conn_temp = {}
+            # creating object
+            for i in range(len(keys)):
+                conn_temp[keys[i]] = row[i]
+
+            # dumping in json
+
+            f_out.write(json.dumps(conn_temp))
+
+        f_out.write(']}')
             
 
 
