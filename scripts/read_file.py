@@ -185,9 +185,12 @@ with open(path_of_file_output, "r") as f_in:
     for row in reader:
         # get the key
         key = row[0] + " " + row[1]
+
+        path = path_of_temp_json_file + key + '.json'
+        path = path.replace(':', '-')
         
         # open the corrispondent file of the key
-        with open(path_of_temp_json_file + key + '.json', 'a') as f_temp:
+        with open(path, 'a') as f_temp:
 
             # check if the key hasn't been found before
             if key not in connections_keys:
@@ -219,6 +222,7 @@ with open(path_of_file_json, "w") as f_out:
     count = 0
     for key in connections_keys:
         path = path_of_temp_json_file + key + '.json'
+        path = path.replace(':', '-')
 
         with open(path, 'r') as f:
             if count > 0:
