@@ -33,6 +33,7 @@ strings_to_filter_rows = [
     'connection.',
 ]
 
+print('normalizing lines...')
 # normalizing lines
 with open(path_of_file_input, "r+") as f_in:
     with open(path_of_file_output, 'w') as f_out:
@@ -55,6 +56,9 @@ with open(path_of_file_input, "r+") as f_in:
 
                 # writing lines to new file
                 f_out.write(line)
+os.remove(path_of_file_input)
+
+print('...normalizations completed')
 
 # printing the connections in a json file
 # memory inefficient with unordered data
@@ -160,6 +164,8 @@ with open(path_of_file_output, "r") as f_in:
         # writing the end of the file
         f_out.write(']}')
 '''
+
+print('creating the temporary files...')
             
 # memory efficient with non ordered data
 # (using more file to be then regrouped into one)
@@ -198,6 +204,11 @@ with open(path_of_file_output, "r") as f_in:
 
             # dumping in json
             f_temp.write(json.dumps(conn_temp))
+os.remove(path_of_file_output)
+
+print('...temporary files created')
+
+print('merging files...')
 
 with open(path_of_file_json, "w") as f_out:
     # writing the start of the JSON
@@ -225,3 +236,5 @@ with open(path_of_file_json, "w") as f_out:
 
     # writing the end of the file
     f_out.write(']}')
+
+print('...file merged')
