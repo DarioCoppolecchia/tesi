@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class Packet:
     '''Class of a single packet registered'''
     uid: str
