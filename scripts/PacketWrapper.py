@@ -13,6 +13,16 @@ class PacketWrapper:
             return self.packets.append(p)
         else:
             raise KeyError
+    
+    def to_json_obj(self) -> object:
+        packets = []
+        for packet in self.packets:
+            packets.append(packet.to_json_obj())
+
+        return {
+            "id": self.id,
+            "packets": packets,
+        }
 
     # eq
     # init

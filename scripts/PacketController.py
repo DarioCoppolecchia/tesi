@@ -1,8 +1,6 @@
 # importing pandas library
 import json
-import csv
 from operator import truediv
-import os
 from PacketWrapper import PacketWrapper
 from Packet import Packet
 
@@ -11,9 +9,8 @@ class PacketController:
     def __init__(self, 
         path_of_file_input: str,
         path_of_file_output: str='',
-        path_of_file_json: str='', 
-        path_of_temp_json_file: str='', 
-        lines_to_remove: list=[], 
+        path_of_file_json: str='',
+        lines_to_remove: list=[],
         lines_to_remove_ash: list=[],
         strings_to_filter_rows: list=[],
         to_file: bool=False,
@@ -21,7 +18,6 @@ class PacketController:
         self.path_of_file_input = path_of_file_input
         self.path_of_file_output = path_of_file_output
         self.path_of_file_json = path_of_file_json
-        self.path_of_temp_json_file = path_of_temp_json_file
         self.lines_to_remove = lines_to_remove
         self.lines_to_remove_ash = lines_to_remove_ash
         self.strings_to_filter_rows = strings_to_filter_rows
@@ -33,6 +29,7 @@ class PacketController:
     def load_paths_and_filters_from_config_file(self, config_file_path):
         '''loads all path and filters form the ini file'''
         import configparser
+        print('reading config option from file...')
         config = configparser.ConfigParser()
         config.read(config_file_path)
         self.path_of_file_output = config['Files']['path_of_file_output']
@@ -41,6 +38,7 @@ class PacketController:
         self.lines_to_remove = config['Filters']['lines_to_remove'].replace('\'', '').split(',')
         self.lines_to_remove_ash = config['Filters']['lines_to_remove_ash'].replace('\'', '').split(',')
         self.strings_to_filter_rows = config['Filters']['strings_to_filter_rows'].replace('\'', '').split(',')
+        print('...reading complete')
 
 
     def open_stored_preprocessed_lines(self) -> list:
@@ -129,4 +127,12 @@ class PacketController:
 
         return Packet(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
         
+    def print_packetWrapper_dict_to_json_file(self):
+        with open(self.path_of_file_json, 'w') as f:
+            to_json = []
+            for pw in self.packetWrapper_dict.values():
+                to_json.append(pw.to_json_obj())
+            
+            json.dump(to_json, f, indent=4)
+
 
