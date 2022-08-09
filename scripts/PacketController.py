@@ -23,7 +23,7 @@ class PacketController:
         self.strings_to_filter_rows = strings_to_filter_rows
         self.to_file = to_file
         self.path_of_stored_lines = path_of_stored_lines
-        self.packetWrapper_dict =  {} # dict of packet wrapper from preprocessed lines
+        self.packetWrapper_list = [] # list of packet wrapper from preprocessed lines
         pass
     
     def load_paths_and_filters_from_config_file(self, config_file_path):
@@ -42,29 +42,22 @@ class PacketController:
 
 
     def open_stored_preprocessed_lines(self) -> list:
+        print('reading stored lines from file...')
         with open(self.path_of_stored_lines, 'r') as f:
             preprocessed_lines = []
             for line in f:
                 preprocessed_lines.append(line)
+
+            print('...reading complete')
             return preprocessed_lines
 
-    def tsv_line_to_dict(self, row, keys) -> object:
-        # creating object to be dumped and writteon on disk
-        conn_temp = {}
-        for i in range(len(keys)):
-            conn_temp[keys[i]] = row[i]
-
-        return conn_temp
-
-    def print_preprocessed_lines_to_file(self, preprocessed_lines: list) -> bool:
-        if self.path_of_file_output != '':
-            with open(self.path_of_file_output, 'w') as f_out:
-                # writing lines to new file
-                for line in preprocessed_lines:
-                    f_out.write(line)
-            return True
-        else:
-            return False
+    def print_preprocessed_lines_to_file(self, preprocessed_lines: list):
+        print('printing preprocessed lines to file...')
+        with open(self.path_of_file_output, 'w') as f_out:
+            # writing lines to new file
+            for line in preprocessed_lines:
+                f_out.write(line)
+        print('...printing complete')
 
     def normalize_lines(self) -> list:
         '''normalize lines from file and if the path_of_file_output
@@ -90,19 +83,24 @@ class PacketController:
                     for string in self.strings_to_filter_rows: 
                         line = line.replace(string, '')
                     preprocessed_lines.append(line)
+        print('...normalization completed')
         return preprocessed_lines
 
-    def conv_lines_to_PacketWrapper_list(self, preprocessed_lines: list) -> dict:
+    def conv_lines_to_PacketWrapper_list(self, preprocessed_lines: list) -> list:
+        print('converting preprocessed lines to list of packet wrappers...')
         packets = self.conv_lines_to_list_of_Packet(preprocessed_lines)
         
+        packetWrapper_dict = {}
         for p in packets:
             id = p.generate_id()
 
-            if id not in self.packetWrapper_dict:
-                self.packetWrapper_dict[id] = PacketWrapper(id, [p])
+            if id not in packetWrapper_dict:
+                packetWrapper_dict[id] = PacketWrapper(id, [p])
             else:
-                self.packetWrapper_dict[id].add_packet(p)
-        return self.packetWrapper_dict
+                packetWrapper_dict[id].add_packet(p)
+        print('...conversion completed')
+        self.packetWrapper_list = list(packetWrapper_dict.values())
+        return self.packetWrapper_list
         
     def conv_lines_to_list_of_Packet(self, preprocessed_lines: list) -> list:
         packets = []
@@ -127,12 +125,14 @@ class PacketController:
 
         return Packet(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
         
-    def print_packetWrapper_dict_to_json_file(self):
+    def print_packetWrapper_list_to_json_file(self):
+        print('writing the list of packet to a json file...')
         with open(self.path_of_file_json, 'w') as f:
             to_json = []
-            for pw in self.packetWrapper_dict.values():
+            for pw in self.packetWrapper_list:
                 to_json.append(pw.to_json_obj())
             
             json.dump(to_json, f, indent=4)
+        print('...writing completed')
 
 
