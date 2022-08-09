@@ -2,3 +2,4 @@
 *.tsv
 *.json
 *WorkingHours.pcap
+__pycache__/
