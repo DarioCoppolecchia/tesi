@@ -3,7 +3,7 @@ import json
 import csv
 from operator import truediv
 import os
-
+from PacketWrapper import PacketWrapper
 from Packet import Packet
 
 class PacketController:
@@ -27,7 +27,7 @@ class PacketController:
         self.strings_to_filter_rows = strings_to_filter_rows
         self.to_file = to_file
         self.path_of_stored_lines = path_of_stored_lines
-        self.packetWrapper_list = [] # list of packet wrapper from preprocessed lines
+        self.packetWrapper_dict =  {} # dict of packet wrapper from preprocessed lines
         pass
     
     def load_paths_and_filters_from_config_file(self, config_file_path):
@@ -45,9 +45,10 @@ class PacketController:
 
     def open_stored_preprocessed_lines(self) -> list:
         with open(self.path_of_stored_lines, 'r') as f:
+            preprocessed_lines = []
             for line in f:
-                self.preprocessed_lines.append(line)
-            return self.preprocessed_lines
+                preprocessed_lines.append(line)
+            return preprocessed_lines
 
     def tsv_line_to_dict(self, row, keys) -> object:
         # creating object to be dumped and writteon on disk
@@ -57,11 +58,11 @@ class PacketController:
 
         return conn_temp
 
-    def print_lines_to_file(self) -> bool:
+    def print_preprocessed_lines_to_file(self, preprocessed_lines: list) -> bool:
         if self.path_of_file_output != '':
             with open(self.path_of_file_output, 'w') as f_out:
                 # writing lines to new file
-                for line in self.preprocessed_lines:
+                for line in preprocessed_lines:
                     f_out.write(line)
             return True
         else:
@@ -93,24 +94,39 @@ class PacketController:
                     preprocessed_lines.append(line)
         return preprocessed_lines
 
+    def conv_lines_to_PacketWrapper_list(self, preprocessed_lines: list) -> dict:
+        packets = self.conv_lines_to_list_of_Packet(preprocessed_lines)
+        
+        for p in packets:
+            id = p.generate_id()
+
+            if id not in self.packetWrapper_dict:
+                self.packetWrapper_dict[id] = PacketWrapper(id, [p])
+            else:
+                self.packetWrapper_dict[id].add_packet(p)
+        return self.packetWrapper_dict
+        
     def conv_lines_to_list_of_Packet(self, preprocessed_lines: list) -> list:
         packets = []
         
         for line in preprocessed_lines:
             packets.append(self.conv_line_to_Packet(line))
+
         return packets
 
     def conv_line_to_Packet(self, line: str) -> Packet:
         list_to_pack = line.split('\t')
-        print(list_to_pack)
-        
 
-    def conv_lines_to_PacketWrapper_list(self, preprocessed_lines: list) -> list:
-        #print(preprocessed_lines)
-        packets = self.conv_lines_to_list_of_Packet(preprocessed_lines)
+        # getting info to insert in Packet
+        uid = list_to_pack[1]
+        orig_ip = list_to_pack[2]
+        orig_port = list_to_pack[3]
+        resp_ip = list_to_pack[4]
+        resp_port = list_to_pack[5]
+        ts = list_to_pack[0]
+        services = list_to_pack[7]
+        state = list_to_pack[11]
 
-        '''for p in packets:
-            packet = '''
-        
+        return Packet(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
         
 
