@@ -1,5 +1,4 @@
-from src.PacketsModule.Packets import PacketController
-
+from PacketsModule.Packets import PacketController
 
 def main():
     # test

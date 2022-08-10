@@ -3,4 +3,4 @@
 *.json
 *WorkingHours.pcap
 scripts/__pycache__/
-build/*
+*/build/*

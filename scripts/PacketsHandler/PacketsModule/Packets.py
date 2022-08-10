@@ -9,15 +9,22 @@ class Packet:
     This class contains all of the data that are going to be used
     to classify this packet
 
-    Args:
-        uid (str): unique id of this connection
-        orig_ip (str): ip of the origin host
-        orig_port (int): port of the origin host
-        resp_ip (str): ip of the responder host
-        resp_port (int): port of the responder host
-        ts (str): timestamp of this connection
-        services (str): service used for this connection
-        state (str): state of the connection
+    :param uid: unique id of this connection
+    :type uid: str
+    :param orig_ip: ip of the origin host
+    :type orig_ip: str
+    :param orig_port: port of the origin host
+    :type orig_port: int
+    :param resp_ip: ip of the responder host
+    :type resp_ip: str
+    :param resp_port: port of the responder host
+    :type resp_port: int
+    :param ts: timestamp of this connection
+    :type ts: str
+    :param services: service used for this connection
+    :type services: str
+    :param state: state of the connection
+    :type state: str
     '''
     uid: str
     orig_ip: str
@@ -32,8 +39,8 @@ class Packet:
         """
         generate an id of this packet
 
-        Returns:
-            str: the id based on the origin and responder ip and port
+        :return: the id based on the origin and responder ip and port
+        :rtype: str
         """        
         return self.orig_ip + " " + self.orig_port + " " + self.resp_ip + " " + self.resp_port
 
@@ -41,9 +48,9 @@ class Packet:
         """
         converts this class object to an object that can be easily dumped in a json file
 
-        Returns:
-            object: object that can be converted to a json file
-        """        
+        :return: object that can be converted to a json file
+        :rtype: object
+        """
         return {
             "uid": self.uid,
             "orig_ip": self.orig_ip,
@@ -67,29 +74,25 @@ class Packet:
 @dataclass
 class PacketWrapper:
     """
-    Class that contains multiple Packets with the same id
-
     This class contains all the packets that are being originated by the same
     ip and port of origin and responder hosts.
 
-    Args:
-        id (str): a combination of the ip and port of origin and responder host
-        packets (list[Packet]): list of the packets excanged by the hosts according
-            that port
+    
+    :param id: a combination of the ip and port of origin and responder host
+    :type id: str
+    :param packets: list of the packets excanged by the hosts according that port
+    :type packets: list[Packet]
     """
     id: str
     packets: list[Packet] = field(default_factory=list)
 
     def add_packet(self, p: Packet):
         """
-        adds the packet p to the list only if the id is equal to the
-        id of the object
+        Class that contains multiple Packets with the same id
 
-        Args:
-            p (Packet): the packet to be added to this wrapper
-
-        Raises:
-            KeyError: raises a KeyError if the id of the packet doesn't match
+        :param p: the packet to be added to this wrapper
+        :type p: Packet
+        :raises KeyError: raises a KeyError if the id of the packet doesn't match
         """
         if p.generate_id() == self.id:
             self.packets.append(p)
@@ -97,11 +100,10 @@ class PacketWrapper:
             raise KeyError
     
     def to_json_obj(self) -> object:
-        """
-        Convert this object to an object that can be easily converted to a json
+        """Convert this object to an object that can be easily converted to a json
 
-        Returns:
-            object: this object as a dumpable object
+        :return: this object as a dumpable object
+        :rtype: object
         """
         packets = []
         for packet in self.packets:
@@ -121,13 +123,18 @@ class PacketController:
     """
     Class that contains the method used to filter and organize packets
 
-    Args:
-        path_of_file_input (str): path of the file that contains the logs to be acquired
-        path_of_file_output (str): path of the file where the preprocessed lines are stored or will be stored
-        path_of_file_json (str): path of the file where to write the json file
-        lines_to_remove (list): list of the lines to remove from the log file
-        lines_to_remove_ash (list): list of the # to remove from the file
-        strings_to_filter_rows (list): list of string to be filtered out
+    :param path_of_file_input: path of the file that contains the logs to be acquired
+    :type path_of_file_input: str
+    :param path_of_file_output: path of the file where the preprocessed lines are stored or will be stored
+    :type path_of_file_output: str
+    :param path_of_file_json: path of the file where to write the json file
+    :type path_of_file_json: str
+    :param lines_to_remove: list of the lines to remove from the log file
+    :type lines_to_remove: list[str]
+    :param lines_to_remove_ash: list of the # to remove from the file
+    :type lines_to_remove_ash: list[str]
+    :param strings_to_filter_rows: list of string to be filtered out
+    :type strings_to_filter_rows: list[str]
     """
     def __init__(self, 
         path_of_file_input: str,
@@ -136,6 +143,8 @@ class PacketController:
         lines_to_remove: list=[],
         lines_to_remove_ash: list=[],
         strings_to_filter_rows: list=[]) -> None:
+        """Constructor Method
+        """
         self.path_of_file_input = path_of_file_input
         self.path_of_file_output = path_of_file_output
         self.path_of_file_json = path_of_file_json
@@ -146,7 +155,12 @@ class PacketController:
         pass
     
     def load_paths_and_filters_from_config_file(self, config_file_path):
-        '''loads all path and filters form the ini file'''
+        """
+        loads all path and filters form the ini file
+
+        :param config_file_path: path of the configuration path
+        :type config_file_path: str
+        """   
         import configparser
         print('reading config option from file...')
         config = configparser.ConfigParser()
@@ -178,8 +192,13 @@ class PacketController:
 
 
     def open_stored_preprocessed_lines(self) -> list:
-        '''read stored preprocessed lines from a file specified in the
-           path_of_file_output of this object'''
+        """
+        read stored preprocessed lines from a file specified in the
+        path_of_file_output of this object
+
+        :return: pre-processed lines red from file
+        :rtype: list(str)
+        """
         print('reading stored lines from file...')
         with open(self.path_of_file_output, 'r') as f:
             preprocessed_lines = []
@@ -190,8 +209,13 @@ class PacketController:
             return preprocessed_lines
 
     def print_preprocessed_lines_to_file(self, preprocessed_lines: list):
-        '''prints preprocessed lines to a file specified in the path_of_file_output
-           field of this object'''
+        """
+        prints preprocessed lines to a file specified in the path_of_file_output
+        field of this object
+
+        :param preprocessed_lines: preprocessed lines to be printed to file
+        :type preprocessed_lines: list(str)
+        """
         print('printing preprocessed lines to file...')
         with open(self.path_of_file_output, 'w') as f_out:
             # writing lines to new file
@@ -200,8 +224,13 @@ class PacketController:
         print('...printing complete')
 
     def normalize_lines(self) -> list:
-        '''normalize lines from file and if the path_of_file_output
-           is set, prints the lines to a file'''
+        """
+        normalize lines from file and if the path_of_file_output
+        is set, prints the lines to a file
+
+        :return: lines that have been normalized
+        :rtype: list(str)
+        """
         print('normalizing lines...')
         preprocessed_lines = []
         # normalizing lines
@@ -227,7 +256,14 @@ class PacketController:
         return preprocessed_lines
 
     def conv_lines_to_PacketWrapper_list(self, preprocessed_lines: list) -> list:
-        '''Wrappes a list of preprocessed lines to a list of PacketWrapper'''
+        """
+        Wrappes a list of preprocessed lines to a list of PacketWrapper
+
+        :param preprocessed_lines: list of the strings to be normalized
+        :type preprocessed_lines: list(str)
+        :return: list of strings that have been normalized
+        :rtype: list(str)
+        """        
         print('converting preprocessed lines to list of packet wrappers...')
         packets = self.__conv_lines_to_list_of_Packet(preprocessed_lines)
         
@@ -244,7 +280,14 @@ class PacketController:
         return self.packetWrapper_list
         
     def __conv_lines_to_list_of_Packet(self, preprocessed_lines: list) -> list:
-        '''converts a list of preprocessed lines to a list of Packets'''
+        """
+        converts a list of preprocessed lines to a list of Packets
+
+        :param preprocessed_lines: list of lines to be converted to list of Packets
+        :type preprocessed_lines: list(str)
+        :return: list of Packets converted from list of lines
+        :rtype: list(Packet)
+        """        
         packets = []
         
         for line in preprocessed_lines:
@@ -253,7 +296,14 @@ class PacketController:
         return packets
 
     def __conv_conn_line_to_Packet(self, line: str) -> Packet:
-        '''converts a conn.log line to a Packet'''
+        """
+        converts a conn.log line to a Packet
+
+        :param line: line to be converted to Packet
+        :type line: str
+        :return: Packet converted from line
+        :rtype: Packet
+        """
         list_to_pack = line.split('\t')
 
         # getting info to insert in Packet
@@ -269,7 +319,8 @@ class PacketController:
         return Packet(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
         
     def print_packetWrapper_list_to_json_file(self):
-        '''prints all the packetwrapper list to a json file'''
+        """prints all the packetwrapper list to a json file
+        """
         print('writing the list of packet to a json file...')
         with open(self.path_of_file_json, 'w') as f:
             to_json = []
