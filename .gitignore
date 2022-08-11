@@ -2,5 +2,5 @@
 *.tsv
 *.json
 *WorkingHours.pcap
-scripts/__pycache__/
-*/build/*
+scripts/PacketsHandler/PacketsModule/__pycache__
+scripts/PacketsHandler/build
