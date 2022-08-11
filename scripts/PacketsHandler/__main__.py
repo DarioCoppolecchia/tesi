@@ -2,13 +2,30 @@ from PacketsModule.Packets import PacketController
 import os
 
 class Main:
+    """
+    Class that contains the UI and the startup routine of the application
+
+    Args:
+        config_path (str): if provided, the application loads the configuration options from the file at that path
+    """
     def __init__(self, config_path: str = '') -> None:
+        """Constructor of class Main
+
+        :param config_path: if provided, the application loads the configuration options from the file at that path, defaults to ''
+        :type config_path: str, optional
+        """
         if config_path == '':
             config_path = input('type the path of the config.ini file\n> ')
         self.start_application(config_path)
         self.main_loop()
 
     def start_application(self, config_path: str = ''):
+        """The routine of the startup of the class that consists in reading all the configuration options
+        from the config file or from the user if the confi_path isn't given
+
+        :param config_path: path of the configuration file, defaults to ''
+        :type config_path: str, optional
+        """
         self.pc = PacketController()
 
         if config_path != '':
@@ -23,6 +40,9 @@ class Main:
             self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of PacketWrapper (optional)\n> ')
 
     def main_loop(self):
+        """
+        main loop of the application containig the UI elements that control the PacketController
+        """
         while True:
             op = input("""\ntype the number for the various options: 
  1) read and normalize lines from the file stored in path_of_file_input
@@ -77,6 +97,14 @@ class Main:
                 print('command not valid, enter an integer number between 1 and 11')
     
     def __get_lines_from_input(self, message: str) -> list:
+        """returns a list filled from the std input and for each element of the list
+        prints the message given as a parameter
+
+        :param message: message to be displayed before each line of input
+        :type message: str
+        :return: list filled by the user via std input
+        :rtype: list
+        """
         lines = []
         while True:
             temp = input('type:\n- ' + message + ' or\n- END: to end the list\n> ')
