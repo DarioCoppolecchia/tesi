@@ -14,9 +14,10 @@ class Main:
         if config_path != '':
             self.pc.load_paths_and_filters_from_config_file(config_path)
         else:
-            self.pc.lines_to_remove = self.get_lines_from_input('the line to add to the list of lines to remove')
-            self.pc.lines_to_remove_ash = self.get_lines_from_input('the line to add to the list of lines where to remove the start of the line')
-            self.pc.strings_to_filter_rows = self.get_lines_from_input('the string to add to the list of strings to filter out')
+            print('path of the config file not given, enter config options manually:')
+            self.pc.lines_to_remove = self.__get_lines_from_input('the line to add to the list of lines to remove')
+            self.pc.lines_to_remove_ash = self.__get_lines_from_input('the line to add to the list of lines where to remove the start of the line')
+            self.pc.strings_to_filter_rows = self.__get_lines_from_input('the string to add to the list of strings to filter out')
             self.pc.path_of_file_input = input('type the path of the file containing the lines of the packets to analyze\n> ')
             self.pc.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
             self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of PacketWrapper (optional)\n> ')
@@ -75,7 +76,7 @@ class Main:
             else:
                 print('command not valid, enter an integer number between 1 and 11')
     
-    def get_lines_from_input(self, message: str) -> list:
+    def __get_lines_from_input(self, message: str) -> list:
         lines = []
         while True:
             temp = input('type:\n- ' + message + ' or\n- END: to end the list\n> ')
@@ -83,7 +84,9 @@ class Main:
                 break
             else:
                 lines.append(temp)
+            
+        os.system('clear')
         return lines
 
 if __name__ == "__main__":
-    Main(config_path='config.ini')
+    Main()
