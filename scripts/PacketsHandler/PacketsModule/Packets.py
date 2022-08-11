@@ -124,20 +124,24 @@ class PacketController:
     Class that contains the method used to filter and organize packets
 
     :param path_of_file_input: path of the file that contains the logs to be acquired
-    :type path_of_file_input: str
+    :type path_of_file_input: str, optional
     :param path_of_file_output: path of the file where the preprocessed lines are stored or will be stored
-    :type path_of_file_output: str
+    :type path_of_file_output: str, optional
     :param path_of_file_json: path of the file where to write the json file
-    :type path_of_file_json: str
+    :type path_of_file_json: str, optional
     :param lines_to_remove: list of the lines to remove from the log file
-    :type lines_to_remove: list[str]
+    :type lines_to_remove: list[str], optional
     :param lines_to_remove_ash: list of the # to remove from the file
-    :type lines_to_remove_ash: list[str]
+    :type lines_to_remove_ash: list[str], optional
     :param strings_to_filter_rows: list of string to be filtered out
-    :type strings_to_filter_rows: list[str]
+    :type strings_to_filter_rows: list[str], optional
+    :param packetWrapper_list: list of the PacketWrapper
+    :type packetWrapper_list: list[PacketWrapper]
+    :param preprocessd_lines: list of preprocessed lines
+    :type preprocessd_lines: list[str]
     """
     def __init__(self, 
-        path_of_file_input: str,
+        path_of_file_input: str='',
         path_of_file_output: str='',
         path_of_file_json: str='',
         lines_to_remove: list=[],
@@ -151,7 +155,8 @@ class PacketController:
         self.lines_to_remove = lines_to_remove
         self.lines_to_remove_ash = lines_to_remove_ash
         self.strings_to_filter_rows = strings_to_filter_rows
-        self.packetWrapper_list = [] # list of packet wrapper from preprocessed lines
+        self.packetWrapper_list = []
+        self.preprocessed_lines = []
         pass
     
     def load_paths_and_filters_from_config_file(self, config_file_path):
@@ -168,11 +173,13 @@ class PacketController:
 
         # checks if Files is in config.ini file
         if 'Files' in config:
+            self.path_of_file_input = config['Files']['path_of_file_input'] if 'path_of_file_input' in config['Files'] else ''
             self.path_of_file_output = config['Files']['path_of_file_output'] if 'path_of_file_output' in config['Files'] else ''
             self.path_of_file_json = config['Files']['path_of_file_json']  if 'path_of_file_json' in config['Files'] else ''
         else:
-            self.path_of_file_output = ''
-            self.path_of_file_json = ''
+            self.path_of_file_input = self.path_of_file_input if self.path_of_file_input != '' else ''
+            self.path_of_file_output = self.path_of_file_output if self.path_of_file_output != '' else ''
+            self.path_of_file_json = self.path_of_file_json if self.path_of_file_json != '' else ''
 
         # checks if Filters is in config.ini file
         if 'Filters' in config:
@@ -201,25 +208,23 @@ class PacketController:
         """
         print('reading stored lines from file...')
         with open(self.path_of_file_output, 'r') as f:
-            preprocessed_lines = []
+            self.preprocessed_lines = []
             for line in f:
-                preprocessed_lines.append(line)
+                self.preprocessed_lines.append(line)
 
             print('...reading complete')
-            return preprocessed_lines
+        return self.preprocessed_lines
 
-    def print_preprocessed_lines_to_file(self, preprocessed_lines: list):
+    def print_preprocessed_lines_to_file(self):
         """
         prints preprocessed lines to a file specified in the path_of_file_output
         field of this object
 
-        :param preprocessed_lines: preprocessed lines to be printed to file
-        :type preprocessed_lines: list(str)
         """
         print('printing preprocessed lines to file...')
         with open(self.path_of_file_output, 'w') as f_out:
             # writing lines to new file
-            for line in preprocessed_lines:
+            for line in self.preprocessed_lines:
                 f_out.write(line)
         print('...printing complete')
 
@@ -232,7 +237,7 @@ class PacketController:
         :rtype: list(str)
         """
         print('normalizing lines...')
-        preprocessed_lines = []
+        self.preprocessed_lines = []
         # normalizing lines
         with open(self.path_of_file_input, "r+") as f_in:
             for line in f_in:
@@ -251,21 +256,19 @@ class PacketController:
                     # removing unnecessary strings
                     for string in self.strings_to_filter_rows: 
                         line = line.replace(string, '')
-                    preprocessed_lines.append(line)
+                    self.preprocessed_lines.append(line)
         print('...normalization completed')
-        return preprocessed_lines
+        return self.preprocessed_lines
 
-    def conv_lines_to_PacketWrapper_list(self, preprocessed_lines: list) -> list:
+    def conv_lines_to_PacketWrapper_list(self) -> list:
         """
         Wrappes a list of preprocessed lines to a list of PacketWrapper
 
-        :param preprocessed_lines: list of the strings to be normalized
-        :type preprocessed_lines: list(str)
         :return: list of strings that have been normalized
         :rtype: list(str)
         """        
         print('converting preprocessed lines to list of packet wrappers...')
-        packets = self.__conv_lines_to_list_of_Packet(preprocessed_lines)
+        packets = self.__conv_lines_to_list_of_Packet()
         
         packetWrapper_dict = {}
         for p in packets:
@@ -279,18 +282,16 @@ class PacketController:
         self.packetWrapper_list = list(packetWrapper_dict.values())
         return self.packetWrapper_list
         
-    def __conv_lines_to_list_of_Packet(self, preprocessed_lines: list) -> list:
+    def __conv_lines_to_list_of_Packet(self) -> list:
         """
         converts a list of preprocessed lines to a list of Packets
 
-        :param preprocessed_lines: list of lines to be converted to list of Packets
-        :type preprocessed_lines: list(str)
         :return: list of Packets converted from list of lines
         :rtype: list(Packet)
         """        
         packets = []
         
-        for line in preprocessed_lines:
+        for line in self.preprocessed_lines:
             packets.append(self.__conv_conn_line_to_Packet(line))
 
         return packets
