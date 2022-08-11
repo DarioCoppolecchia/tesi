@@ -8,7 +8,7 @@ comandi utili:
 
 - avvia zeek su un file pcap e salva i log nella cartella attuale
 
-    `$ /usr/local/zeek/bin/zeek -r ../pcap_files/2020-10-12-Lokibot-infection-traffic.pcap ../scripts/log_connections.zeek`
+    `$ /usr/local/zeek/bin/zeek -r ../pcap_files/2020-10-12-Lokibot-infection-traffic.pcap`
 
 - dopo che lo script è stato eseguito, spostarsi nella cartella degli script per eseguire lo script python per la normalizzazione dei dati, tramite il seguente comando:
 
@@ -16,4 +16,4 @@ comandi utili:
 
 - a questo punto eseguire la normalizzazione dei file tramite il comando:
 
-    `$ python3 read_file.py`
+    `$ python3 PacketsHandler/__main__.py`
