@@ -43,17 +43,17 @@ class MainApplicationCLI:
         """
         main loop of the application containig the UI elements that control the PacketController
         for every iteration this allows the user to do one of the following operations:
-        1) read and normalize lines from the file stored in path_of_file_input
-        2) print preprocessed lines to a file
-        3) convert normalized lines to a PacketWrapper list
-        4) print packet wrapper list to a json file
-        5) open stored preprocessed lines
-        6) loads configuration options from config.ini file
-        7) show configuration options
-        8) modify the path of input file
-        9) modify the path of preprocessed lines
-        10) modify the path of json file
-        11) exit program
+            #. read and normalize lines from the file stored in path_of_file_input
+            #. print preprocessed lines to a file
+            #. convert normalized lines to a PacketWrapper list
+            #. print packet wrapper list to a json file
+            #. open stored preprocessed lines
+            #. loads configuration options from config.ini file
+            #. show configuration options
+            #. modify the path of input file
+            #. modify the path of preprocessed lines
+            #. modify the path of json file
+            #. exit program
         """
         while True:
             op = input("""\ntype the number for the various options: 
