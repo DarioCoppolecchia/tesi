@@ -91,7 +91,7 @@ class Main:
             elif op == "10":
                 self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of PacketWrapper (optional)\n> ')
             elif op == "11":
-                if input('are you sure you want to exit? (y or Y):').lower() == 'y':
+                if input('are you sure you want to exit? (y or Y):\n> ').lower() == 'y':
                     return
             else:
                 print('command not valid, enter an integer number between 1 and 11')
