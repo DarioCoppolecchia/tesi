@@ -117,4 +117,4 @@ class Main:
         return lines
 
 if __name__ == "__main__":
-    Main()
+    Main('config.ini')
