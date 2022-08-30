@@ -9,28 +9,16 @@ class Packet:
     This class contains all of the data that are going to be used
     to classify this packet
 
-    :param uid: unique id of this connection
+    :param uid: unique id of this packet
     :type uid: str
-    :param orig_ip: ip of the origin host
-    :type orig_ip: str
-    :param orig_port: port of the origin host
-    :type orig_port: int
-    :param resp_ip: ip of the responder host
-    :type resp_ip: str
-    :param resp_port: port of the responder host
-    :type resp_port: int
-    :param ts: timestamp of this connection
+    :param ts: timestamp of this packet
     :type ts: str
-    :param services: service used for this connection
+    :param services: service used for this packet
     :type services: str
-    :param state: state of the connection
+    :param state: state of the packet
     :type state: str
     '''
     uid: str
-    orig_ip: str
-    orig_port: int
-    resp_ip: str
-    resp_port: int
     ts: str
     services: str
     state: str
@@ -71,8 +59,7 @@ class Packet:
     # setattr
 
 
-@dataclass
-class PacketWrapper:
+class Connection:
     """
     This class contains all the packets that are being originated by the same
     ip and port of origin and responder hosts.
@@ -83,10 +70,16 @@ class PacketWrapper:
     :param packets: list of the packets excanged by the hosts according that port
     :type packets: list[Packet]
     """
-    id: str
-    packets: list[Packet] = field(default_factory=list)
 
-    def add_packet(self, p: Packet):
+    def __init__(self, orig_ip: str, orig_port: int, resp_ip: str, resp_port: int, ts_on_open: str):
+        self.orig_ip = orig_ip
+        self.orig_port = orig_port
+        self.resp_ip = resp_ip
+        self.resp_port = resp_port
+        self.ts_on_open = ts_on_open
+        self.packets = []
+
+    def add_packet(self, p: Packet, elapsed_ts: float=None) -> None:
         """
         Class that contains multiple Packets with the same id
 
@@ -94,10 +87,13 @@ class PacketWrapper:
         :type p: Packet
         :raises KeyError: raises a KeyError if the id of the packet doesn't match
         """
-        if p.generate_id() == self.id:
-            self.packets.append(p)
+        if elapsed_ts is None:
+            if p.generate_id() == self.id:
+                self.packets.append(p)
+            else:
+                raise KeyError
         else:
-            raise KeyError
+            pass # TODO
     
     def to_json_obj(self) -> object:
         """Convert this object to an object that can be easily converted to a json
@@ -119,7 +115,7 @@ class PacketWrapper:
     # repr
 
 
-class PacketController:
+class NetworkTrafficController:
     """
     Class that contains the method used to filter and organize packets
 
@@ -144,7 +140,6 @@ class PacketController:
         path_of_file_input: str='',
         path_of_file_output: str='',
         path_of_file_json: str='',
-        lines_to_remove: list=[],
         lines_to_remove_ash: list=[],
         strings_to_filter_rows: list=[]) -> None:
         """Constructor Method
@@ -152,12 +147,10 @@ class PacketController:
         self.path_of_file_input = path_of_file_input
         self.path_of_file_output = path_of_file_output
         self.path_of_file_json = path_of_file_json
-        self.lines_to_remove = lines_to_remove
         self.lines_to_remove_ash = lines_to_remove_ash
         self.strings_to_filter_rows = strings_to_filter_rows
-        self.packetWrapper_list = []
-        self.preprocessed_lines = []
-        pass
+        self.network_traffic = []
+        self.connection_pos_dict = {}
     
     def load_paths_and_filters_from_config_file(self, config_file_path):
         """
@@ -183,15 +176,12 @@ class PacketController:
 
         # checks if Filters is in config.ini file
         if 'Filters' in config:
-            self.lines_to_remove = config['Filters']['lines_to_remove']  if 'lines_to_remove' in config['Filters'] else ''
             self.lines_to_remove_ash = config['Filters']['lines_to_remove_ash']  if 'lines_to_remove_ash' in config['Filters'] else ''
             self.strings_to_filter_rows = config['Filters']['strings_to_filter_rows']  if 'strings_to_filter_rows' in config['Filters'] else ''
 
-            self.lines_to_remove = self.lines_to_remove.replace('\'', '').split(',')
             self.lines_to_remove_ash = self.lines_to_remove_ash.replace('\'', '').split(',')
             self.strings_to_filter_rows = self.strings_to_filter_rows.replace('\'', '').split(',')
         else:
-            self.lines_to_remove = '' 
             self.lines_to_remove_ash = '' 
             self.strings_to_filter_rows = '' 
 
