@@ -1,4 +1,4 @@
-from PacketsModule.Packets import PacketController
+from ConnectionsModule.Connections import NetworkTrafficController
 import os
 
 class MainApplicationCLI:
@@ -26,7 +26,7 @@ class MainApplicationCLI:
         :param config_path: path of the configuration file, defaults to ''
         :type config_path: str, optional
         """
-        self.pc = PacketController()
+        self.pc = NetworkTrafficController()
 
         if config_path != '':
             self.pc.load_paths_and_filters_from_config_file(config_path)
@@ -35,18 +35,18 @@ class MainApplicationCLI:
             self.pc.lines_to_remove = self.__get_lines_from_input('the line to add to the list of lines to remove')
             self.pc.lines_to_remove_ash = self.__get_lines_from_input('the line to add to the list of lines where to remove the start of the line')
             self.pc.strings_to_filter_rows = self.__get_lines_from_input('the string to add to the list of strings to filter out')
-            self.pc.path_of_file_input = input('type the path of the file containing the lines of the packets to analyze\n> ')
+            self.pc.path_of_file_input = input('type the path of the file containing the lines of the connections to analyze\n> ')
             self.pc.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
-            self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of PacketWrapper (optional)\n> ')
+            self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
 
     def main_loop(self):
         """
-        main loop of the application containig the UI elements that control the PacketController
+        main loop of the application containig the UI elements that control the NetworkTrafficController
         for every iteration this allows the user to do one of the following operations:
             #. read and normalize lines from the file stored in path_of_file_input
             #. print preprocessed lines to a file
-            #. convert normalized lines to a PacketWrapper list
-            #. print packet wrapper list to a json file
+            #. convert normalized lines to a NetworkConversation list
+            #. print network conversation list to a json file
             #. open stored preprocessed lines
             #. loads configuration options from config.ini file
             #. show configuration options
@@ -59,8 +59,8 @@ class MainApplicationCLI:
             op = input("""\ntype the number for the various options: 
  1) read and normalize lines from the file stored in path_of_file_input
  2) print preprocessed lines to a file
- 3) convert normalized lines to a PacketWrapper list
- 4) print packet wrapper list to a json file
+ 3) convert normalized lines to a NetworkConversation list
+ 4) print network conversation list to a json file
  5) open stored preprocessed lines
  6) loads configuration options from config.ini file
  7) show configuration options
@@ -75,7 +75,7 @@ class MainApplicationCLI:
             elif op == "2":
                 self.pc.print_preprocessed_lines_to_file()
             elif op == "3":
-                self.pc.conv_lines_to_PacketWrapper_list()
+                self.pc.conv_lines_to_NetworkConversation_list()
             elif op == "4":
                 self.pc.print_packetWrapper_list_to_json_file()
             elif op == "5":
@@ -95,13 +95,13 @@ class MainApplicationCLI:
                     print('   ' + line)
                 print("path of the file containing the lines of the packets to analyze: " + self.pc.path_of_file_input)
                 print("path of the file that will contain the preprocessed lines: " + self.pc.path_of_file_output)
-                print("path of the json file where to store the json of the list of PacketWrapper: " + self.pc.path_of_file_json)
+                print("path of the json file where to store the json of the list of NetworkConversation: " + self.pc.path_of_file_json)
             elif op == "8":
                 self.pc.path_of_file_input = input('type the path of the file containing the lines of the packets to analyze\n> ')
             elif op == "9":
                 self.pc.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
             elif op == "10":
-                self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of PacketWrapper (optional)\n> ')
+                self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
             elif op == "11":
                 if input('are you sure you want to exit? (y or Y):\n> ').lower() == 'y':
                     return
