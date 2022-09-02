@@ -89,13 +89,13 @@ class NetworkConversation:
     This class contains all the connections that are being originated by the same
     ip and port of origin and responder hosts.
 
-    :param orig_ip: ip of the host that opened the conversation
+    :param orig_ip: ip of the host that started this conversation
     :type orig_ip:  str
-    :param orig_port: port of the host that opened the conversation
+    :param orig_port: port of the host that started this conversation
     :type orig_port: str
-    :param resp_ip: ip of the host that has been requested to open the conversation
+    :param resp_ip: ip of the host that has been requested to start this conversation
     :type resp_ip: str
-    :param resp_port: port of the host that has been requested to open the conversation
+    :param resp_port: port of the host that has been requested to start this conversation
     :type resp_port: str
     :param ts_on_open: timestamp of the first packet of the connection that started this conversation
     :type ts_on_open: str
@@ -297,7 +297,8 @@ class NetworkTrafficController:
 
     def conv_lines_to_NetworkConversation_list(self) -> list:
         """
-        Wrappes a list of preprocessed lines to a list of Connection
+        Convert a list of preprocessed lines to a list of Connection and inserts them into the 
+        NetworkConversation list
 
         :return: list of strings that have been normalized
         :rtype: list(str)

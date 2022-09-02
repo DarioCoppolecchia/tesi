@@ -1,8 +1,8 @@
-PacketsHandler
-==============
+ConnectionsHandler
+==================
 
 .. toctree::
    :maxdepth: 4
 
-   PacketsModule
+   ConnectionsModule
    UI

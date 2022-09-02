@@ -2,7 +2,7 @@
 *.tsv
 *.json
 *WorkingHours.pcap
-scripts/PacketsHandler/PacketsModule/__pycache__/*
-scripts/PacketsHandler/__pycache__/*
-scripts/PacketsHandler/UI/__pycache__/*
-scripts/PacketsHandler/docs/_build/*
+scripts/ConnectionsHandler/ConnectionsModule/__pycache__/*
+scripts/ConnectionsHandler/__pycache__/*
+scripts/ConnectionsHandler/UI/__pycache__/*
+scripts/ConnectionsHandler/docs/_build/*
