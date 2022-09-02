@@ -6,3 +6,4 @@ scripts/ConnectionsHandler/ConnectionsModule/__pycache__/*
 scripts/ConnectionsHandler/__pycache__/*
 scripts/ConnectionsHandler/UI/__pycache__/*
 scripts/ConnectionsHandler/docs/_build/*
+outputs/

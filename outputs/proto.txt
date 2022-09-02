@@ -1,3 +1,0 @@
-per questo id 192.168.10.8  51751   192.168.10.3   53 ci sono 2.0 ricorrenze, con differenza di tempo media 02:02:21: ['udp', '1499170550.973682', 'tcp', '1499177891.192481']
-per questo id 192.168.10.50  51438   192.168.10.3   88 ci sono 2.0 ricorrenze, con differenza di tempo media 02:02:37: ['tcp', '1499173455.468961', 'udp', '1499180812.008087']
-per questo id 192.168.10.14  61743   192.168.10.3   53 ci sono 2.0 ricorrenze, con differenza di tempo media 00:32:34: ['udp', '1499193660.192251', 'tcp', '1499195614.057506']
