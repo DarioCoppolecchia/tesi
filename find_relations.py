@@ -1,6 +1,16 @@
 from datetime import datetime
 import csv
 
+# creates output directory if doesn't exists
+import os
+path = [
+    './outputs/correlations_between_files/', 
+    './outputs/redundant_attr_conn/',
+]
+for p in path:
+    os.makedirs(p, exist_ok=True)
+
+
 def getId(pkt, h):
     return f"{pkt[h['id.orig_h']]}  {pkt[h['id.orig_p']]}   {pkt[h['id.resp_h']]}   {pkt[h['id.resp_p']]}"
 
@@ -67,7 +77,7 @@ def find_correlations_conn_service(file_dict_conn: dict, header_pos_conn: dict, 
     corr_not_found = []
     for conn, val in file_dict_conn.items():
         for c in val:
-            if c[header_pos_conn['service']] == service:
+            if service in c[header_pos_conn['service']].split(','):
                 if getId(c, header_pos_conn) in file_dict_service:
                     corr_found.append(f"{conn}: {val}")
                 else:
@@ -87,12 +97,13 @@ def get_all_values_of_column(col, file_dict, header_pos) -> set:
                 values.add(s)
     return values
 
+service_to_check = 'ntlm'
 conn_file_path = "./logs/conn.log"
-service_file_path = "./logs/ssl.log"
+service_file_path = "./logs/ntlm.log"
 param_to_check = 'proto'
 file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
 file_dict_service, header_pos_service = get_file_dict(service_file_path)
-find_correlations_conn_service(file_dict_conn, header_pos_conn, file_dict_service, header_pos_service, 'ntp')
+find_correlations_conn_service(file_dict_conn, header_pos_conn, file_dict_service, header_pos_service, service_to_check)
 
 #print(get_all_values_of_column('service', file_dict_conn, header_pos_conn))
 
