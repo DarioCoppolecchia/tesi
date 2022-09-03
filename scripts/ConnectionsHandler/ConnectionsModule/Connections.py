@@ -101,8 +101,8 @@ class NetworkConversation:
     :type ts_on_open: str
     :param proto: protocol used for this conversation
     :type proto: str
-    :param connections: list of the connection between this 2 hosts with these ports
-    :type connections: list[Connection]
+    :param connections: set of the connection between this 2 hosts with these ports
+    :type connections: set[Connection]
     """
 
     def __init__(self, orig_ip: str, orig_port: int, resp_ip: str, resp_port: int, ts_on_open: str, proto: str):
@@ -112,7 +112,7 @@ class NetworkConversation:
         self.resp_port = resp_port
         self.ts_on_open = ts_on_open
         self.proto = proto
-        self.packets = []
+        self.connections = set()
 
     def add_packet(self, p: Connection, elapsed_ts: float=None) -> None:
         """
@@ -126,7 +126,7 @@ class NetworkConversation:
         """
         if elapsed_ts is None:
             if p.generate_id() == self.id:
-                self.packets.append(p)
+                self.connections.append(p)
             else:
                 raise KeyError
         else:
@@ -138,9 +138,9 @@ class NetworkConversation:
         :return: this object as a dumpable object
         :rtype: object
         """
-        packets = []
-        for packet in self.packets:
-            packets.append(packet.to_json_obj())
+        connections = []
+        for connection in self.connections:
+            connections.append(connection.to_json_obj())
 
         return {
             'orig_ip': self.orig_ip,
@@ -149,12 +149,12 @@ class NetworkConversation:
             'resp_port': self.resp_port,
             'ts_on_open': self.ts_on_open,
             'proto': self.proto,
-            'packets': packets,
+            'connections': connections,
         }
         
     def generate_id(self) -> str:
         """
-        generate the id for this connection based on origin ip, origin port, responder ip, responder port, timestamp
+        generate the id for this conversation based on origin ip, origin port, responder ip, responder port, timestamp
 
         :return: the id based on the origin and responder ip and port
         :rtype: str
@@ -172,12 +172,12 @@ class NetworkTrafficController:
     :type path_of_file_output: str, optional
     :param path_of_file_json: path of the file where to write the json file
     :type path_of_file_json: str, optional
-    :param lines_to_remove_ash: list of the # to remove from the file
-    :type lines_to_remove_ash: list[str], optional
-    :param strings_to_filter_rows: list of string to be filtered out
-    :type strings_to_filter_rows: list[str], optional
-    :param network_traffic: list of the NetworkConversation
-    :type network_traffic: list[NetworkConversation]
+    :param lines_to_remove_ash: set of the # to remove from the file
+    :type lines_to_remove_ash: set[str], optional
+    :param strings_to_filter_rows: set of string to be filtered out
+    :type strings_to_filter_rows: set[str], optional
+    :param network_traffic: set of the NetworkConversation
+    :type network_traffic: set[NetworkConversation]
     :param networkConversation_pos_dict: dict that contains the indices of network_traffic
     :type networkConversation_pos_dict: dict{str: int}
     """
@@ -185,8 +185,8 @@ class NetworkTrafficController:
         path_of_file_input: str='',
         path_of_file_output: str='',
         path_of_file_json: str='',
-        lines_to_remove_ash: list=[],
-        strings_to_filter_rows: list=[]) -> None:
+        lines_to_remove_ash: set=[],
+        strings_to_filter_rows: set=[]) -> None:
         """Constructor Method
         """
         self.path_of_file_input = path_of_file_input
@@ -295,13 +295,13 @@ class NetworkTrafficController:
         print('...normalization completed')
         return self.preprocessed_lines
 
-    def conv_lines_to_NetworkConversation_list(self) -> list:
+    def conv_lines_to_NetworkConversation_set(self) -> set:
         """
         Convert a list of preprocessed lines to a list of Connection and inserts them into the 
-        NetworkConversation list
+        NetworkConversation set
 
-        :return: list of strings that have been normalized
-        :rtype: list(str)
+        :return: set of strings that have been normalized
+        :rtype: set(str)
         """        
         print('converting preprocessed lines to list of packet wrappers...')
         packets = self.__conv_lines_to_list_of_Connection()

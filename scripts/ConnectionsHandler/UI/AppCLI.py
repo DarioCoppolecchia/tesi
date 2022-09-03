@@ -45,7 +45,7 @@ class MainApplicationCLI:
         for every iteration this allows the user to do one of the following operations:
             #. read and normalize lines from the file stored in path_of_file_input
             #. print preprocessed lines to a file
-            #. convert normalized lines to a NetworkConversation list
+            #. convert normalized lines to a NetworkConversation set
             #. print network conversation list to a json file
             #. open stored preprocessed lines
             #. loads configuration options from config.ini file
@@ -59,7 +59,7 @@ class MainApplicationCLI:
             op = input("""\ntype the number for the various options: 
  1) read and normalize lines from the file stored in path_of_file_input
  2) print preprocessed lines to a file
- 3) convert normalized lines to a NetworkConversation list
+ 3) convert normalized lines to a NetworkConversation set
  4) print network conversation list to a json file
  5) open stored preprocessed lines
  6) loads configuration options from config.ini file
