@@ -5,6 +5,7 @@ class RowHistory:
     '''
     Class that manages the history of a single row, takes the string history
     and according to its characters sets single fields of this object to their value
+
     :param history: history to be converted
     :type history: str
     :param orig_syn: Origin sent this number of packets with a SYN bit set w/o the ACK bit set
@@ -257,6 +258,42 @@ class RowHistory:
 
         return out_list
 
+    def to_json_obj(self) -> object:
+        """
+        converts this class object to an object that can be easily dumped in a json file
+
+        :return: object that can be converted to a json file
+        :rtype: object
+        """
+        return {
+            'history': self.__history,
+            'S': self.__orig_syn,
+            'F': self.__orig_fin,
+            'H': self.__orig_syn_ack,
+            'R': self.__orig_rest,
+            's': self.__resp_syn,
+            'f': self.__resp_fin,
+            'h': self.__resp_syn_ack,
+            'r': self.__resp_rest,
+            'A': self.__orig_ack,
+            'D': self.__orig_payload,
+            'I': self.__orig_inconsistent,
+            'Q': self.__orig_multi_flag,
+            'a': self.__resp_ack,
+            'd': self.__resp_payload,
+            'i': self.__resp_inconsistent,
+            'q': self.__resp_multi_flag,
+            'C': self.__orig_bad_checksum,
+            'G': self.__orig_content_gap,
+            'T': self.__orig_retransmitted_payload,
+            'W': self.__orig_zero_window,
+            'c': self.__resp_bad_checksum,
+            'g': self.__resp_content_gap,
+            't': self.__resp_retransmitted_payload,
+            'w': self.__resp_zero_window,
+            '^': self.__conn_dir_flipped,
+        }
+
 
 @dataclass(frozen=True)
 class Connection:
@@ -284,8 +321,8 @@ class Connection:
     :type conn_state: str
     :param missed_bytes: bytes missed during this connection
     :type missed_bytes: int
-    :param history: state history of connections as a string of letters.
-    :type history: str
+    :param history: state history of this connection.
+    :type history: RowHistory
     :param orig_pkts: Number of packets that the originator sent
     :type orig_pkts: int
     :param orig_ip_bytes: Number of IP level bytes that the originator sent (as seen on the wire, taken from the IP total_length header field
@@ -303,7 +340,7 @@ class Connection:
     resp_bytes: int
     conn_state: str
     missed_bytes: int
-    history: str
+    history: RowHistory
     orig_pkts: int
     orig_ip_bytes: int
     resp_pkts: int

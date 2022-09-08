@@ -1,10 +1,10 @@
-.. NetworkTrafficAnalyzer documentation master file, created by
-   sphinx-quickstart on Thu Sep  1 20:07:07 2022.
+.. NetworkAnalyzer documentation master file, created by
+   sphinx-quickstart on Thu Sep  8 15:15:37 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to NetworkTrafficAnalyzer's documentation!
-==================================================
+Welcome to NetworkAnalyzer's documentation!
+===========================================
 
 .. toctree::
    :maxdepth: 2
