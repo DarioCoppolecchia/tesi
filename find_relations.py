@@ -1,6 +1,5 @@
 from datetime import datetime
 import csv
-from email import header
 from random import random
 import tqdm
 
@@ -466,7 +465,7 @@ def copy_contents_of_files_into_another_file(input_files_path: list, output_file
 
 column = 'version'
 value_to_check = '-'
-conn_file_path = "./logs/tuesday/conn.log"
+conn_file_path = "./logs/monday/conn.log"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
 file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
@@ -504,15 +503,26 @@ for res in res_history:
     for i, r in enumerate(res):
         res[i] = str(r)
 res_history = [','.join(res) for res in res_history]
-res_history.insert(0, ", ".join(header))
-print_list_to_file("output/", "combinations_history_frequency.csv", res_history)
+res_history.insert(0, ','.join(header))
+#print_list_to_file("output/", "combinations_history_frequency.csv", res_history)
 
 
-header = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p']
+header = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto']
 res_l = get_n_combinations_of_values_of_columns(header, file_dict_conn, header_pos_conn)
-res_l = [" ".join(res[0:-1]) + ", " + str(res[-1]) for res in res_l]
+res_l = [" ".join(res[0:-1]) + ',' + str(res[-1]) for res in res_l]
 res_l.sort()
 print_list_to_file("output/", "combinations_conn_proto_frequency.csv", res_l)
+'''
+
+############### combinazioni di header nel file
+'''
+header = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto']
+occ_dic = get_number_of_occurrencies_of_cols_from_file(conn_file_path, header)
+occ_l = [[k, v] for k, v in occ_dic.items()]
+occ_l.sort(key=lambda row: row[-1], reverse=True)
+occ_copy = occ_l
+occ_l = ['\t'.join([row[0], str(row[1])]) for row in occ_l]
+print_list_to_file("output/", "combinations_conn_proto_frequency.tsv", occ_l)
 '''
 
 ############### raggruppo le righe e creo la tabella con ts, durata e history
@@ -526,7 +536,6 @@ print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata
 '''
 
 ############## raggruppo l'id con ts, duration e history
-'''
 id_list = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto',]
 cols = ['ts', 'duration', 'history']
 out_l = get_values_of_columns(id_list, cols, file_dict_conn, header_pos_conn)
@@ -537,16 +546,15 @@ print('finito sorting')
 print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history.tsv", out_l)
 new_out_l = []
 for i in tqdm.tqdm(range(len(out_l) - 1)):
-    h_lower = out_l[i].split('\t')[-1].lower()
-    if 'c' in h_lower or 'g' in h_lower or 't' in h_lower or 'w' in h_lower:
-        new_out_l.append(out_l[i])
-        if out_l[i].split('\t')[0] != out_l[i + 1].split('\t')[0]:
-            new_out_l.append('')
+    new_out_l.append(out_l[i])
+    if out_l[i].split('\t')[0] != out_l[i + 1].split('\t')[0]:
+        new_out_l.append('')
 print('finito mettere gli spazi')
 print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history_separati_da_righe.tsv", new_out_l)
-'''
+
 
 ############### Stampo delle history di esempio sulla console
+'''
 id_list = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto',]
 cols = ['ts', 'duration', 'history']
 out_l = get_values_of_columns(id_list, cols, file_dict_conn, header_pos_conn)
@@ -559,6 +567,8 @@ for i in rand_indexes:
     for p in rh.get_history_with_values(history):
         print(p)
     print('\n')
+'''
+
 ############### trova la cardinalità di tutte le righe con i valori di header
 '''
 header = ['history', 'orig_pkts', 'resp_pkts']
@@ -571,10 +581,10 @@ print_list_to_file("output/", "combinations_history_pkts_cardinality.tsv", occ_l
 
 values = [occ[0] for occ in occ_copy]
 print_list_to_file("output/", "combinations_history_pkts_values.tsv", values)
-'''
+
 
 ############ trovo la cardinalità delle cardinalità
-'''
+
 card_dict = {}
 for occ in occ_copy:
     key = occ[-1]

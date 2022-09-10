@@ -1,9 +1,9 @@
 import json
 from dataclasses import dataclass
 
-class RowHistory:
+class EventHistory:
     '''
-    Class that manages the history of a single row, takes the string history
+    Class that manages the history of a single event, takes the string history
     and according to its characters sets single fields of this object to their value
 
     :param history: history to be converted
@@ -56,7 +56,7 @@ class RowHistory:
     :type resp_retransmitted_payload: int 
     :param resp_zero_window: Responder sent this number of packet with zero window
     :type resp_zero_window: int 
-    :param conn_dir_flipped: Connection direction was flipped by Zeek's heuristic
+    :param conn_dir_flipped: Event direction was flipped by Zeek's heuristic
     :type conn_dir_flipped: bool
     '''
 
@@ -254,7 +254,7 @@ class RowHistory:
             elif c == 't': out_list.append(f'{i + 1}. Responder retransmitted a packet with payload')
             elif c == 'w': out_list.append(f'{i + 1}. Responder sent a packet with zero window')
 
-            elif c == '^': out_list.append(f"{i + 1}. Connection direction was flipped by Zeek's heuristic")
+            elif c == '^': out_list.append(f"{i + 1}. Event direction was flipped by Zeek's heuristic")
 
         return out_list
 
@@ -296,33 +296,33 @@ class RowHistory:
 
 
 @dataclass(frozen=True)
-class Connection:
+class Event:
     '''
-    Class of a single connection registered
+    Class of a single event registered
 
     This class contains all of the data that are going to be used
-    to classify this connection
+    to classify this event
 
-    :param uid: unique id of this connection
+    :param uid: unique id of this event
     :type uid: str
-    :param ts: timestamp of this connection
+    :param ts: timestamp of this event
     :type ts: str
-    :param service: An identification of an application protocol being sent over the connection.
+    :param service: An identification of an application protocol being sent over the event.
     :type service: str
-    :param state: state of the connection
+    :param state: state of the event
     :type state: str
-    :param duration: How long the connection lasted. For 3-way or 4-way connection tear-downs, this will not include the final ACK.
+    :param duration: How long the event lasted. For 3-way or 4-way event tear-downs, this will not include the final ACK.
     :type duration: float
     :param orig_bytes: number of bytes sent by the origin
     :type orig_bytes: int
     :param resp_bytes: number of bytes sent by the responder
     :type resp_bytes: int
-    :param conn_state: state of this connection
+    :param conn_state: state of this event
     :type conn_state: str
-    :param missed_bytes: bytes missed during this connection
+    :param missed_bytes: bytes missed during this event
     :type missed_bytes: int
-    :param history: state history of this connection.
-    :type history: RowHistory
+    :param history: state history of this event.
+    :type history: EventHistory
     :param orig_pkts: Number of packets that the originator sent
     :type orig_pkts: int
     :param orig_ip_bytes: Number of IP level bytes that the originator sent (as seen on the wire, taken from the IP total_length header field
@@ -340,7 +340,7 @@ class Connection:
     resp_bytes: int
     conn_state: str
     missed_bytes: int
-    history: RowHistory
+    history: EventHistory
     orig_pkts: int
     orig_ip_bytes: int
     resp_pkts: int
@@ -378,25 +378,25 @@ class Connection:
     # setattr
 
 
-class NetworkConversation:
+class Trace:
     """
-    This class contains all the connections that are being originated by the same
+    This class contains all the events that are being originated by the same
     ip and port of origin and responder hosts.
 
-    :param orig_ip: ip of the host that started this conversation
+    :param orig_ip: ip of the host that started this trace
     :type orig_ip:  str
-    :param orig_port: port of the host that started this conversation
+    :param orig_port: port of the host that started this trace
     :type orig_port: str
-    :param resp_ip: ip of the host that has been requested to start this conversation
+    :param resp_ip: ip of the host that has been requested to start this trace
     :type resp_ip: str
-    :param resp_port: port of the host that has been requested to start this conversation
+    :param resp_port: port of the host that has been requested to start this trace
     :type resp_port: str
-    :param ts_on_open: timestamp of the first packet of the connection that started this conversation
+    :param ts_on_open: timestamp of the first packet of the event that started this trace
     :type ts_on_open: str
-    :param proto: protocol used for this conversation
+    :param proto: protocol used for this trace
     :type proto: str
-    :param connections: set of the connection between this 2 hosts with these ports
-    :type connections: set[Connection]
+    :param events: set of the event between this 2 hosts with these ports
+    :type events: set[Event]
     """
 
     def __init__(self, orig_ip: str, orig_port: int, resp_ip: str, resp_port: int, ts_on_open: str, proto: str):
@@ -406,21 +406,21 @@ class NetworkConversation:
         self.resp_port = resp_port
         self.ts_on_open = ts_on_open
         self.proto = proto
-        self.connections = set()
+        self.events = set()
 
-    def add_packet(self, p: Connection, elapsed_ts: float=None) -> None:
+    def add_packet(self, p: Event, elapsed_ts: float=None) -> None:
         """
-        Class that contains multiple Connections with the same id
+        Class that contains multiple Events with the same id
 
-        :param p: the connection to be added to this wrapper
-        :type p: Connection
-        :param elapsed_ts: max window time so that a connection can be considered to belong to this NetworkConversation
+        :param p: the event to be added to this wrapper
+        :type p: Event
+        :param elapsed_ts: max window time so that a event can be considered to belong to this Trace
         :type elapsed_ts: float
-        :raises KeyError: raises a KeyError if the id of the connection doesn't match
+        :raises KeyError: raises a KeyError if the id of the event doesn't match
         """
         if elapsed_ts is None:
             if p.generate_id() == self.id:
-                self.connections.append(p)
+                self.events.append(p)
             else:
                 raise KeyError
         else:
@@ -432,9 +432,9 @@ class NetworkConversation:
         :return: this object as a dumpable object
         :rtype: object
         """
-        connections = []
-        for connection in self.connections:
-            connections.append(connection.to_json_obj())
+        events = []
+        for event in self.events:
+            events.append(event.to_json_obj())
 
         return {
             'orig_ip': self.orig_ip,
@@ -443,12 +443,12 @@ class NetworkConversation:
             'resp_port': self.resp_port,
             'ts_on_open': self.ts_on_open,
             'proto': self.proto,
-            'connections': connections,
+            'events': events,
         }
         
     def generate_id(self) -> str:
         """
-        generate the id for this conversation based on origin ip, origin port, responder ip, responder port, timestamp
+        generate the id for this trace based on origin ip, origin port, responder ip, responder port, timestamp
 
         :return: the id based on the origin and responder ip and port
         :rtype: str
@@ -456,9 +456,9 @@ class NetworkConversation:
         return self.orig_ip + " " + self.orig_port + " " + self.resp_ip + " " + self.resp_port + " " + self.ts_on_open
 
 
-class NetworkTrafficController:
+class TracesController:
     """
-    Class that contains the method used to filter and organize packets
+    Class that contains the method used to filter and organize events
 
     :param path_of_file_input: path of the file that contains the logs to be acquired
     :type path_of_file_input: str, optional
@@ -468,10 +468,10 @@ class NetworkTrafficController:
     :type path_of_file_json: str, optional
     :param lines_to_remove_ash: set of the # to remove from the file
     :type lines_to_remove_ash: set[str], optional
-    :param strings_to_filter_rows: set of string to be filtered out
-    :type strings_to_filter_rows: set[str], optional
-    :param network_traffic: set of the NetworkConversation
-    :type network_traffic: set[NetworkConversation]
+    :param strings_to_filter_event: set of string to be filtered out
+    :type strings_to_filter_event: set[str], optional
+    :param network_traffic: set of the Trace
+    :type network_traffic: set[Trace]
     :param networkConversation_pos_dict: dict that contains the indices of network_traffic
     :type networkConversation_pos_dict: dict{str: int}
     """
@@ -480,14 +480,14 @@ class NetworkTrafficController:
         path_of_file_output: str='',
         path_of_file_json: str='',
         lines_to_remove_ash: set=[],
-        strings_to_filter_rows: set=[]) -> None:
+        strings_to_filter_event: set=[]) -> None:
         """Constructor Method
         """
         self.path_of_file_input = path_of_file_input
         self.path_of_file_output = path_of_file_output
         self.path_of_file_json = path_of_file_json
         self.lines_to_remove_ash = lines_to_remove_ash
-        self.strings_to_filter_rows = strings_to_filter_rows
+        self.strings_to_filter_event = strings_to_filter_event
         self.network_traffic = []
         self.networkConversation_pos_dict = {}
     
@@ -516,13 +516,13 @@ class NetworkTrafficController:
         # checks if Filters is in config.ini file
         if 'Filters' in config:
             self.lines_to_remove_ash = config['Filters']['lines_to_remove_ash']  if 'lines_to_remove_ash' in config['Filters'] else ''
-            self.strings_to_filter_rows = config['Filters']['strings_to_filter_rows']  if 'strings_to_filter_rows' in config['Filters'] else ''
+            self.strings_to_filter_event = config['Filters']['strings_to_filter_event']  if 'strings_to_filter_event' in config['Filters'] else ''
 
             self.lines_to_remove_ash = self.lines_to_remove_ash.replace('\'', '').split(',')
-            self.strings_to_filter_rows = self.strings_to_filter_rows.replace('\'', '').split(',')
+            self.strings_to_filter_event = self.strings_to_filter_event.replace('\'', '').split(',')
         else:
             self.lines_to_remove_ash = '' 
-            self.strings_to_filter_rows = '' 
+            self.strings_to_filter_event = '' 
 
         print('...reading complete')
 
@@ -583,61 +583,61 @@ class NetworkTrafficController:
                             break
 
                     # removing unnecessary strings
-                    for string in self.strings_to_filter_rows: 
+                    for string in self.strings_to_filter_event: 
                         line = line.replace(string, '')
                     self.preprocessed_lines.append(line)
         print('...normalization completed')
         return self.preprocessed_lines
 
-    def conv_lines_to_NetworkConversation_set(self) -> set:
+    def conv_lines_to_Trace_set(self) -> set:
         """
-        Convert a list of preprocessed lines to a list of Connection and inserts them into the 
-        NetworkConversation set
+        Convert a list of preprocessed lines to a list of Event and inserts them into the 
+        Trace set
 
         :return: set of strings that have been normalized
         :rtype: set(str)
         """        
-        print('converting preprocessed lines to list of packet wrappers...')
-        packets = self.__conv_lines_to_list_of_Connection()
+        print('converting preprocessed lines to list of traces...')
+        packets = self.__conv_lines_to_list_of_Event()
         
-        connections_dict = {}
+        events_dict = {}
         for p in packets:
             id = p.generate_id()
 
-            if id not in connections_dict:
-                connections_dict[id] = Connection()
+            if id not in events_dict:
+                events_dict[id] = Event()
             else:
-                connections_dict[id].add_packet(p)
+                events_dict[id].add_packet(p)
         print('...conversion completed')
-        self.connections_list = list(connections_dict.values())
-        return self.connections_list
+        self.events_list = list(events_dict.values())
+        return self.events_list
         
-    def __conv_lines_to_list_of_Connection(self) -> list:
+    def __conv_lines_to_list_of_Event(self) -> list:
         """
-        converts a list of preprocessed lines to a list of Connections
+        converts a list of preprocessed lines to a list of Events
 
-        :return: list of Connections converted from list of lines
-        :rtype: list(Connection)
+        :return: list of Events converted from list of lines
+        :rtype: list(Event)
         """        
         packets = []
         
         for line in self.preprocessed_lines:
-            packets.append(self.__conv_conn_line_to_Connection(line))
+            packets.append(self.__conv_conn_line_to_Event(line))
 
         return packets
 
-    def __conv_conn_line_to_Connection(self, line: str) -> Connection:
+    def __conv_conn_line_to_Event(self, line: str) -> Event:
         """
-        converts a conn.log line to a Connection
+        converts a conn.log line to a Event
 
-        :param line: line to be converted to Connection
+        :param line: line to be converted to Event
         :type line: str
-        :return: Connection converted from line
-        :rtype: Connection
+        :return: Event converted from line
+        :rtype: Event
         """
         list_to_pack = line.split('\t')
 
-        # getting info to insert in Connection
+        # getting info to insert in Event
         uid = list_to_pack[1]
         orig_ip = list_to_pack[2]
         orig_port = list_to_pack[3]
@@ -647,15 +647,15 @@ class NetworkTrafficController:
         services = list_to_pack[7]
         state = list_to_pack[11]
 
-        return Connection(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
+        return Event(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
         
-    def print_NetworkConversation_list_to_json_file(self):
-        """prints all the Network Conversations list to a json file
+    def print_Trace_list_to_json_file(self):
+        """prints all the Traces list to a json file
         """
-        print('writing the list of Connections to a json file...')
+        print('writing the list of Events to a json file...')
         with open(self.path_of_file_json, 'w') as f:
             to_json = []
-            for pw in self.connections_list:
+            for pw in self.events_list:
                 to_json.append(pw.to_json_obj())
             
             json.dump(to_json, f, indent=4)
