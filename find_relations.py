@@ -3,257 +3,6 @@ import csv
 from random import random
 import tqdm
 
-class RowHistory:
-    '''
-    Class that manages the history of a single row, takes the string history
-    and according to its characters sets single fields of this object to their value
-    :param history: history to be converted
-    :type history: str
-    :param orig_syn: Origin sent this number of packets with a SYN bit set w/o the ACK bit set
-    :type orig_syn: int
-    :param orig_fin: Origin sent this number of packets with a FIN bit set
-    :type orig_fin: int
-    :param orig_syn_ack: Origin sent this number of packets with a SYN with the ACK bit set
-    :type orig_syn_ack: int
-    :param orig_rest: Origin sent this number of packets with a RST bit set
-    :type orig_rest: int
-    :param resp_syn: Responder sent this number of packets with a SYN bit set w/o the ACK bit set
-    :type resp_syn: int
-    :param resp_fin: Responder sent this number of packets with a FIN bit set 
-    :type resp_fin: int
-    :param resp_syn_ack: Responder sent this number of packets with a SYN with the ACK bit set
-    :type resp_syn_ack: int
-    :param resp_rest: Responder sent this number of packets with a RST bit set
-    :type resp_rest: int
-    :param orig_ack: Origin sent a packet with ACK bit set
-    :type orig_ack: bool
-    :param orig_payload: Origin sent a payload
-    :type orig_payload: bool
-    :param orig_inconsistent: Origin packet was inconsistent (e.g. FIN+RST bits set)
-    :type orig_inconsistent: bool
-    :param orig_multi_flag: Origin sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
-    :type orig_multi_flag: bool
-    :param resp_ack: Responder sent a packet with ACK bit set
-    :type resp_ack: bool
-    :param resp_payload: Responder sent a payload
-    :type resp_payload: bool
-    :param resp_inconsistent: Responder packet was inconsistent (e.g. FIN+RST bits set)
-    :type resp_inconsistent: bool
-    :param resp_multi_flag: Responder sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
-    :type resp_multi_flag: bool
-    :param orig_bad_checksum: Origin sent this number of packets with a bad checksum
-    :type orig_bad_checksum: int 
-    :param orig_content_gap: Origin sent this number of packets with content gap
-    :type orig_content_gap: int 
-    :param orig_retransmitted_payload: Origin retransmitted this number of packets with payload
-    :type orig_retransmitted_payload: int 
-    :param orig_zero_window: Origin sent this number of packet with zero window
-    :type orig_zero_window: int 
-    :param resp_bad_checksum: Responder sent this number of packets with a bad checksum
-    :type resp_bad_checksum: int 
-    :param resp_content_gap: Responder sent this number of packets with content gap
-    :type resp_content_gap: int 
-    :param resp_retransmitted_payload: Responder retransmitted this number of packets with payload
-    :type resp_retransmitted_payload: int 
-    :param resp_zero_window: Responder sent this number of packet with zero window
-    :type resp_zero_window: int 
-    :param conn_dir_flipped: Connection direction was flipped by Zeek's heuristic
-    :type conn_dir_flipped: bool
-    '''
-
-    def __init__(self, history: str=None) -> None:
-        self.__history = history if history is not None else ''
-
-        # S, F, H, R
-        self.__orig_syn                   = 0
-        self.__orig_fin                   = 0
-        self.__orig_syn_ack               = 0
-        self.__orig_rest                  = 0
-
-        # s, f, h, r
-        self.__resp_syn                   = 0
-        self.__resp_fin                   = 0
-        self.__resp_syn_ack               = 0
-        self.__resp_rest                  = 0
-        
-        # A, D, I, Q
-        self.__orig_ack                   = False
-        self.__orig_payload               = False
-        self.__orig_inconsistent          = False
-        self.__orig_multi_flag            = False
-
-        # a, d, i, q
-        self.__resp_ack                   = False
-        self.__resp_payload               = False
-        self.__resp_inconsistent          = False
-        self.__resp_multi_flag            = False
-        
-        # C, G, T, W
-        self.__orig_bad_checksum          = 0
-        self.__orig_content_gap           = 0
-        self.__orig_retransmitted_payload = 0
-        self.__orig_zero_window           = 0
-
-        # c, g, t, w
-        self.__resp_bad_checksum          = 0
-        self.__resp_content_gap           = 0
-        self.__resp_retransmitted_payload = 0
-        self.__resp_zero_window           = 0
-
-        # ^
-        self.__conn_dir_flipped           = False
-        
-        self.analyze_history()
-
-    def analyze_history(self, history: str=None) -> None:
-        """Based on the field history, this analyze the history string and changes
-        all the fields of this object. If given a history, this will be analyzed and set
-        as this object history
-
-        :param history: the history to be analyzed, defaults to None
-        :type history: str, optional
-        """
-
-        if history is not None:
-            self.__history = history
-
-        for c in self.__history:
-            if c == 'S': self.__orig_syn += 1
-            elif c == 'F': self.__orig_fin += 1
-            elif c == 'H': self.__orig_syn_ack += 1
-            elif c == 'R': self.__orig_rest += 1
-            
-            elif c == 's': self.__resp_syn += 1
-            elif c == 'f': self.__resp_fin += 1
-            elif c == 'h': self.__resp_syn_ack += 1
-            elif c == 'r': self.__resp_rest += 1
-
-            elif c == 'A': self.__orig_ack = True
-            elif c == 'D': self.__orig_payload = True
-            elif c == 'I': self.__orig_inconsistent = True
-            elif c == 'Q': self.__orig_multi_flag = True
-
-            elif c == 'a': self.__resp_ack = True
-            elif c == 'd': self.__resp_payload = True
-            elif c == 'i': self.__resp_inconsistent = True
-            elif c == 'q': self.__resp_multi_flag = True
-
-            elif c == 'C': self.__orig_bad_checksum += 1
-            elif c == 'G': self.__orig_content_gap += 1
-            elif c == 'T': self.__orig_retransmitted_payload += 1
-            elif c == 'W': self.__orig_zero_window += 1
-
-            elif c == 'c': self.__resp_bad_checksum += 1
-            elif c == 'g': self.__resp_content_gap += 1
-            elif c == 't': self.__resp_retransmitted_payload += 1
-            elif c == 'w': self.__resp_zero_window += 1
-
-            elif c == '^': self.__conn_dir_flipped = True
-
-    def get_history_with_values(self, history: str=None) -> list:
-        """Returns a list of the tuples where the first element of the tuple
-        is the character red, the second is the value itself.__ If a history string is given, 
-        the list is relative to that history and this object's history value is changed
-
-        :param history: history to be transformed, defaults to None
-        :type history: str, optional
-        :return: list of the tuples of the history
-        :rtype: list
-        """        
-
-        if history is not None:
-            self.analyze_history(history)
-        
-        return [self.__history,
-            ('S', self.__orig_syn),
-            ('F', self.__orig_fin),
-            ('H', self.__orig_syn_ack),
-            ('R', self.__orig_rest),
-
-            ('s', self.__resp_syn),
-            ('f', self.__resp_fin),
-            ('h', self.__resp_syn_ack),
-            ('r', self.__resp_rest),
-
-            ('A', self.__orig_ack),
-            ('D', self.__orig_payload),
-            ('I', self.__orig_inconsistent),
-            ('Q', self.__orig_multi_flag),
-
-            ('a', self.__resp_ack),
-            ('d', self.__resp_payload),
-            ('i', self.__resp_inconsistent),
-            ('q', self.__resp_multi_flag),
-
-            ('C', self.__orig_bad_checksum),
-            ('G', self.__orig_content_gap),
-            ('T', self.__orig_retransmitted_payload),
-            ('W', self.__orig_zero_window),
-
-            ('c', self.__resp_bad_checksum),
-            ('g', self.__resp_content_gap),
-            ('t', self.__resp_retransmitted_payload),
-            ('w', self.__resp_zero_window),
-
-            ('^', self.__conn_dir_flipped),
-        ]
-
-    def get_history_with_description(self, history: str=None) -> list:
-        """Returns a list where for each element, there is a string describing the letter red
-        at that position. If a history string is given, the list is relative to that history and
-        this object's history value is changed
-
-        :param history: history to be transformed, defaults to None
-        :type history: str, optional
-        :return: list of the description of each letter
-        :rtype: list
-        """        
-        """Returns a list where for each element, there is a string describing the letter red
-        at that position
-
-        :return: list of the description of each letter
-        :rtype: list
-        """
-        if history is not None:
-            self.analyze_history(history)
-
-        out_list = [] # lista delle stringhe corrispondenti alle fasi della history
-        for i, c in enumerate(self.__history):
-            if c == 'S': out_list.append(f'{i + 1}. Origin sent a packet with a SYN bit set w/o the ACK bit set')
-            elif c == 'F': out_list.append(f'{i + 1}. Origin sent a packet with a FIN bit set')
-            elif c == 'H': out_list.append(f'{i + 1}. Origin sent a packet with a SYN with the ACK bit set')
-            elif c == 'R': out_list.append(f'{i + 1}. Origin sent a packet with a RST bit set')
-            
-            elif c == 's': out_list.append(f'{i + 1}. Responder sent a packet with a SYN bit set w/o the ACK bit set')
-            elif c == 'f': out_list.append(f'{i + 1}. Responder sent a packet with a FIN bit set ')
-            elif c == 'h': out_list.append(f'{i + 1}. Responder sent a packet with a SYN with the ACK bit set')
-            elif c == 'r': out_list.append(f'{i + 1}. Responder sent a packet with a RST bit set')
-
-            elif c == 'A': out_list.append(f'{i + 1}. Origin sent a packet with ACK bit set')
-            elif c == 'D': out_list.append(f'{i + 1}. Origin sent a payload')
-            elif c == 'I': out_list.append(f'{i + 1}. Origin packet was inconsistent (e.g. FIN+RST bits set)')
-            elif c == 'Q': out_list.append(f'{i + 1}. Origin sent a multi-flag packet (SYN+FIN or SYN+RST bits set)')
-
-            elif c == 'a': out_list.append(f'{i + 1}. Responder sent a packet with ACK bit set')
-            elif c == 'd': out_list.append(f'{i + 1}. Responder sent a payload')
-            elif c == 'i': out_list.append(f'{i + 1}. Responder packet was inconsistent (e.g. FIN+RST bits set)')
-            elif c == 'q': out_list.append(f'{i + 1}. Responder sent a multi-flag packet (SYN+FIN or SYN+RST bits set)')
-
-            elif c == 'C': out_list.append(f'{i + 1}. Origin sent a packet with a bad checksum')
-            elif c == 'G': out_list.append(f'{i + 1}. Origin sent a packet with content gap')
-            elif c == 'T': out_list.append(f'{i + 1}. Origin retransmitted a packet with payload')
-            elif c == 'W': out_list.append(f'{i + 1}. Origin sent a packet with zero window')
-
-            elif c == 'c': out_list.append(f'{i + 1}. Responder sent a packet with a bad checksum')
-            elif c == 'g': out_list.append(f'{i + 1}. Responder sent a packet with content gap')
-            elif c == 't': out_list.append(f'{i + 1}. Responder retransmitted a packet with payload')
-            elif c == 'w': out_list.append(f'{i + 1}. Responder sent a packet with zero window')
-
-            elif c == '^': out_list.append(f"{i + 1}. Connection direction was flipped by Zeek's heuristic")
-
-        return out_list
-
-
 def getId(pkt, h):
     return f"{pkt[h['id.orig_h']]}  {pkt[h['id.orig_p']]}   {pkt[h['id.resp_h']]}   {pkt[h['id.resp_p']]}"
 
@@ -463,9 +212,47 @@ def copy_contents_of_files_into_another_file(input_files_path: list, output_file
             with open(input_path, 'r') as f_in:
                 f_out.writelines(f_in.readlines())
 
+'''
+Il parametro sottostante è un array di oggetti dove ognuno contiene il limite inferiore, il limite superiore, l'ip dell'attaccante, 
+l'ip dell'attaccato e la label corrispondente
+
+label(x) <- 
+    lower_bound <= x.ts <= upper_bound && 
+    ip_attacker = x.ip_orig && 
+    ip_attacked = x.ip_resp
+
+struttura della lista
+interval_to_label = [
+    { lower_bound, upper_bound, ip_attacker, ip_attacked, label },
+    { lower_bound, upper_bound, ip_attacker, ip_attacked, label },
+    ...
+    { lower_bound, upper_bound, ip_attacker, ip_attacked, label },
+]
+'''
+def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, header_pos: list, constraint_to_label: list):
+    with open(output_file_path, 'w') as f_out:
+        with open(input_files_path, 'r') as f_in:
+            next(f_in)
+            for line in f_in:
+                line = line.replace('\n', '')
+                splitted = line.split('\t')
+                ts = splitted[header_pos['ts']]
+                orig_ip = splitted[header_pos['id.orig_h']]
+                resp_ip = splitted[header_pos['id.resp_h']]
+                for constraints in constraint_to_label:
+                    if (float(constraints['lower_bound']) <= float(ts) <= float(constraints['upper_bound']) and 
+                        constraints['ip_attacker'] == orig_ip and
+                        constraints['ip_attacked'] == resp_ip):
+                        line += '\t' + constraints['label']
+                        break
+                else:
+                    line += '\t' + 'BENIGN'
+                f_out.write(line + '\n')
+
+
 column = 'version'
 value_to_check = '-'
-conn_file_path = "./logs/monday/conn.log"
+conn_file_path = "./logs/tuesday/conn_labeled.log"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
 file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
@@ -479,6 +266,79 @@ file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
 #res = get_n_values_of_columns(['history', 'orig_pkts', 'resp_pkts'], n, file_dict_conn, header_pos_conn)
 #for r in res:
  #   print(r)
+
+
+# applico le label agli event nei file
+'''
+import time
+import datetime
+constraint_to_label = [
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime("2017-07-04 14:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime("2017-07-04 15:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.1',
+        'ip_attacked': '192.168.10.50',
+        'label': 'FTP-Patator',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime("2017-07-04 19:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime("2017-07-04 20:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.1',
+        'ip_attacked': '192.168.10.50',
+        'label': 'SSH-Patator',
+    },
+]
+apply_label_to_events_in_file(conn_file_path, "./logs/tuesday/conn_labeled.log", header_pos_conn, constraint_to_label)
+'''
+
+################### controllo che nello stesso trace sono presenti le stesse label
+# file_dict_conn, header_pos_conn
+'''
+print(header_pos_conn)
+for trace, events in file_dict_conn.items():
+    print(trace)
+    for event in events:
+        print(event)
+    exit(0)
+'''
+'''
+with open("./logs/tuesday/conn.log") as f:
+    for line in f:
+        with open("./logs/tuesday/merda.log", 'w') as f2:
+            f2.write(line.replace('\n', '') + '\tlabel')
+            exit(0)
+'''
+first_addr = '172.16.0.1 52122 192.168.10.50 21 tcp'
+same_label = []
+diff_label = []
+for trace, events in file_dict_conn.items():
+    prev_label = events[0][header_pos_conn['label']]
+    for event in events:
+        new_label = event[header_pos_conn['label']]
+        if new_label != prev_label:
+            diff_label.append(trace)
+            break
+        else:
+            prev_label = new_label
+    else:
+        same_label.append(trace)
+
+print_list_to_file("output/", "traces_with_same_label.csv", same_label)
+print_list_to_file("output/", "traces_with_diff_label.csv", diff_label)
+
+
+################### trovo il primo pacchetto con questo ip
+'''
+ip_da_trovare = ['172.16.0.1', '192.168.10.50']
+with open(conn_file_path) as f:
+    with open('output/ip_trovati.tsv', 'w') as f_out:
+        for line in f:
+            splitted = line.split('\t')
+            orig = splitted[header_pos_conn['id.orig_h']]
+            resp = splitted[header_pos_conn['id.resp_h']]
+            if orig == ip_da_trovare[0] and resp == ip_da_trovare[1]:
+                f_out.write(line)
+'''
 
 '''
 header = ['history', 'orig_pkts', 'resp_pkts']
@@ -536,6 +396,7 @@ print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata
 '''
 
 ############## raggruppo l'id con ts, duration e history
+'''
 id_list = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto',]
 cols = ['ts', 'duration', 'history']
 out_l = get_values_of_columns(id_list, cols, file_dict_conn, header_pos_conn)
@@ -551,7 +412,7 @@ for i in tqdm.tqdm(range(len(out_l) - 1)):
         new_out_l.append('')
 print('finito mettere gli spazi')
 print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history_separati_da_righe.tsv", new_out_l)
-
+'''
 
 ############### Stampo delle history di esempio sulla console
 '''
