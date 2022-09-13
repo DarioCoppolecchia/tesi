@@ -249,13 +249,83 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
                     line += '\t' + 'BENIGN'
                 f_out.write(line + '\n')
 
+def print_file_dict_to_file(output_file_path: str, file_dict: dict, header_pos: dict):
+    import json
+        
+    with open(output_file_path + '_dict.json', "w") as outfile:
+        json.dump(file_dict, outfile)
+    with open(output_file_path + '_header.json', "w") as outfile:
+        json.dump(header_pos, outfile)
+
+def read_file_dict_from_file(input_file_path: str):
+    import json
+
+    with open(input_file_path + '_dict.json') as f:
+        file_dict = json.load(f)
+    with open(input_file_path + '_header.json') as f:
+        header_pos = json.load(f)
+    return file_dict, header_pos
+
 
 column = 'version'
 value_to_check = '-'
 conn_file_path = "./logs/tuesday/conn_labeled.log"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
-file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
+
+################ getting file_dict_conn and header_pos_conn
+parsed_conn_file_path = './logs/tuesday/parsed/conn_labeled'
+from os.path import exists
+if not(exists(parsed_conn_file_path + '_dict.json') and exists(parsed_conn_file_path + '_header.json')):
+    file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
+    print_file_dict_to_file(parsed_conn_file_path, file_dict_conn, header_pos_conn)
+else:
+    file_dict_conn, header_pos_conn = read_file_dict_from_file(parsed_conn_file_path)
+
+################ discretizzazione
+import numpy as np
+import matplotlib.pyplot as plt
+
+attributes_to_digitize = {
+    #'duration': 5000,
+    'orig_bytes': 500,
+    'resp_bytes': 10,
+    'missed_bytes': 10,
+    'orig_pkts': 10,
+    'orig_ip_bytes': 10,
+    'resp_pkts': 10,
+    'resp_ip_bytes': 10,
+}
+
+#define function to calculate equal-frequency bins 
+def equalObs(x, nbin):
+    nlen = len(x)
+    return np.interp(np.linspace(0, nlen, nbin + 1),
+                     np.arange(nlen),
+                     np.sort(x))
+
+# getting max value for each attribute to digitize
+for k, v in attributes_to_digitize.items():
+    print('\n\n', k)
+    arr_to_adjust = get_all_values_of_columns([k], file_dict_conn, header_pos_conn)
+    data = [float(value.replace('\t', '')) for value in arr_to_adjust if value != '-\t']
+
+    # showing equal-width
+    n, bins, patches = plt.hist(data, edgecolor='black')
+    plt.title(label=f'{k} - equal-width', fontsize=10)
+    plt.show()
+
+    print(bins)
+    print(n)
+
+    # showing equal-height
+    n, bins, patches = plt.hist(data, equalObs(data, v), edgecolor='black')
+    plt.title(label=f'{k} - equal-height | N = {v}', fontsize=10)
+    plt.show()
+
+    print(bins)
+    print(n)
+
 #file_dict_value, header_pos = get_file_dict(value_file_path)
 #corr_found, corr_not_found, val_found = find_correlations_conn_column(file_dict_conn, header_pos_conn, file_dict_value, column, value_to_check)
 #print(val_found)
@@ -292,7 +362,6 @@ apply_label_to_events_in_file(conn_file_path, "./logs/tuesday/conn_labeled.log",
 '''
 
 ################### controllo che nello stesso trace sono presenti le stesse label
-# file_dict_conn, header_pos_conn
 '''
 print(header_pos_conn)
 for trace, events in file_dict_conn.items():
@@ -308,7 +377,7 @@ with open("./logs/tuesday/conn.log") as f:
             f2.write(line.replace('\n', '') + '\tlabel')
             exit(0)
 '''
-first_addr = '172.16.0.1 52122 192.168.10.50 21 tcp'
+'''
 same_label = []
 diff_label = []
 for trace, events in file_dict_conn.items():
@@ -325,7 +394,7 @@ for trace, events in file_dict_conn.items():
 
 print_list_to_file("output/", "traces_with_same_label.csv", same_label)
 print_list_to_file("output/", "traces_with_diff_label.csv", diff_label)
-
+'''
 
 ################### trovo il primo pacchetto con questo ip
 '''
@@ -620,3 +689,4 @@ for file in files:
     input_files_path = [master_folder + folder + file for folder in input_folders]
     copy_contents_of_files_into_another_file(input_files_path, master_folder + output_folder + file)
 '''
+
