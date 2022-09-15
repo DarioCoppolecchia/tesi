@@ -287,7 +287,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 attributes_to_digitize = {
-    #'duration': 5000,
+    'duration': 5000,
     'orig_bytes': 500,
     'resp_bytes': 10,
     'missed_bytes': 10,
