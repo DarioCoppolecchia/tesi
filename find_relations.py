@@ -287,7 +287,7 @@ else:
 values = set([v.replace('\t', '') for v in get_all_values_of_columns(['conn_state'], file_dict_conn, header_pos_conn)])
 all_values = set(['S0','S1','SF','REJ','S2','S3','RSTO','RSTR','RSTOS0','RSTRH','SH','SHR','OTH'])
 print(all_values.difference(values))
-
+'''
 '''
 ################ discretizzazione
 import numpy as np
