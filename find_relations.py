@@ -282,13 +282,20 @@ if not(exists(parsed_conn_file_path + '_dict.json') and exists(parsed_conn_file_
 else:
     file_dict_conn, header_pos_conn = read_file_dict_from_file(parsed_conn_file_path)
 
+################ prendo tutti i valori usati di conn_state
+'''
+values = set([v.replace('\t', '') for v in get_all_values_of_columns(['conn_state'], file_dict_conn, header_pos_conn)])
+all_values = set(['S0','S1','SF','REJ','S2','S3','RSTO','RSTR','RSTOS0','RSTRH','SH','SHR','OTH'])
+print(all_values.difference(values))
+
+'''
 ################ discretizzazione
 import numpy as np
 import matplotlib.pyplot as plt
 
 attributes_to_digitize = {
-    #'duration': 5000,
-    'orig_bytes': 500,
+    'duration': 10,
+    'orig_bytes': 10,
     'resp_bytes': 10,
     'missed_bytes': 10,
     'orig_pkts': 10,
@@ -336,7 +343,7 @@ for k, v in attributes_to_digitize.items():
 #res = get_n_values_of_columns(['history', 'orig_pkts', 'resp_pkts'], n, file_dict_conn, header_pos_conn)
 #for r in res:
  #   print(r)
-
+'''
 
 # applico le label agli event nei file
 '''

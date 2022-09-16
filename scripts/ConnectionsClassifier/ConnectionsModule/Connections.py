@@ -1,5 +1,24 @@
 import json
 from dataclasses import dataclass
+from enum import Enum, auto
+
+class CONN_STATE(Enum):
+    S0 = auto()
+    S1 = auto()
+    SF = auto()
+    REJ = auto()
+    S2 = auto()
+    S3 = auto()
+    RSTO = auto()
+    RSTR = auto()
+    RSTOS0 = auto()
+    RSTRH = auto()
+    SH = auto()
+    SHR = auto()
+    OTH = auto()
+
+    def __str__(self):
+        return f'{self.name(self.value)}'
 
 class EventHistory:
     '''
@@ -9,21 +28,21 @@ class EventHistory:
     :param history: history to be converted
     :type history: str
     :param orig_syn: Origin sent this number of packets with a SYN bit set w/o the ACK bit set
-    :type orig_syn: int
+    :type orig_syn: float
     :param orig_fin: Origin sent this number of packets with a FIN bit set
-    :type orig_fin: int
+    :type orig_fin: float
     :param orig_syn_ack: Origin sent this number of packets with a SYN with the ACK bit set
-    :type orig_syn_ack: int
+    :type orig_syn_ack: float
     :param orig_rest: Origin sent this number of packets with a RST bit set
-    :type orig_rest: int
+    :type orig_rest: float
     :param resp_syn: Responder sent this number of packets with a SYN bit set w/o the ACK bit set
-    :type resp_syn: int
+    :type resp_syn: float
     :param resp_fin: Responder sent this number of packets with a FIN bit set 
-    :type resp_fin: int
+    :type resp_fin: float
     :param resp_syn_ack: Responder sent this number of packets with a SYN with the ACK bit set
-    :type resp_syn_ack: int
+    :type resp_syn_ack: float
     :param resp_rest: Responder sent this number of packets with a RST bit set
-    :type resp_rest: int
+    :type resp_rest: float
     :param orig_ack: Origin sent a packet with ACK bit set
     :type orig_ack: bool
     :param orig_payload: Origin sent a payload
@@ -41,21 +60,21 @@ class EventHistory:
     :param resp_multi_flag: Responder sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
     :type resp_multi_flag: bool
     :param orig_bad_checksum: Origin sent this number of packets with a bad checksum
-    :type orig_bad_checksum: int 
+    :type orig_bad_checksum: float 
     :param orig_content_gap: Origin sent this number of packets with content gap
-    :type orig_content_gap: int 
+    :type orig_content_gap: float 
     :param orig_retransmitted_payload: Origin retransmitted this number of packets with payload
-    :type orig_retransmitted_payload: int 
+    :type orig_retransmitted_payload: float 
     :param orig_zero_window: Origin sent this number of packet with zero window
-    :type orig_zero_window: int 
+    :type orig_zero_window: float 
     :param resp_bad_checksum: Responder sent this number of packets with a bad checksum
-    :type resp_bad_checksum: int 
+    :type resp_bad_checksum: float 
     :param resp_content_gap: Responder sent this number of packets with content gap
-    :type resp_content_gap: int 
+    :type resp_content_gap: float 
     :param resp_retransmitted_payload: Responder retransmitted this number of packets with payload
-    :type resp_retransmitted_payload: int 
+    :type resp_retransmitted_payload: float 
     :param resp_zero_window: Responder sent this number of packet with zero window
-    :type resp_zero_window: int 
+    :type resp_zero_window: float 
     :param conn_dir_flipped: Event direction was flipped by Zeek's heuristic
     :type conn_dir_flipped: bool
     '''
@@ -303,8 +322,6 @@ class Event:
     This class contains all of the data that are going to be used
     to classify this event
 
-    :param uid: unique id of this event
-    :type uid: str
     :param ts: timestamp of this event
     :type ts: str
     :param service: An identification of an application protocol being sent over the event.
@@ -314,37 +331,36 @@ class Event:
     :param duration: How long the event lasted. For 3-way or 4-way event tear-downs, this will not include the final ACK.
     :type duration: float
     :param orig_bytes: number of bytes sent by the origin
-    :type orig_bytes: int
+    :type orig_bytes: float
     :param resp_bytes: number of bytes sent by the responder
-    :type resp_bytes: int
+    :type resp_bytes: float
     :param conn_state: state of this event
     :type conn_state: str
     :param missed_bytes: bytes missed during this event
-    :type missed_bytes: int
+    :type missed_bytes: float
     :param history: state history of this event.
     :type history: EventHistory
     :param orig_pkts: Number of packets that the originator sent
-    :type orig_pkts: int
+    :type orig_pkts: float
     :param orig_ip_bytes: Number of IP level bytes that the originator sent (as seen on the wire, taken from the IP total_length header field
-    :type orig_ip_bytes: int
+    :type orig_ip_bytes: float
     :param resp_pkts: Number of packets that the responder sent.
-    :type resp_pkts: int
+    :type resp_pkts: float
     :param resp_ip_bytes: Number of IP level bytes that the responder sent (as seen on the wire, taken from the IP total_length header field
-    :type resp_ip_bytes: int
+    :type resp_ip_bytes: float
     '''
-    uid: str
     ts: str
-    services: str
+    service: str
     duration: float
-    orig_bytes: int
-    resp_bytes: int
+    orig_bytes: float
+    resp_bytes: float
     conn_state: str
-    missed_bytes: int
+    missed_bytes: float
     history: EventHistory
-    orig_pkts: int
-    orig_ip_bytes: int
-    resp_pkts: int
-    resp_ip_bytes: int
+    orig_pkts: float
+    orig_ip_bytes: float
+    resp_pkts: float
+    resp_ip_bytes: float
     label: str
 
     def to_json_obj(self) -> object:
@@ -355,9 +371,8 @@ class Event:
         :rtype: object
         """
         return {
-            'uid': self.uid,
             'ts': self.ts,
-            'services': self.services,
+            'services': self.service,
             'duration': self.duration,
             'orig_bytes': self.orig_bytes,
             'resp_bytes': self.resp_bytes,
@@ -410,19 +425,19 @@ class Trace:
         self.proto = proto
         self.events = set()
 
-    def add_packet(self, p: Event, elapsed_ts: float=None) -> None:
+    def add_packet(self, e: Event, elapsed_ts: float=None) -> None:
         """
         Class that contains multiple Events with the same id
 
-        :param p: the event to be added to this wrapper
-        :type p: Event
+        :param e: the event to be added to this wrapper
+        :type e: Event
         :param elapsed_ts: max window time so that a event can be considered to belong to this Trace
         :type elapsed_ts: float
         :raises KeyError: raises a KeyError if the id of the event doesn't match
         """
         if elapsed_ts is None:
-            if p.generate_id() == self.id:
-                self.events.append(p)
+            if e.generate_id() == self.id:
+                self.events.append(e)
             else:
                 raise KeyError
         else:
@@ -455,7 +470,7 @@ class Trace:
         :return: the id based on the origin and responder ip and port
         :rtype: str
         """        
-        return self.orig_ip + " " + self.orig_port + " " + self.resp_ip + " " + self.resp_port + " " + self.ts_on_open
+        return f"{self.orig_ip} {self.orig_port} {self.resp_ip} {self.resp_port} {self.proto} {self.ts_on_open}"
 
 
 class TracesController:
@@ -472,17 +487,17 @@ class TracesController:
     :type lines_to_remove_ash: set[str], optional
     :param strings_to_filter_event: set of string to be filtered out
     :type strings_to_filter_event: set[str], optional
-    :param network_traffic: set of the Trace
-    :type network_traffic: set[Trace]
-    :param networkConversation_pos_dict: dict that contains the indices of network_traffic
-    :type networkConversation_pos_dict: dict{str: int}
+    :param network_traffic: list of the Trace
+    :type network_traffic: list[Trace]
+    :param traces_pos_dict: dict that contains the indices of network_traffic
+    :type traces_pos_dict: dict{str: int}
     """
     def __init__(self, 
         path_of_file_input: str='',
         path_of_file_output: str='',
         path_of_file_json: str='',
-        lines_to_remove_ash: set=[],
-        strings_to_filter_event: set=[]) -> None:
+        lines_to_remove_ash: list=[],
+        strings_to_filter_event: list=[]) -> None:
         """Constructor Method
         """
         self.path_of_file_input = path_of_file_input
@@ -491,7 +506,7 @@ class TracesController:
         self.lines_to_remove_ash = lines_to_remove_ash
         self.strings_to_filter_event = strings_to_filter_event
         self.network_traffic = []
-        self.networkConversation_pos_dict = {}
+        self.traces_pos_dict = {}
     
     def load_paths_and_filters_from_config_file(self, config_file_path):
         """
@@ -662,7 +677,5 @@ class TracesController:
             
             json.dump(to_json, f, indent=4)
         print('...writing completed')
-
-
 
 
