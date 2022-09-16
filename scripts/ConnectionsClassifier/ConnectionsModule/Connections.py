@@ -1,8 +1,25 @@
 import json
 from dataclasses import dataclass
 from enum import Enum, auto
+from DiscretizerModule.Discretizer import Discretizer
 
 class CONN_STATE(Enum):
+    """
+    Describes the state that a Connection can have
+    #. S0: Connection attempt seen, no reply.
+    #. S1: Connection established, not terminated.
+    #. SF: Normal establishment and termination. Note that this is the same symbol as for state S1. You can tell the two apart because for S1 there will not be any byte counts in the summary, while for SF there will be.
+    #. REJ: Connection attempt rejected.
+    #. S2: Connection established and close attempt by originator seen (but no reply from responder).
+    #. S3: Connection established and close attempt by responder seen (but no reply from originator).
+    #. RSTO: Connection established, originator aborted (sent a RST).
+    #. RSTR: Responder sent a RST.
+    #. RSTOS0: Originator sent a SYN followed by a RST, we never saw a SYN-ACK from the responder.
+    #. RSTRH: Responder sent a SYN ACK followed by a RST, we never saw a SYN from the (purported) originator.
+    #. SH: Originator sent a SYN followed by a FIN, we never saw a SYN ACK from the responder (hence the connection was “half” open).
+    #. SHR: Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator.
+    #. OTH: No SYN seen, just midstream traffic (one example of this is a “partial connection” that was not later closed).
+    """    
     S0 = auto()
     S1 = auto()
     SF = auto()
@@ -25,59 +42,116 @@ class EventHistory:
     Class that manages the history of a single event, takes the string history
     and according to its characters sets single fields of this object to their value
 
-    :param history: history to be converted
-    :type history: str
-    :param orig_syn: Origin sent this number of packets with a SYN bit set w/o the ACK bit set
-    :type orig_syn: float
-    :param orig_fin: Origin sent this number of packets with a FIN bit set
-    :type orig_fin: float
-    :param orig_syn_ack: Origin sent this number of packets with a SYN with the ACK bit set
-    :type orig_syn_ack: float
-    :param orig_rest: Origin sent this number of packets with a RST bit set
-    :type orig_rest: float
-    :param resp_syn: Responder sent this number of packets with a SYN bit set w/o the ACK bit set
-    :type resp_syn: float
-    :param resp_fin: Responder sent this number of packets with a FIN bit set 
-    :type resp_fin: float
-    :param resp_syn_ack: Responder sent this number of packets with a SYN with the ACK bit set
-    :type resp_syn_ack: float
-    :param resp_rest: Responder sent this number of packets with a RST bit set
-    :type resp_rest: float
-    :param orig_ack: Origin sent a packet with ACK bit set
-    :type orig_ack: bool
-    :param orig_payload: Origin sent a payload
-    :type orig_payload: bool
-    :param orig_inconsistent: Origin packet was inconsistent (e.g. FIN+RST bits set)
-    :type orig_inconsistent: bool
-    :param orig_multi_flag: Origin sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
-    :type orig_multi_flag: bool
-    :param resp_ack: Responder sent a packet with ACK bit set
-    :type resp_ack: bool
-    :param resp_payload: Responder sent a payload
-    :type resp_payload: bool
-    :param resp_inconsistent: Responder packet was inconsistent (e.g. FIN+RST bits set)
-    :type resp_inconsistent: bool
-    :param resp_multi_flag: Responder sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
-    :type resp_multi_flag: bool
-    :param orig_bad_checksum: Origin sent this number of packets with a bad checksum
-    :type orig_bad_checksum: float 
-    :param orig_content_gap: Origin sent this number of packets with content gap
-    :type orig_content_gap: float 
-    :param orig_retransmitted_payload: Origin retransmitted this number of packets with payload
-    :type orig_retransmitted_payload: float 
-    :param orig_zero_window: Origin sent this number of packet with zero window
-    :type orig_zero_window: float 
-    :param resp_bad_checksum: Responder sent this number of packets with a bad checksum
-    :type resp_bad_checksum: float 
-    :param resp_content_gap: Responder sent this number of packets with content gap
-    :type resp_content_gap: float 
-    :param resp_retransmitted_payload: Responder retransmitted this number of packets with payload
-    :type resp_retransmitted_payload: float 
-    :param resp_zero_window: Responder sent this number of packet with zero window
-    :type resp_zero_window: float 
-    :param conn_dir_flipped: Event direction was flipped by Zeek's heuristic
-    :type conn_dir_flipped: bool
+    :param __history: history to be converted
+    :type __history: str
+    :param __orig_syn: Origin sent this number of packets with a SYN bit set w/o the ACK bit set
+    :type __orig_syn: float
+    :param __orig_fin: Origin sent this number of packets with a FIN bit set
+    :type __orig_fin: float
+    :param __orig_syn_ack: Origin sent this number of packets with a SYN with the ACK bit set
+    :type __orig_syn_ack: float
+    :param __orig_rest: Origin sent this number of packets with a RST bit set
+    :type __orig_rest: float
+    :param __resp_syn: Responder sent this number of packets with a SYN bit set w/o the ACK bit set
+    :type __resp_syn: float
+    :param __resp_fin: Responder sent this number of packets with a FIN bit set 
+    :type __resp_fin: float
+    :param __resp_syn_ack: Responder sent this number of packets with a SYN with the ACK bit set
+    :type __resp_syn_ack: float
+    :param __resp_rest: Responder sent this number of packets with a RST bit set
+    :type __resp_rest: float
+    :param __orig_ack: Origin sent a packet with ACK bit set
+    :type __orig_ack: bool
+    :param __orig_payload: Origin sent a payload
+    :type __orig_payload: bool
+    :param __orig_inconsistent: Origin packet was inconsistent (e.g. FIN+RST bits set)
+    :type __orig_inconsistent: bool
+    :param __orig_multi_flag: Origin sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
+    :type __orig_multi_flag: bool
+    :param __resp_ack: Responder sent a packet with ACK bit set
+    :type __resp_ack: bool
+    :param __resp_payload: Responder sent a payload
+    :type __resp_payload: bool
+    :param __resp_inconsistent: Responder packet was inconsistent (e.g. FIN+RST bits set)
+    :type __resp_inconsistent: bool
+    :param __resp_multi_flag: Responder sent a multi-flag packet (SYN+FIN or SYN+RST bits set)
+    :type __resp_multi_flag: bool
+    :param __orig_bad_checksum: Origin sent this number of packets with a bad checksum
+    :type __orig_bad_checksum: float 
+    :param __orig_content_gap: Origin sent this number of packets with content gap
+    :type __orig_content_gap: float 
+    :param __orig_retransmitted_payload: Origin retransmitted this number of packets with payload
+    :type __orig_retransmitted_payload: float 
+    :param __orig_zero_window: Origin sent this number of packet with zero window
+    :type __orig_zero_window: float 
+    :param __resp_bad_checksum: Responder sent this number of packets with a bad checksum
+    :type __resp_bad_checksum: float 
+    :param __resp_content_gap: Responder sent this number of packets with content gap
+    :type __resp_content_gap: float 
+    :param __resp_retransmitted_payload: Responder retransmitted this number of packets with payload
+    :type __resp_retransmitted_payload: float 
+    :param __resp_zero_window: Responder sent this number of packet with zero window
+    :type __resp_zero_window: float 
+    :param __conn_dir_flipped: Event direction was flipped by Zeek's heuristic
+    :type __conn_dir_flipped: bool
+
+    :param disc_orig_syn: Discretizer of the relative attribute
+    :type disc_orig_syn: Discretizer
+    :param disc_orig_fin: Discretizer of the relative attribute
+    :type disc_orig_fin: Discretizer
+    :param disc_orig_syn_ack: Discretizer of the relative attribute
+    :type disc_orig_syn_ack: Discretizer
+    :param disc_orig_rst: Discretizer of the relative attribute
+    :type disc_orig_rst: Discretizer
+    :param disc_resp_syn: Discretizer of the relative attribute
+    :type disc_resp_syn: Discretizer
+    :param disc_resp_fin: Discretizer of the relative attribute
+    :type disc_resp_fin: Discretizer
+    :param disc_resp_syn_ack: Discretizer of the relative attribute
+    :type disc_resp_syn_ack: Discretizer
+    :param disc_resp_rst: Discretizer of the relative attribute
+    :type disc_resp_rst: Discretizer
+    :param disc_orig_bad_checksum: Discretizer of the relative attribute
+    :type disc_orig_bad_checksum: Discretizer
+    :param disc_orig_content_gap: Discretizer of the relative attribute
+    :type disc_orig_content_gap: Discretizer
+    :param disc_orig_retransmitted: Discretizer of the relative attribute
+    :type disc_orig_retransmitted: Discretizer
+    :param disc_orig_zero_window: Discretizer of the relative attribute
+    :type disc_orig_zero_window: Discretizer
+    :param disc_resp_bad_checksum: Discretizer of the relative attribute
+    :type disc_resp_bad_checksum: Discretizer
+    :param disc_resp_conten_gap: Discretizer of the relative attribute
+    :type disc_resp_conten_gap: Discretizer
+    :param disc_resp_retransmitted: Discretizer of the relative attribute
+    :type disc_resp_retransmitted: Discretizer
+    :param disc_resp_zero_window: Discretizer of the relative attribute
+    :type disc_resp_zero_window: Discretizer
     '''
+
+    # S, F, H, R Discretized
+    disc_orig_syn: Discretizer = None
+    disc_orig_fin: Discretizer = None
+    disc_orig_syn_ack: Discretizer = None
+    disc_orig_rst: Discretizer = None
+
+    # s, f, h, r Discretized
+    disc_resp_syn: Discretizer = None
+    disc_resp_fin: Discretizer = None
+    disc_resp_syn_ack: Discretizer = None
+    disc_resp_rst: Discretizer = None
+
+    # c, g, t, w Discretized
+    disc_orig_bad_checksum: Discretizer = None
+    disc_orig_content_gap: Discretizer = None
+    disc_orig_retransmitted: Discretizer = None
+    disc_orig_zero_window: Discretizer = None
+
+    # C, G, T, W Discretized
+    disc_resp_bad_checksum: Discretizer = None
+    disc_resp_conten_gap: Discretizer = None
+    disc_resp_retransmitted: Discretizer = None
+    disc_resp_zero_window: Discretizer = None
 
     def __init__(self, history: str=None) -> None:
         """The constructor initialize the parameters required and if history is given,
@@ -313,8 +387,6 @@ class EventHistory:
             '^': self.__conn_dir_flipped,
         }
 
-
-@dataclass(frozen=True)
 class Event:
     '''
     Class of a single event registered
@@ -348,20 +420,60 @@ class Event:
     :type resp_pkts: float
     :param resp_ip_bytes: Number of IP level bytes that the responder sent (as seen on the wire, taken from the IP total_length header field
     :type resp_ip_bytes: float
+    
+    :param disc_orig_bytes: Discretizer of the relative attribute
+    :type disc_orig_bytes: Discretizer
+    :param disc_resp_bytes: Discretizer of the relative attribute
+    :type disc_resp_bytes: Discretizer
+    :param disc_missed_bytes: Discretizer of the relative attribute
+    :type disc_missed_bytes: Discretizer
+    :param disc_orig_pkts: Discretizer of the relative attribute
+    :type disc_orig_pkts: Discretizer
+    :param disc_duration: Discretizer of the relative attribute
+    :type disc_duration: Discretizer
+    :param disc_orig_ip_bytes: Discretizer of the relative attribute
+    :type disc_orig_ip_bytes: Discretizer
+    :param disc_resp_pkts: Discretizer of the relative attribute
+    :type disc_resp_pkts: Discretizer
+    :param disc_resp_ip_bytes: Discretizer of the relative attribute
+    :type disc_resp_ip_bytes: Discretizer
     '''
-    ts: str
-    service: str
-    duration: float
-    orig_bytes: float
-    resp_bytes: float
-    conn_state: str
-    missed_bytes: float
-    history: EventHistory
-    orig_pkts: float
-    orig_ip_bytes: float
-    resp_pkts: float
-    resp_ip_bytes: float
-    label: str
+    disc_orig_bytes: Discretizer = None
+    disc_resp_bytes: Discretizer = None
+    disc_missed_bytes: Discretizer = None
+    disc_orig_pkts: Discretizer = None
+    disc_duration: Discretizer = None
+    disc_orig_ip_bytes: Discretizer = None
+    disc_resp_pkts: Discretizer = None
+    disc_resp_ip_bytes: Discretizer = None
+
+    def __init__(self, 
+            ts: str,
+            service: str,
+            duration: float,
+            orig_bytes: float,
+            resp_bytes: float,
+            conn_state: str,
+            missed_bytes: float,
+            history: EventHistory,
+            orig_pkts: float,
+            orig_ip_bytes: float,
+            resp_pkts: float,
+            resp_ip_bytes: float,
+            label: str) -> None:    
+        self.__ts = ts
+        self.__service = service
+        self.__duration = duration
+        self.__orig_bytes = orig_bytes
+        self.__resp_bytes = resp_bytes
+        self.__conn_state = conn_state
+        self.__missed_bytes = missed_bytes
+        self.__history = history
+        self.__orig_pkts = orig_pkts
+        self.__orig_ip_bytes = orig_ip_bytes
+        self.__resp_pkts = resp_pkts
+        self.__resp_ip_bytes = resp_ip_bytes
+        self.__label = label
 
     def to_json_obj(self) -> object:
         """
@@ -371,28 +483,124 @@ class Event:
         :rtype: object
         """
         return {
-            'ts': self.ts,
-            'services': self.service,
-            'duration': self.duration,
-            'orig_bytes': self.orig_bytes,
-            'resp_bytes': self.resp_bytes,
-            'conn_state': self.conn_state,
-            'missed_bytes': self.missed_bytes,
-            'history': self.history,
-            'orig_pkts': self.orig_pkts,
-            'orig_ip_bytes': self.orig_ip_bytes,
-            'resp_pkts': self.resp_pkts,
-            'resp_ip_bytes': self.resp_ip_bytes,
-            'label': self.label,
+            'ts': self.__ts,
+            'services': self.__service,
+            'duration': self.__duration,
+            'orig_bytes': self.__orig_bytes,
+            'resp_bytes': self.__resp_bytes,
+            'conn_state': self.__conn_state,
+            'missed_bytes': self.__missed_bytes,
+            'history': self.__history,
+            'orig_pkts': self.__orig_pkts,
+            'orig_ip_bytes': self.__orig_ip_bytes,
+            'resp_pkts': self.__resp_pkts,
+            'resp_ip_bytes': self.__resp_ip_bytes,
+            'label': self.__label,
         }
+    
+    def get_ts(self) -> str:
+        """Getter of ts
 
-    ## method generated by dataclass
-    # delattr
-    # eq
-    # hash
-    # init
-    # repr
-    # setattr
+        :return: the value of ts
+        :rtype: str
+        """        
+        return self.__ts
+
+    def get_service(self) -> str:
+        """Getter of service
+
+        :return: the value of service
+        :rtype: str
+        """        
+        return self.__service
+
+    def get_duration(self) -> float:
+        """Getter of duration
+
+        :return: the value of duration
+        :rtype: float
+        """
+        return self.__duration
+
+    def get_orig_bytes(self) -> float:
+        """Getter of orig_bytes
+
+        :return: the value of orig_bytes
+        :rtype: float
+        """
+        return self.__orig_bytes
+
+    def get_resp_bytes(self) -> float:
+        """Getter of resp_bytes
+
+        :return: the value of resp_bytes
+        :rtype: float
+        """
+        return self.__resp_bytes
+
+    def get_conn_state(self) -> str:
+        """Getter of conn_state
+
+        :return: the value of conn_state
+        :rtype: str
+        """
+        return self.__conn_state
+
+    def get_missed_bytes(self) -> float:
+        """Getter of missed_bytes
+
+        :return: the value of missed_bytes
+        :rtype: float
+        """
+        return self.__missed_bytes
+
+    def get_history(self) -> EventHistory:
+        """Getter of history
+
+        :return: the value of history
+        :rtype: EventHistory
+        """
+        return self.__history
+
+    def get_orig_pkts(self) -> float:
+        """Getter of orig_pkts
+
+        :return: the value of orig_pkts
+        :rtype: float
+        """
+        return self.__orig_pkts
+
+    def get_orig_ip_bytes(self) -> float:
+        """Getter of orig_ip_bytes
+
+        :return: the value of orig_ip_bytes
+        :rtype: float
+        """
+        return self.__orig_ip_bytes
+
+    def get_resp_pkts(self) -> float:
+        """Getter of resp_pkts
+
+        :return: the value of resp_pkts
+        :rtype: float
+        """
+        return self.__resp_pkts
+
+    def get_resp_ip_bytes(self) -> float:
+        """Getter of resp_ip_bytes
+
+        :return: the value of resp_ip_bytes
+        :rtype: float
+        """
+        return self.__resp_ip_bytes
+
+    def get_label(self) -> str:
+        """Getter of label
+
+        :return: the value of label
+        :rtype: str
+        """
+        return self.__label
 
 
 class Trace:

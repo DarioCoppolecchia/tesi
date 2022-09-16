@@ -20,7 +20,7 @@ class Equal_Height_Discretizer(Discretizer):
     def get_attribute(self) -> Any:
         return self.attribute
 
-class Equal_Height_Discretizer(Discretizer):
+class Equal_Width_Discretizer(Discretizer):
     def discretize_attribute(self, values: list):
         pass
 
