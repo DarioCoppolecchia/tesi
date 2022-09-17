@@ -159,7 +159,7 @@ class EventHistory:
 
         :param history: string to be analyzed, defaults to None
         :type history: str, optional
-        """        
+        """
         self.__history = history if history is not None else ''
 
         # S, F, H, R
@@ -257,7 +257,7 @@ class EventHistory:
         :type history: str, optional
         :return: list of the tuples of the history
         :rtype: list
-        """        
+        """
 
         if history is not None:
             self.analyze_history(history)
@@ -305,7 +305,7 @@ class EventHistory:
         :type history: str, optional
         :return: list of the description of each letter
         :rtype: list
-        """        
+        """
         """Returns a list where for each element, there is a string describing the letter red
         at that position
 
@@ -503,7 +503,7 @@ class Event:
 
         :return: the value of ts
         :rtype: str
-        """        
+        """
         return self.__ts
 
     def get_service(self) -> str:
@@ -511,7 +511,7 @@ class Event:
 
         :return: the value of service
         :rtype: str
-        """        
+        """
         return self.__service
 
     def get_duration(self) -> float:
@@ -620,8 +620,8 @@ class Trace:
     :type ts_on_open: str
     :param proto: protocol used for this trace
     :type proto: str
-    :param events: set of the event between this 2 hosts with these ports
-    :type events: set[Event]
+    :param events: list of the event between this 2 hosts with these ports
+    :type events: list[Event]
     """
 
     def __init__(self, orig_ip: str, orig_port: int, resp_ip: str, resp_port: int, ts_on_open: str, proto: str):
@@ -631,7 +631,7 @@ class Trace:
         self.resp_port = resp_port
         self.ts_on_open = ts_on_open
         self.proto = proto
-        self.events = set()
+        self.events = list()
 
     def add_packet(self, e: Event, elapsed_ts: float=None) -> None:
         """
@@ -677,8 +677,151 @@ class Trace:
 
         :return: the id based on the origin and responder ip and port
         :rtype: str
-        """        
+        """
         return f"{self.orig_ip} {self.orig_port} {self.resp_ip} {self.resp_port} {self.proto} {self.ts_on_open}"
+
+    def get_list_of_ts(self) -> list:
+        """Getter of the ts of the events in this trace
+
+        :return: the list of all the value of ts
+        :rtype: list[str]
+        """
+        list_ts = []
+        for event in self.events:
+            list_ts.append(event.get_ts())
+        return list_ts
+
+    def get_list_of_service(self) -> list:
+        """Getter of the service of the events in this trace
+
+        :return: the list of all the value of service
+        :rtype: list[str]
+        """
+        list_service = []
+        for event in self.events:
+            list_service.append(event.get_service())
+        return list_service
+
+    def get_list_of_duration(self) -> list:
+        """Getter of the duration of the events in this trace
+
+        :return: the list of all the value of duration
+        :rtype: list[float]
+        """
+        list_duration = []
+        for event in self.events:
+            list_duration.append(event.get_duration())
+        return list_duration
+
+    def get_list_of_orig_bytes(self) -> list:
+        """Getter of the orig_bytes of the events in this trace
+
+        :return: the list of all the value of orig_bytes
+        :rtype: list[float]
+        """
+        list_orig_bytes = []
+        for event in self.events:
+            list_orig_bytes.append(event.get_orig_bytes())
+        return list_orig_bytes
+
+    def get_list_of_resp_bytes(self) -> list:
+        """Getter of the resp_bytes of the events in this trace
+
+        :return: the list of all the value of resp_bytes
+        :rtype: list[float]
+        """
+        list_resp_bytes = []
+        for event in self.events:
+            list_resp_bytes.append(event.get_resp_bytes())
+        return list_resp_bytes
+
+    def get_list_of_conn_state(self) -> list:
+        """Getter of the conn_state of the events in this trace
+
+        :return: the list of all the value of conn_state
+        :rtype: list[str]
+        """
+        list_conn_state = []
+        for event in self.events:
+            list_conn_state.append(event.get_conn_state())
+        return list_conn_state
+
+    def get_list_of_missed_bytes(self) -> list:
+        """Getter of the missed_bytes of the events in this trace
+
+        :return: the list of all the value of missed_bytes
+        :rtype: list[float]
+        """
+        list_missed_bytes = []
+        for event in self.events:
+            list_missed_bytes.append(event.get_missed_bytes())
+        return list_missed_bytes
+
+    def get_list_of_history(self) -> list:
+        """Getter of the history of the events in this trace
+
+        :return: the list of all the value of history
+        :rtype: list[EventHistory]
+        """
+        list_history = []
+        for event in self.events:
+            list_history.append(event.get_history())
+        return list_history
+
+    def get_list_of_orig_pkts(self) -> list:
+        """Getter of the orig_pkts of the events in this trace
+
+        :return: the list of all the value of orig_pkts
+        :rtype: list[float]
+        """
+        list_orig_pkts = []
+        for event in self.events:
+            list_orig_pkts.append(event.get_orig_pkts())
+        return list_orig_pkts
+
+    def get_list_of_orig_ip_bytes(self) -> list:
+        """Getter of the orig_ip_bytes of the events in this trace
+
+        :return: the list of all the value of orig_ip_bytes
+        :rtype: list[float]
+        """
+        list_orig_ip_bytes = []
+        for event in self.events:
+            list_orig_ip_bytes.append(event.get_orig_ip_bytes())
+        return list_orig_ip_bytes
+
+    def get_list_of_resp_pkts(self) -> list:
+        """Getter of the resp_pkts of the events in this trace
+
+        :return: the list of all the value of resp_pkts
+        :rtype: list[float]
+        """
+        list_resp_pkts = []
+        for event in self.events:
+            list_resp_pkts.append(event.get_resp_pkts())
+        return list_resp_pkts
+
+    def get_list_of_resp_ip_bytes(self) -> list:
+        """Getter of the resp_ip_bytes of the events in this trace
+
+        :return: the list of all the value of resp_ip_bytes
+        :rtype: list[float]
+        """
+        list_resp_ip_bytes = []
+        for event in self.events:
+            list_resp_ip_bytes.append(event.get_resp_ip_bytes())
+        return list_resp_ip_bytes
+
+    def get_list_of_label(self) -> list:
+        """Getter of the label of the events in this trace
+
+        :return: the list of all the value of label
+        :rtype: list[str]
+        """
+        list_label = []
+        for event in self.events:
+            list_label.append(event.get_label())
+        return list_label
 
 
 class TracesController:
@@ -821,7 +964,7 @@ class TracesController:
 
         :return: set of strings that have been normalized
         :rtype: set(str)
-        """        
+        """
         print('converting preprocessed lines to list of traces...')
         packets = self.__conv_lines_to_list_of_Event()
         
@@ -843,7 +986,7 @@ class TracesController:
 
         :return: list of Events converted from list of lines
         :rtype: list(Event)
-        """        
+        """
         packets = []
         
         for line in self.preprocessed_lines:

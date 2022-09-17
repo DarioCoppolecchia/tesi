@@ -3,26 +3,40 @@ from typing import Any # to create an abstract class
 
 class Discretizer(metaclass=abc.ABCMeta):
     def __init__(self) -> None:
-        self.attribute = 0
+        self.discretized_bins = []
 
     @abc.abstractmethod
-    def discretize_attribute(self, values: list):
+    def discretize(self, values: list):
         pass
 
     @abc.abstractmethod
-    def get_attribute(self) -> Any:
-        return self.attribute
+    def discretize_attribute(self, value: float):
+        pass
 
 class Equal_Height_Discretizer(Discretizer):
-    def discretize_attribute(self, values: list):
+    def discretize_attribute(self, value: float):
         pass
-
-    def get_attribute(self) -> Any:
-        return self.attribute
 
 class Equal_Width_Discretizer(Discretizer):
-    def discretize_attribute(self, values: list):
-        pass
 
-    def get_attribute(self) -> Any:
-        return self.attribute
+    def __init__(self, min: float, max: float, n_bins: int) -> None:
+        super().__init__()
+        self.min = min
+        self.max = max
+        self.n_bins = n_bins
+
+    def discretize_attribute(self, value: float):
+        pass
+    
+    def set_min(self, min: float):
+        self.min = min
+    def set_max(self, max: float):
+        self.max = max
+    def set_n_bin(self, n_bin: int):
+        self.n_bin = n_bin
+    def get_min(self) -> float:
+        return self.min
+    def get_max(self) -> float:
+        return self.max
+    def get_n_bins(self) -> int:
+        return self.n_bins
