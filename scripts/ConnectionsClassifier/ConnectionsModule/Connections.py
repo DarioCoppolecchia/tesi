@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from enum import Enum, auto
-from DiscretizerModule.Discretizer import Discretizer
+from DiscretizerModule.Discretizer import Discretizer, Equal_Width_Discretizer, Equal_Height_Discretizer
 
 class CONN_STATE(Enum):
     """
@@ -643,6 +643,8 @@ class Trace:
         :type elapsed_ts: float
         :raises KeyError: raises a KeyError if the id of the event doesn't match
         """
+
+        # Checking if the parameter is present
         if elapsed_ts is None:
             if e.generate_id() == self.id:
                 self.events.append(e)
@@ -957,65 +959,63 @@ class TracesController:
         print('...normalization completed')
         return self.preprocessed_lines
 
-    def conv_lines_to_Trace_set(self) -> set:
+    def conv_lines_to_Trace_set(self) -> list:
         """
         Convert a list of preprocessed lines to a list of Event and inserts them into the 
-        Trace set
+        Trace list
 
-        :return: set of strings that have been normalized
-        :rtype: set(str)
+        :return: list of strings that have been normalized
+        :rtype: list(Traces)
         """
         print('converting preprocessed lines to list of traces...')
-        packets = self.__conv_lines_to_list_of_Event()
-        
-        events_dict = {}
-        for p in packets:
-            id = p.generate_id()
-
-            if id not in events_dict:
-                events_dict[id] = Event()
-            else:
-                events_dict[id].add_packet(p)
-        print('...conversion completed')
-        self.events_list = list(events_dict.values())
-        return self.events_list
-        
-    def __conv_lines_to_list_of_Event(self) -> list:
-        """
-        converts a list of preprocessed lines to a list of Events
-
-        :return: list of Events converted from list of lines
-        :rtype: list(Event)
-        """
-        packets = []
-        
+        count = 0
         for line in self.preprocessed_lines:
-            packets.append(self.__conv_conn_line_to_Event(line))
+            list_to_pack = line.split('\t')
 
-        return packets
+            ts = list_to_pack[0]
+            orig_ip = list_to_pack[2]
+            orig_port = list_to_pack[3]
+            resp_ip = list_to_pack[4]
+            resp_port = list_to_pack[5]
+            proto = list_to_pack[6]
+            service = list_to_pack[7]
+            duration = list_to_pack[8]
+            orig_bytes = list_to_pack[9]
+            resp_bytes = list_to_pack[10]
+            conn_state = list_to_pack[11]
+            missed_bytes = list_to_pack[14]
+            history = list_to_pack[15]
+            orig_pkts = list_to_pack[16]
+            orig_ip_bytes = list_to_pack[17]
+            resp_pkts = list_to_pack[18]
+            resp_ip_bytes = list_to_pack[19]
+            label = list_to_pack[20]
 
-    def __conv_conn_line_to_Event(self, line: str) -> Event:
-        """
-        converts a conn.log line to a Event
+            event = Event(ts,
+                service,
+                duration,
+                orig_bytes,
+                resp_bytes,
+                conn_state,
+                missed_bytes,
+                history,
+                orig_pkts,
+                orig_ip_bytes,
+                resp_pkts,
+                resp_ip_bytes,
+                label)
+        
+            new_trace = Trace(orig_ip, orig_port, resp_ip, resp_port, ts, proto)
+            id = new_trace.generate_id()
 
-        :param line: line to be converted to Event
-        :type line: str
-        :return: Event converted from line
-        :rtype: Event
-        """
-        list_to_pack = line.split('\t')
-
-        # getting info to insert in Event
-        uid = list_to_pack[1]
-        orig_ip = list_to_pack[2]
-        orig_port = list_to_pack[3]
-        resp_ip = list_to_pack[4]
-        resp_port = list_to_pack[5]
-        ts = list_to_pack[0]
-        services = list_to_pack[7]
-        state = list_to_pack[11]
-
-        return Event(uid, orig_ip, orig_port, resp_ip, resp_port, ts, services, state)
+            if id not in self.traces_pos_dict:
+                self.network_traffic.append(new_trace)
+                self.network_traffic[-1].add_packet(event)
+                self.traces_pos_dict[id] = count
+                count += 1
+            else:
+                self.traces_pos_dict[id].add_packet(event)
+        print('...conversion completed')
         
     def print_Trace_list_to_json_file(self):
         """prints all the Traces list to a json file
@@ -1023,10 +1023,76 @@ class TracesController:
         print('writing the list of Events to a json file...')
         with open(self.path_of_file_json, 'w') as f:
             to_json = []
-            for pw in self.events_list:
-                to_json.append(pw.to_json_obj())
+            for trace in self.network_traffic:
+                to_json.append(trace.to_json_obj())
             
             json.dump(to_json, f, indent=4)
         print('...writing completed')
 
+    def discretize_attributes_equal_width(self, n_bins_list: list):
 
+        orig_bytes_list = []
+        resp_bytes_list = []
+        missed_bytes_list = []
+        orig_pkts_list = []
+        duration_list = []
+        orig_ip_bytes_list = []
+        resp_pkts_list = []
+        resp_ip_bytes_list = []
+
+        # getting all value for each list
+        for trace in self.network_traffic:
+            orig_bytes_list += trace.get_list_of_orig_bytes()
+            resp_bytes_list += trace.get_list_of_resp_bytes()
+            missed_bytes_list += trace.get_list_of_missed_bytes()
+            orig_pkts_list += trace.get_list_of_orig_pkts()
+            duration_list += trace.get_list_of_duration()
+            orig_ip_bytes_list += trace.get_list_of_orig_ip_bytes()
+            resp_pkts_list += trace.get_list_of_resp_pkts()
+            resp_ip_bytes_list += trace.get_list_of_resp_ip_bytes()
+
+        if len(n_bins_list) != 8:
+            n_bins_list = [10, 10, 10, 10, 10, 10, 10, 10]
+        
+        Event.disc_orig_bytes = Equal_Width_Discretizer(min(orig_bytes_list), max(orig_bytes_list), n_bins_list[0])
+        Event.disc_resp_bytes = Equal_Width_Discretizer(min(resp_bytes_list), max(resp_bytes_list), n_bins_list[1])
+        Event.disc_missed_bytes = Equal_Width_Discretizer(min(missed_bytes_list), max(missed_bytes_list), n_bins_list[2])
+        Event.disc_orig_pkts = Equal_Width_Discretizer(min(orig_pkts_list), max(orig_pkts_list), n_bins_list[3])
+        Event.disc_duration = Equal_Width_Discretizer(min(duration_list), max(duration_list), n_bins_list[4])
+        Event.disc_orig_ip_bytes = Equal_Width_Discretizer(min(orig_ip_bytes_list), max(orig_ip_bytes_list), n_bins_list[5])
+        Event.disc_resp_pkts = Equal_Width_Discretizer(min(resp_pkts_list), max(resp_pkts_list), n_bins_list[6])
+        Event.disc_resp_ip_bytes = Equal_Width_Discretizer(min(resp_ip_bytes_list), max(resp_ip_bytes_list), n_bins_list[7])
+
+    def discretize_attributes_equal_height(self, n_bins_list: list):
+
+        orig_bytes_list = []
+        resp_bytes_list = []
+        missed_bytes_list = []
+        orig_pkts_list = []
+        duration_list = []
+        orig_ip_bytes_list = []
+        resp_pkts_list = []
+        resp_ip_bytes_list = []
+
+        # getting all value for each list
+        for trace in self.network_traffic:
+            orig_bytes_list += trace.get_list_of_orig_bytes()
+            resp_bytes_list += trace.get_list_of_resp_bytes()
+            missed_bytes_list += trace.get_list_of_missed_bytes()
+            orig_pkts_list += trace.get_list_of_orig_pkts()
+            duration_list += trace.get_list_of_duration()
+            orig_ip_bytes_list += trace.get_list_of_orig_ip_bytes()
+            resp_pkts_list += trace.get_list_of_resp_pkts()
+            resp_ip_bytes_list += trace.get_list_of_resp_ip_bytes()
+
+        if len(n_bins_list) != 8:
+            n_bins_list = [10, 10, 10, 10, 10, 10, 10, 10]
+        
+        Event.disc_orig_bytes = Equal_Height_Discretizer(orig_bytes_list)
+        Event.disc_resp_bytes = Equal_Height_Discretizer(resp_bytes_list)
+        Event.disc_missed_bytes = Equal_Height_Discretizer(missed_bytes_list)
+        Event.disc_orig_pkts = Equal_Height_Discretizer(orig_pkts_list)
+        Event.disc_duration = Equal_Height_Discretizer(duration_list)
+        Event.disc_orig_ip_bytes = Equal_Height_Discretizer(orig_ip_bytes_list)
+        Event.disc_resp_pkts = Equal_Height_Discretizer(resp_pkts_list)
+        Event.disc_resp_ip_bytes = Equal_Height_Discretizer(resp_ip_bytes_list)

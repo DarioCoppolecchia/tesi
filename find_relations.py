@@ -153,6 +153,19 @@ def get_n_values_of_columns(cols: list, n: int, file_dict: dict, header_pos: dic
         if i >= n:
             break
     return values
+    
+def get_frequency_of_value_of_column_from_file(col: str, file_path: str) -> dict:
+    with open(file_path) as f:
+        frequency_of_value = {}
+        csvr = csv.DictReader(f, delimiter='\t')
+        for conn in csvr:
+            k = conn[col]
+            if k in frequency_of_value:
+                frequency_of_value[k] += 1
+            else:
+                frequency_of_value[k] = 1
+        return frequency_of_value
+    
 
 def get_n_combinations_of_values_of_columns(cols: list, file_dict: dict, header_pos: dict):
     values = {}
@@ -269,18 +282,40 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-conn_file_path = "./logs/tuesday/conn_labeled.log"
+day = 'monday'
+file_name = 'conn.log'
+conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
 
 ################ getting file_dict_conn and header_pos_conn
-parsed_conn_file_path = './logs/tuesday/parsed/conn_labeled'
+parsed_conn_file_path = f'./logs/{day}/parsed/{file_name}'
+import os
 from os.path import exists
 if not(exists(parsed_conn_file_path + '_dict.json') and exists(parsed_conn_file_path + '_header.json')):
     file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
+    os.mkdir(f'./logs/{day}/parsed/')
     print_file_dict_to_file(parsed_conn_file_path, file_dict_conn, header_pos_conn)
 else:
     file_dict_conn, header_pos_conn = read_file_dict_from_file(parsed_conn_file_path)
+
+################ frequenza di history
+freq_dict = get_frequency_of_value_of_column_from_file('history', conn_file_path)
+list_to_save = [[k, v] for k, v in freq_dict.items()]
+list_to_save.sort(key=lambda row: row[-1], reverse=True)
+list_to_save = [f'{l[0]}, {l[1]}' for l in list_to_save]
+#print_list_to_file(f"outputs/correlations_between_files_history/", f"combinations_history_frequency.tsv", list_to_save)
+
+card_freq = {}
+for _, v in freq_dict.items():
+    if v in card_freq:
+        card_freq[v] += 1
+    else:
+        card_freq[v] = 1
+list_to_save = [[k, v] for k, v in card_freq.items()]
+list_to_save.sort(key=lambda row: row[-1], reverse=True)
+list_to_save = [f'{l[0]}, {l[1]}' for l in list_to_save]
+print_list_to_file(f"outputs/correlations_between_files_history/", f"combinations_cardinality_frequency_history.csv", list_to_save)
 
 ################ prendo tutti i valori usati di conn_state
 '''
@@ -288,8 +323,8 @@ values = set([v.replace('\t', '') for v in get_all_values_of_columns(['conn_stat
 all_values = set(['S0','S1','SF','REJ','S2','S3','RSTO','RSTR','RSTOS0','RSTRH','SH','SHR','OTH'])
 print(all_values.difference(values))
 '''
-'''
 ################ discretizzazione
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -392,12 +427,15 @@ for trace, events in file_dict_conn.items():
     for event in events:
         new_label = event[header_pos_conn['label']]
         if new_label != prev_label:
-            diff_label.append(trace)
+            diff_label.append([trace, len(events), prev_label, new_label,])
             break
         else:
             prev_label = new_label
     else:
-        same_label.append(trace)
+        same_label.append([trace, len(events), prev_label,])
+
+same_label = [' | '.join(str(e) for e in event) for event in same_label if event[1] > 1]
+diff_label = [' | '.join(str(e) for e in event) for event in diff_label if event[1] > 1]
 
 print_list_to_file("output/", "traces_with_same_label.csv", same_label)
 print_list_to_file("output/", "traces_with_diff_label.csv", diff_label)
@@ -430,26 +468,6 @@ res_l.insert(0, ", ".join(header))
 print_list_to_file("output/", "combinations_history_orig_pkts_resp_pkts.csv", res_l)
 '''
 
-'''
-header = ['history']
-res_history = get_n_combinations_of_values_of_columns(header, file_dict_conn, header_pos_conn)
-res_history.sort(key = lambda row: (row[1]), reverse=True)
-header.append('n_ricorrenze')
-for res in res_history:
-    for i, r in enumerate(res):
-        res[i] = str(r)
-res_history = [','.join(res) for res in res_history]
-res_history.insert(0, ','.join(header))
-#print_list_to_file("output/", "combinations_history_frequency.csv", res_history)
-
-
-header = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto']
-res_l = get_n_combinations_of_values_of_columns(header, file_dict_conn, header_pos_conn)
-res_l = [" ".join(res[0:-1]) + ',' + str(res[-1]) for res in res_l]
-res_l.sort()
-print_list_to_file("output/", "combinations_conn_proto_frequency.csv", res_l)
-'''
-
 ############### combinazioni di header nel file
 '''
 header = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto']
@@ -465,10 +483,10 @@ print_list_to_file("output/", "combinations_conn_proto_frequency.tsv", occ_l)
 '''
 header = ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto', 'ts', 'duration', 'history']
 res_l = list(get_all_values_of_columns(header, file_dict_conn, header_pos_conn))
-res_l.sort(key = lambda row: (row[0], row[1], row[2], row[3], row[4]), reverse=True)
+res_l.sort(key = lambda row: (row[0], row[1], row[2], row[3], row[4]))
 res_l = [res[:-1] for res in res_l]
 res_l.insert(0, "\t".join(header))
-print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history.tsv", res_l)
+print_list_to_file("outputs/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history.csv", res_l)
 '''
 
 ############## raggruppo l'id con ts, duration e history
@@ -480,14 +498,14 @@ print('finito presi i valori')
 out_l.sort()
 print('finito sorting')
 
-print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history.tsv", out_l)
+#print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history.tsv", out_l)
 new_out_l = []
 for i in tqdm.tqdm(range(len(out_l) - 1)):
     new_out_l.append(out_l[i])
     if out_l[i].split('\t')[0] != out_l[i + 1].split('\t')[0]:
         new_out_l.append('')
 print('finito mettere gli spazi')
-print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history_separati_da_righe.tsv", new_out_l)
+print_list_to_file("output/", "combinazioni_raggruppamenti_delle_righe_ts_durata_history_separati_da_righe.csv", new_out_l)
 '''
 
 ############### Stampo delle history di esempio sulla console
@@ -504,36 +522,6 @@ for i in rand_indexes:
     for p in rh.get_history_with_values(history):
         print(p)
     print('\n')
-'''
-
-############### trova la cardinalità di tutte le righe con i valori di header
-'''
-header = ['history', 'orig_pkts', 'resp_pkts']
-occ_dic = get_number_of_occurrencies_of_cols_from_file(conn_file_path, header)
-occ_l = [[k, v] for k, v in occ_dic.items()]
-occ_l.sort(key=lambda row: row[-1], reverse=True)
-occ_copy = occ_l
-occ_l = ['\t'.join([row[0], str(row[1])]) for row in occ_l]
-print_list_to_file("output/", "combinations_history_pkts_cardinality.tsv", occ_l)
-
-values = [occ[0] for occ in occ_copy]
-print_list_to_file("output/", "combinations_history_pkts_values.tsv", values)
-
-
-############ trovo la cardinalità delle cardinalità
-
-card_dict = {}
-for occ in occ_copy:
-    key = occ[-1]
-    if key in card_dict:
-        card_dict[key] += 1
-    else:
-        card_dict[key] = 1
-
-card_of_card_l = [[k, v] for k, v in card_dict.items()]
-#card_of_card_l.sort(key=lambda row: row[-1], reverse=True)
-card_of_card_l = ['\t'.join([str(row[0]), str(row[1])]) for row in card_of_card_l]
-print_list_to_file("output/", "combinations_cardinality_frequency.tsv", card_of_card_l)
 '''
 
 #res = get_all_values_of_columns(['curve'], file_dict_conn, header_pos_conn)

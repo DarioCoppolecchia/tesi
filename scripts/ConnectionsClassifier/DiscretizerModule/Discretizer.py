@@ -14,6 +14,10 @@ class Discretizer(metaclass=abc.ABCMeta):
         pass
 
 class Equal_Height_Discretizer(Discretizer):
+
+    def __init__(self, values: list):
+        self.values = values
+
     def discretize_attribute(self, value: float):
         pass
 
