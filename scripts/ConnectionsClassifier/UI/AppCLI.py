@@ -1,4 +1,4 @@
-from ConnectionsModule.Connections import NetworkTrafficController
+from ConnectionsModule.Connections import TracesController
 import os
 
 class MainApplicationCLI:
@@ -26,18 +26,17 @@ class MainApplicationCLI:
         :param config_path: path of the configuration file, defaults to ''
         :type config_path: str, optional
         """
-        self.pc = NetworkTrafficController()
+        self.traces_controller = TracesController()
 
         if config_path != '':
-            self.pc.load_paths_and_filters_from_config_file(config_path)
+            self.traces_controller.load_paths_and_filters_from_config_file(config_path)
         else:
             print('path of the config file not given, enter config options manually:')
-            self.pc.lines_to_remove = self.__get_lines_from_input('the line to add to the list of lines to remove')
-            self.pc.lines_to_remove_ash = self.__get_lines_from_input('the line to add to the list of lines where to remove the start of the line')
-            self.pc.strings_to_filter_rows = self.__get_lines_from_input('the string to add to the list of strings to filter out')
-            self.pc.path_of_file_input = input('type the path of the file containing the lines of the connections to analyze\n> ')
-            self.pc.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
-            self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
+            self.traces_controller.lines_to_remove_ash = self.__get_lines_from_input('the line to add to the list of lines where to remove the start of the line')
+            self.traces_controller.strings_to_filter_event = self.__get_lines_from_input('the string to add to the list of strings to filter out')
+            self.traces_controller.path_of_file_input = input('type the path of the file containing the lines of the connections to analyze\n> ')
+            self.traces_controller.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
+            self.traces_controller.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
 
     def main_loop(self):
         """
@@ -45,8 +44,8 @@ class MainApplicationCLI:
         for every iteration this allows the user to do one of the following operations:
             #. read and normalize lines from the file stored in path_of_file_input
             #. print preprocessed lines to a file
-            #. convert normalized lines to a NetworkConversation set
-            #. print network conversation list to a json file
+            #. convert normalized lines to a Traces list
+            #. print traces list to a json file
             #. open stored preprocessed lines
             #. loads configuration options from config.ini file
             #. show configuration options
@@ -59,8 +58,8 @@ class MainApplicationCLI:
             op = input("""\ntype the number for the various options: 
  1) read and normalize lines from the file stored in path_of_file_input
  2) print preprocessed lines to a file
- 3) convert normalized lines to a NetworkConversation set
- 4) print network conversation list to a json file
+ 3) convert normalized lines to a Traces list
+ 4) print traces list to a json file
  5) open stored preprocessed lines
  6) loads configuration options from config.ini file
  7) show configuration options
@@ -71,37 +70,34 @@ class MainApplicationCLI:
             os.system('clear')
 
             if op == "1":
-                self.pc.normalize_lines()
+                self.traces_controller.normalize_lines()
             elif op == "2":
-                self.pc.print_preprocessed_lines_to_file()
+                self.traces_controller.print_preprocessed_lines_to_file()
             elif op == "3":
-                self.pc.conv_lines_to_NetworkConversation_list()
+                self.traces_controller.conv_lines_to_Trace_list()
             elif op == "4":
-                self.pc.print_packetWrapper_list_to_json_file()
+                self.traces_controller.print_Trace_list_to_json_file()
             elif op == "5":
-                self.pc.open_stored_preprocessed_lines()
+                self.traces_controller.open_stored_preprocessed_lines()
             elif op == "6":
                 config_path = input('type the path of the config.ini file\n> ')
-                self.pc.load_paths_and_filters_from_config_file(config_path)
+                self.traces_controller.load_paths_and_filters_from_config_file(config_path)
             elif op == "7":
-                print("list of lines to remove:")
-                for line in self.pc.lines_to_remove:
-                    print('   ' + line)
                 print("list of lines where to remove the word with #:")
-                for line in self.pc.lines_to_remove_ash:
+                for line in self.traces_controller.lines_to_remove_ash:
                     print('   ' + line)
                 print("list of string to filter out:")
-                for line in self.pc.strings_to_filter_rows:
+                for line in self.traces_controller.strings_to_filter_event:
                     print('   ' + line)
-                print("path of the file containing the lines of the packets to analyze: " + self.pc.path_of_file_input)
-                print("path of the file that will contain the preprocessed lines: " + self.pc.path_of_file_output)
-                print("path of the json file where to store the json of the list of NetworkConversation: " + self.pc.path_of_file_json)
+                print("path of the file containing the lines of the packets to analyze: " + self.traces_controller.path_of_file_input)
+                print("path of the file that will contain the preprocessed lines: " + self.traces_controller.path_of_file_output)
+                print("path of the json file where to store the json of the list of NetworkConversation: " + self.traces_controller.path_of_file_json)
             elif op == "8":
-                self.pc.path_of_file_input = input('type the path of the file containing the lines of the packets to analyze\n> ')
+                self.traces_controller.path_of_file_input = input('type the path of the file containing the lines of the packets to analyze\n> ')
             elif op == "9":
-                self.pc.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
+                self.traces_controller.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
             elif op == "10":
-                self.pc.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
+                self.traces_controller.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
             elif op == "11":
                 if input('are you sure you want to exit? (y or Y):\n> ').lower() == 'y':
                     return

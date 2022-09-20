@@ -1,6 +1,4 @@
-from inspect import Attribute
 import json
-from dataclasses import dataclass
 from enum import Enum, auto
 from DiscretizerModule.Discretizer import Discretizer, Equal_Width_Discretizer, Equal_Height_Discretizer
 
@@ -66,6 +64,36 @@ class CONN_STATE(Enum):
             return cls.SHR
         if val == 'OTH':
             return cls.OTH
+    
+    @classmethod
+    def state_to_str(cls, state: int):
+        if state == cls.S0:
+            return 'S0'
+        if state == cls.S1:
+            return 'S1'
+        if state == cls.SF:
+            return 'SF'
+        if state == cls.REJ:
+            return 'REJ'
+        if state == cls.S2:
+            return 'S2'
+        if state == cls.S3:
+            return 'S3'
+        if state == cls.RSTO:
+            return 'RSTO'
+        if state == cls.RSTR:
+            return 'RSTR'
+        if state == cls.RSTOS0:
+            return 'RSTOS0'
+        if state == cls.RSTRH:
+            return 'RSTRH'
+        if state == cls.SH:
+            return 'SH'
+        if state == cls.SHR:
+            return 'SHR'
+        if state == cls.OTH:
+            return 'OTH'
+
 
 class EventHistory:
     '''
@@ -381,42 +409,16 @@ class EventHistory:
 
         return out_list
 
-    def to_json_obj(self) -> object:
+    def get_history(self) -> str:
         """
-        converts this class object to an object that can be easily dumped in a json file
+        return the history string of this object
 
-        :return: object that can be converted to a json file
-        :rtype: object
+        :return: the value of history
+        :rtype: str
         """
-        return {
-            'history': self.__history,
-            'S': self.__orig_syn,
-            'F': self.__orig_fin,
-            'H': self.__orig_syn_ack,
-            'R': self.__orig_rest,
-            's': self.__resp_syn,
-            'f': self.__resp_fin,
-            'h': self.__resp_syn_ack,
-            'r': self.__resp_rest,
-            'A': self.__orig_ack,
-            'D': self.__orig_payload,
-            'I': self.__orig_inconsistent,
-            'Q': self.__orig_multi_flag,
-            'a': self.__resp_ack,
-            'd': self.__resp_payload,
-            'i': self.__resp_inconsistent,
-            'q': self.__resp_multi_flag,
-            'C': self.__orig_bad_checksum,
-            'G': self.__orig_content_gap,
-            'T': self.__orig_retransmitted_payload,
-            'W': self.__orig_zero_window,
-            'c': self.__resp_bad_checksum,
-            'g': self.__resp_content_gap,
-            't': self.__resp_retransmitted_payload,
-            'w': self.__resp_zero_window,
-            '^': self.__conn_dir_flipped,
-        }
+        return self.__history
 
+    
 class Event:
     '''
     Class of a single event registered
@@ -498,7 +500,7 @@ class Event:
         self.__resp_bytes = resp_bytes
         self.__conn_state = CONN_STATE.str_to_state(conn_state)
         self.__missed_bytes = missed_bytes
-        self.__history = history
+        self.__history = EventHistory(history)
         self.__orig_pkts = orig_pkts
         self.__orig_ip_bytes = orig_ip_bytes
         self.__resp_pkts = resp_pkts
@@ -518,9 +520,9 @@ class Event:
             'duration': self.__duration,
             'orig_bytes': self.__orig_bytes,
             'resp_bytes': self.__resp_bytes,
-            'conn_state': self.__conn_state,
+            'conn_state': CONN_STATE.state_to_str(self.__conn_state),
             'missed_bytes': self.__missed_bytes,
-            'history': self.__history,
+            'history': self.__history.get_history(),
             'orig_pkts': self.__orig_pkts,
             'orig_ip_bytes': self.__orig_ip_bytes,
             'resp_pkts': self.__resp_pkts,
@@ -663,7 +665,7 @@ class Trace:
         self.ts_on_open = ts_on_open
         self.events = list()
 
-    def add_packet(self, e: Event, elapsed_ts: float=None) -> None:
+    def add_event(self, e: Event, elapsed_ts: float=None) -> bool:
         """
         Class that contains multiple Events with the same id
 
@@ -676,12 +678,14 @@ class Trace:
 
         # Checking if the parameter is present
         if elapsed_ts is None:
-            if e.generate_id() == self.id:
-                self.events.append(e)
-            else:
-                raise KeyError
+            self.events.append(e)
+            return True
         else:
-            pass # TODO
+            if float(elapsed_ts) <= float(e.get_ts()) - float(self.ts_on_open):
+                self.events.append(e)
+                return True
+            return False
+            
     
     def to_json_obj(self) -> object:
         """Convert this object to an object that can be easily converted to a json
@@ -703,16 +707,34 @@ class Trace:
             'events': events,
         }
         
-    def generate_id(self, orig_ip: str=None, orig_port: int=None, resp_ip: str=None, resp_port: int=None, proto: str=None, ts: str=None) -> str:
+    @classmethod
+    def generate_id_static(cls, orig_ip: str=None, orig_port: int=None, resp_ip: str=None, resp_port: int=None, proto: str=None) -> str:
         """
-        generate the id for this trace based on origin ip, origin port, responder ip, responder port, timestamp
+        generate the id for this trace based on origin ip, origin port, responder ip, responder port and protocol values of the parameters
 
-        :return: the id based on the origin and responder ip and port
+        :param orig_ip: orig_ip to be inserted in the id, defaults to None
+        :type orig_ip: str, optional
+        :param orig_port: orig_port to be inserted in the id, defaults to None
+        :type orig_port: int, optional
+        :param resp_ip: resp_ip to be inserted in the id, defaults to None
+        :type resp_ip: str, optional
+        :param resp_port: resp_port to be inserted in the id, defaults to None
+        :type resp_port: int, optional
+        :param proto: proto to be inserted in the id, defaults to None
+        :type proto: str, optional
+        :return: generated id 
+        :rtype: str
+        """        
+        return f"{orig_ip} {orig_port} {resp_ip} {resp_port} {proto}"
+
+    def generate_id(self) -> str:
+        """
+        generate the id for this trace based on origin ip, origin port, responder ip, responder port and protocol of this oject
+
+        :return: the id based on the origin and responder ip and port and the protocol
         :rtype: str
         """
-        if orig_ip is None and orig_port is None and resp_ip is None and resp_port is None and proto is None and ts is None:
-            return f"{orig_ip} {orig_port} {resp_ip} {resp_port} {proto} {ts}"
-        return f"{self.orig_ip} {self.orig_port} {self.resp_ip} {self.resp_port} {self.proto} {self.ts_on_open}"
+        return Trace.generate_id_static(self.orig_ip, self.orig_port, self.resp_ip, self.resp_port, self.proto)
 
     def get_list_of_ts(self) -> list:
         """Getter of the ts of the events in this trace
@@ -971,10 +993,19 @@ class TracesController:
         self.preprocessed_lines = []
         # normalizing lines
         with open(self.path_of_file_input, "r+") as f_in:
+            lines_to_remove = [
+                '#separator',
+                '#set_separator',
+                '#empty_field',
+                '#unset_field',
+                '#path',
+                '#open',
+                '#close',
+            ]
             for line in f_in:
                 # removing comment lines
                 to_remove = False
-                for line_to_check in self.lines_to_remove:
+                for line_to_check in lines_to_remove:
                     if line.startswith(line_to_check):
                         to_remove = True
                 if not(to_remove):
@@ -987,11 +1018,11 @@ class TracesController:
                     # removing unnecessary strings
                     for string in self.strings_to_filter_event: 
                         line = line.replace(string, '')
-                    self.preprocessed_lines.append(line)
+                    self.preprocessed_lines.append(line.replace('\n', ''))
         print('...normalization completed')
         return self.preprocessed_lines
 
-    def conv_lines_to_Trace_set(self) -> list:
+    def conv_lines_to_Trace_list(self) -> list:
         """
         Convert a list of preprocessed lines to a list of Event and inserts them into the 
         Trace list
@@ -1001,7 +1032,7 @@ class TracesController:
         """
         print('converting preprocessed lines to list of traces...')
         count = 0
-        for line in self.preprocessed_lines:
+        for line in self.preprocessed_lines[1:]:
             list_to_pack = line.split('\t')
 
             ts = list_to_pack[0]
@@ -1021,7 +1052,7 @@ class TracesController:
             orig_ip_bytes = list_to_pack[17]
             resp_pkts = list_to_pack[18]
             resp_ip_bytes = list_to_pack[19]
-            label = list_to_pack[20]
+            label = list_to_pack[21]
 
             event = Event(ts,
                 service,
@@ -1037,15 +1068,15 @@ class TracesController:
                 resp_ip_bytes,
                 label)
         
-            id = Trace.generate_id(orig_ip, orig_port, resp_ip, resp_port, proto, ts)
+            id = Trace.generate_id_static(orig_ip, orig_port, resp_ip, resp_port, proto)
 
             if id not in self.traces_pos_dict:
                 self.network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts))
-                self.network_traffic[-1].add_packet(event)
+                self.network_traffic[-1].add_event(event)
                 self.traces_pos_dict[id] = count
                 count += 1
             else:
-                self.traces_pos_dict[id].add_packet(event)
+                self.network_traffic[self.traces_pos_dict[id]].add_event(event)
         print('...conversion completed')
         
     def print_Trace_list_to_json_file(self):
