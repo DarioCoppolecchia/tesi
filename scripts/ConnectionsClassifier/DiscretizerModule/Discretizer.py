@@ -2,21 +2,21 @@ import abc
 
 class Discretizer(metaclass=abc.ABCMeta):
     """Abstract class that contains the methods to:
-    * create the intervals as a list of floats. 
-    * discretize one value (get the bin where that value is included in the bounds)
+        * create the intervals as a list of floats. 
+        * discretize one value (get the bin where that value is included in the bounds)
 
     The list of floats is structured in this way:
     Given a set of intervals where:
-    * let n the number of interval
-    * the list has n + 1 elements
-    * let i, 0 <= i <= n:
-    * li is the lower bound of the i-nth interval
-    * ui is the upper bound of the i-nth interval
+        * let :math:`n` the number of interval
+        * the list has :math:`n + 1` elements
+        * let :math:`i`, :math:`0 <= i <= n:`
+        * :math:`l_i` is the lower bound of the :math:`i`-nth interval
+        * :math:`u_i` is the upper bound of the :math:`i`-nth interval
 
     the list will be like this
-    [ l_1, u_1/l_2, u_2/l_3, ... , u_(n-1)/l_n, u_n]
-    where u_(i-1)/l_i means that the element is both the upper bound of
-    the (i-1)-nth interval and the lower bound of the i-nth element
+    [ :math:`l_1, u_1/l_2, u_2/l_3, ... , u_{n-1}/l_n, u_n`]
+    where :math:`u_{i-1}/l_i` means that the element is both the upper bound of
+    the :math:`(i-1)`-nth interval and the lower bound of the :math:`i`-nth element
 
     :param discretized_bins: list that contains the intervals after calling discretize
     :type discretized_bins: list
@@ -48,10 +48,8 @@ class Discretizer(metaclass=abc.ABCMeta):
 
         :param value: value to discretize
         :type value: float
-        :return: the return dipends on the value in input
-        * if the value is between lower bound and upper bound, this returns the
-        bounds as a tuple (lower bound, upper bound)
-        * else return a tuple with (0, 0)
+        :return: the return dipends on the value in input: if the value is between lower bound and upper bound, this returns the bounds as a tuple (lower bound, upper bound), else return a tuple with (0, 0)
+
         :rtype: tuple
         """
         pass
@@ -87,10 +85,8 @@ class Equal_Height_Discretizer(Discretizer):
 
         :param value: value to discretize
         :type value: float
-        :return: the return dipends on the value in input
-        * if the value is between lower bound and upper bound, this returns the
-        bounds as a tuple (lower bound, upper bound)
-        * else return a tuple with (0, 0)
+        :return: the return dipends on the value in input: if the value is between lower bound and upper bound, this returns the bounds as a tuple (lower bound, upper bound), else return a tuple with (0, 0)
+
         :rtype: tuple
         """
         pass
@@ -126,10 +122,8 @@ class Equal_Width_Discretizer(Discretizer):
 
         :param value: value to discretize
         :type value: float
-        :return: the return dipends on the value in input
-        * if the value is between lower bound and upper bound, this returns the
-        bounds as a tuple (lower bound, upper bound)
-        * else return a tuple with (0, 0)
+        :return: the return dipends on the value in input: if the value is between lower bound and upper bound, this returns the bounds as a tuple (lower bound, upper bound), else return a tuple with (0, 0)
+
         :rtype: tuple
         """
         pass

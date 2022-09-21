@@ -5,19 +5,19 @@ from DiscretizerModule.Discretizer import Discretizer, Equal_Width_Discretizer, 
 class CONN_STATE(Enum):
     """
     Describes the state that a Connection can have
-    #. S0: Connection attempt seen, no reply.
-    #. S1: Connection established, not terminated.
-    #. SF: Normal establishment and termination. Note that this is the same symbol as for state S1. You can tell the two apart because for S1 there will not be any byte counts in the summary, while for SF there will be.
-    #. REJ: Connection attempt rejected.
-    #. S2: Connection established and close attempt by originator seen (but no reply from responder).
-    #. S3: Connection established and close attempt by responder seen (but no reply from originator).
-    #. RSTO: Connection established, originator aborted (sent a RST).
-    #. RSTR: Responder sent a RST.
-    #. RSTOS0: Originator sent a SYN followed by a RST, we never saw a SYN-ACK from the responder.
-    #. RSTRH: Responder sent a SYN ACK followed by a RST, we never saw a SYN from the (purported) originator.
-    #. SH: Originator sent a SYN followed by a FIN, we never saw a SYN ACK from the responder (hence the connection was “half” open).
-    #. SHR: Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator.
-    #. OTH: No SYN seen, just midstream traffic (one example of this is a “partial connection” that was not later closed).
+        #. S0: Connection attempt seen, no reply.
+        #. S1: Connection established, not terminated.
+        #. SF: Normal establishment and termination. Note that this is the same symbol as for state S1. You can tell the two apart because for S1 there will not be any byte counts in the summary, while for SF there will be.
+        #. REJ: Connection attempt rejected.
+        #. S2: Connection established and close attempt by originator seen (but no reply from responder).
+        #. S3: Connection established and close attempt by responder seen (but no reply from originator).
+        #. RSTO: Connection established, originator aborted (sent a RST).
+        #. RSTR: Responder sent a RST.
+        #. RSTOS0: Originator sent a SYN followed by a RST, we never saw a SYN-ACK from the responder.
+        #. RSTRH: Responder sent a SYN ACK followed by a RST, we never saw a SYN from the (purported) originator.
+        #. SH: Originator sent a SYN followed by a FIN, we never saw a SYN ACK from the responder (hence the connection was “half” open).
+        #. SHR: Responder sent a SYN ACK followed by a FIN, we never saw a SYN from the originator.
+        #. OTH: No SYN seen, just midstream traffic (one example of this is a “partial connection” that was not later closed).
     """    
     S0 = auto()
     S1 = auto()
@@ -616,7 +616,7 @@ class Event:
         """Getter of conn_state
 
         :return: the value of conn_state
-        :rtype: str
+        :rtype: CONN_STATE
         """
         return self.__conn_state
 
@@ -699,7 +699,7 @@ class Trace:
     """
 
     def __init__(self, orig_ip: str, orig_port: str, resp_ip: str, resp_port: str, proto: str,  ts_on_open: str):
-        """Constructor of this class
+        """Constructor
 
         :param orig_ip: orig_ip of this Trace
         :type orig_ip: str
@@ -971,11 +971,9 @@ class TracesController:
         :type path_of_file_output: str, optional
         :param path_of_file_json: path of the file where to dump the traces converted to json, defaults to ''
         :type path_of_file_json: str, optional
-        :param lines_to_remove_ash: set of the strings that if match the start of a line in the input file, 
-        that substring will be removed (this doesn't delete it from the input file), defaults to set()
+        :param lines_to_remove_ash: set of the strings that if match the start of a line in the input file, that substring will be removed (this doesn't delete it from the input file), defaults to set()
         :type lines_to_remove_ash: set, optional
-        :param strings_to_filter_event: set of the substring to be removed from the lines read in the file
-        (this doesn't delete it from the input file), defaults to set()
+        :param strings_to_filter_event: set of the substring to be removed from the lines read in the file (this doesn't delete it from the input file), defaults to set()
         :type strings_to_filter_event: set, optional
         """
         self.path_of_file_input = path_of_file_input
@@ -988,7 +986,7 @@ class TracesController:
     
     def load_paths_and_filters_from_config_file(self, config_file_path: str) -> None:
         """
-        loads all path and filters form the *.ini file
+        Loads all path and filters form the .ini file
 
         :param config_file_path: path of the configuration path
         :type config_file_path: str
@@ -1166,14 +1164,14 @@ class TracesController:
         """Creates a dictionary of list of the values of each attribute
 
         Possible values of the attributes_list:
-        #. orig_bytes
-        #. resp_bytes
-        #. missed_bytes
-        #. orig_pkts
-        #. duration
-        #. orig_ip_bytes
-        #. resp_pkts
-        #. resp_ip_bytes
+            #. orig_bytes
+            #. resp_bytes
+            #. missed_bytes
+            #. orig_pkts
+            #. duration
+            #. orig_ip_bytes
+            #. resp_pkts
+            #. resp_ip_bytes
 
         :param attributes_list: list of the attributes from where to collect data from
         :type attributes_list: list
@@ -1227,14 +1225,14 @@ class TracesController:
         """Discretizes all the attribute with equal width discretization
 
         Possible values of the attributes_list:
-        #. orig_bytes
-        #. resp_bytes
-        #. missed_bytes
-        #. orig_pkts
-        #. duration
-        #. orig_ip_bytes
-        #. resp_pkts
-        #. resp_ip_bytes
+            #. orig_bytes
+            #. resp_bytes
+            #. missed_bytes
+            #. orig_pkts
+            #. duration
+            #. orig_ip_bytes
+            #. resp_pkts
+            #. resp_ip_bytes
 
         :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
         :type n_bins_dict: dict
@@ -1264,14 +1262,14 @@ class TracesController:
         """Discretizes all the attribute with equal height discretization
 
         Possible values of the attributes_list:
-        #. orig_bytes
-        #. resp_bytes
-        #. missed_bytes
-        #. orig_pkts
-        #. duration
-        #. orig_ip_bytes
-        #. resp_pkts
-        #. resp_ip_bytes
+            #. orig_bytes
+            #. resp_bytes
+            #. missed_bytes
+            #. orig_pkts
+            #. duration
+            #. orig_ip_bytes
+            #. resp_pkts
+            #. resp_ip_bytes
 
         :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
         :type n_bins_dict: dict
