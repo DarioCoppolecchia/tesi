@@ -4,8 +4,10 @@
 *.csv
 *WorkingHours.pcap
 scripts/ConnectionsClassifier/ConnectionsModule/__pycache__/*
+scripts/ConnectionsClassifier/DiscretizerModule/__pycache__/*
 scripts/ConnectionsClassifier/__pycache__/*
 scripts/ConnectionsClassifier/UI/__pycache__/*
 scripts/ConnectionsClassifier/docs/_build/*
 outputs/
 output/
+*/*.pyc

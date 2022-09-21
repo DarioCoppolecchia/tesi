@@ -33,11 +33,15 @@ class CONN_STATE(Enum):
     SHR = auto()
     OTH = auto()
 
-    def __str__(self):
-        return f'{self.name(self.value)}'
-
     @classmethod
-    def str_to_state(cls, val: str):
+    def str_to_state(cls, val: str) -> int:
+        """converts a string to the relative enum
+
+        :param val: string to be converted
+        :type val: str
+        :return: the value relative to the string
+        :rtype: int
+        """        
         if val == 'S0':
             return cls.S0
         if val == 'S1':
@@ -66,7 +70,14 @@ class CONN_STATE(Enum):
             return cls.OTH
     
     @classmethod
-    def state_to_str(cls, state: int):
+    def state_to_str(cls, state: int) -> str:
+        """converts an enum value to the relative string
+
+        :param val: enum value to be converted
+        :type val: int
+        :return: the string relative to the value
+        :rtype: str
+        """  
         if state == cls.S0:
             return 'S0'
         if state == cls.S1:
@@ -211,14 +222,14 @@ class EventHistory:
     disc_resp_retransmitted: Discretizer = None
     disc_resp_zero_window: Discretizer = None
 
-    def __init__(self, history: str=None) -> None:
+    def __init__(self, history: str='') -> None:
         """The constructor initialize the parameters required and if history is given,
         it analyze the string and assigns the relativa values to the fields
 
         :param history: string to be analyzed, defaults to None
         :type history: str, optional
         """
-        self.__history = history if history is not None else ''
+        self.__history = history
 
         # S, F, H, R
         self.__orig_syn                   = 0
@@ -450,8 +461,10 @@ class Event:
     :type orig_ip_bytes: float
     :param resp_pkts: Number of packets that the responder sent.
     :type resp_pkts: float
-    :param resp_ip_bytes: Number of IP level bytes that the responder sent (as seen on the wire, taken from the IP total_length header field
+    :param resp_ip_bytes: Number of IP level bytes that the responder sent (as seen on the wire, taken from the IP total_length header field)
     :type resp_ip_bytes: float
+    :param label: label based on the originator ip and port, the responder ip and port, and the ts of this event
+    :type label: float
     
     :param disc_orig_bytes: Discretizer of the relative attribute
     :type disc_orig_bytes: Discretizer
@@ -470,11 +483,11 @@ class Event:
     :param disc_resp_ip_bytes: Discretizer of the relative attribute
     :type disc_resp_ip_bytes: Discretizer
     '''
+    disc_duration: Discretizer = None
     disc_orig_bytes: Discretizer = None
     disc_resp_bytes: Discretizer = None
     disc_missed_bytes: Discretizer = None
     disc_orig_pkts: Discretizer = None
-    disc_duration: Discretizer = None
     disc_orig_ip_bytes: Discretizer = None
     disc_resp_pkts: Discretizer = None
     disc_resp_ip_bytes: Discretizer = None
@@ -487,12 +500,41 @@ class Event:
             resp_bytes: float,
             conn_state: str,
             missed_bytes: float,
-            history: EventHistory,
+            history: str,
             orig_pkts: float,
             orig_ip_bytes: float,
             resp_pkts: float,
             resp_ip_bytes: float,
-            label: str) -> None:    
+            label: str) -> None:
+        """Constructor
+
+        :param ts: timestamp of the event
+        :type ts: str
+        :param service: service of the event
+        :type service: str
+        :param duration: duration of the event
+        :type duration: float
+        :param orig_bytes: orig_bytes of the event
+        :type orig_bytes: float
+        :param resp_bytes: resp_bytes of the event
+        :type resp_bytes: float
+        :param conn_state: conn_state of the event
+        :type conn_state: str
+        :param missed_bytes: missed_bytes of the event
+        :type missed_bytes: float
+        :param history: history of the event
+        :type history: str
+        :param orig_pkts: orig_pkts of the event
+        :type orig_pkts: float
+        :param orig_ip_bytes: orig_ip_bytes of the event
+        :type orig_ip_bytes: float
+        :param resp_pkts: resp_pkts of the event
+        :type resp_pkts: float
+        :param resp_ip_bytes: resp_ip_bytes of the event
+        :type resp_ip_bytes: float
+        :param label: label of the event
+        :type label: str
+        """             
         self.__ts = ts
         self.__service = service
         self.__duration = duration
@@ -570,7 +612,7 @@ class Event:
         """
         return self.__resp_bytes
 
-    def get_conn_state(self) -> str:
+    def get_conn_state(self) -> CONN_STATE:
         """Getter of conn_state
 
         :return: the value of conn_state
@@ -638,42 +680,58 @@ class Event:
 class Trace:
     """
     This class contains all the events that are being originated by the same
-    ip and port of origin and responder hosts.
+    ip and port of origin and responder hosts, and the same protocol.
 
     :param orig_ip: ip of the host that started this trace
     :type orig_ip:  str
     :param orig_port: port of the host that started this trace
-    :type orig_port: str
+    :type orig_port: int
     :param resp_ip: ip of the host that has been requested to start this trace
     :type resp_ip: str
     :param resp_port: port of the host that has been requested to start this trace
+    :type resp_port: int
     :param proto: protocol used for this trace
-    :type resp_port: str
+    :type proto: str
     :param ts_on_open: timestamp of the first packet of the event that started this trace
     :type ts_on_open: str
-    :type proto: str
     :param events: list of the event between this 2 hosts with these ports
     :type events: list[Event]
     """
 
-    def __init__(self, orig_ip: str, orig_port: int, resp_ip: str, resp_port: int, proto: str,  ts_on_open: str):
+    def __init__(self, orig_ip: str, orig_port: str, resp_ip: str, resp_port: str, proto: str,  ts_on_open: str):
+        """Constructor of this class
+
+        :param orig_ip: orig_ip of this Trace
+        :type orig_ip: str
+        :param orig_port: orig_port of this Trace
+        :type orig_port: str
+        :param resp_ip: resp_ip of this Trace
+        :type resp_ip: str
+        :param resp_port: resp_port of this Trace
+        :type resp_port: str
+        :param proto: proto of this Trace
+        :type proto: str
+        :param ts_on_open: the ts of the first packet found with this id (orig_ip, orig_port, resp_ip, resp_port, port)
+        :type ts_on_open: str
+        """        
         self.orig_ip = orig_ip
-        self.orig_port = orig_port
+        self.orig_port = int(orig_port)
         self.resp_ip = resp_ip
-        self.resp_port = resp_port
+        self.resp_port = int(resp_port)
         self.proto = proto
         self.ts_on_open = ts_on_open
         self.events = list()
 
     def add_event(self, e: Event, elapsed_ts: float=None) -> bool:
         """
-        Class that contains multiple Events with the same id
+        Adds an event to this Trace. 
+        If elapsed_ts is given, it checks if the event has been registered in the window of time
+        between ts_on_open and ts_on_open + elapsed_ts
 
-        :param e: the event to be added to this wrapper
+        :param e: the event to be added to this Trace
         :type e: Event
-        :param elapsed_ts: max window time so that a event can be considered to belong to this Trace
+        :param elapsed_ts: max window time so that the event can be considered to belong to this Trace
         :type elapsed_ts: float
-        :raises KeyError: raises a KeyError if the id of the event doesn't match
         """
 
         # Checking if the parameter is present
@@ -795,7 +853,7 @@ class Trace:
         """Getter of the conn_state of the events in this trace
 
         :return: the list of all the value of conn_state
-        :rtype: list[str]
+        :rtype: list[CONN_STATE]
         """
         list_conn_state = []
         for event in self.events:
@@ -882,18 +940,18 @@ class Trace:
 
 class TracesController:
     """
-    Class that contains the method used to filter and organize events
+    Class that contains the method used to filter and organize events and traces
 
     :param path_of_file_input: path of the file that contains the logs to be acquired
-    :type path_of_file_input: str, optional
+    :type path_of_file_input: str
     :param path_of_file_output: path of the file where the preprocessed lines are stored or will be stored
-    :type path_of_file_output: str, optional
+    :type path_of_file_output: str
     :param path_of_file_json: path of the file where to write the json file
-    :type path_of_file_json: str, optional
+    :type path_of_file_json: str
     :param lines_to_remove_ash: set of the # to remove from the file
-    :type lines_to_remove_ash: set[str], optional
+    :type lines_to_remove_ash: set[str]
     :param strings_to_filter_event: set of string to be filtered out
-    :type strings_to_filter_event: set[str], optional
+    :type strings_to_filter_event: set[str]
     :param network_traffic: list of the Trace
     :type network_traffic: list[Trace]
     :param traces_pos_dict: dict that contains the indices of network_traffic
@@ -903,9 +961,22 @@ class TracesController:
         path_of_file_input: str='',
         path_of_file_output: str='',
         path_of_file_json: str='',
-        lines_to_remove_ash: list=[],
-        strings_to_filter_event: list=[]) -> None:
-        """Constructor Method
+        lines_to_remove_ash: set=set(),
+        strings_to_filter_event: set=set()) -> None:
+        """Constructor method
+
+        :param path_of_file_input: path of the file from where to get the events, defaults to ''
+        :type path_of_file_input: str, optional
+        :param path_of_file_output: path of the file where to store the preprocessed lines, defaults to ''
+        :type path_of_file_output: str, optional
+        :param path_of_file_json: path of the file where to dump the traces converted to json, defaults to ''
+        :type path_of_file_json: str, optional
+        :param lines_to_remove_ash: set of the strings that if match the start of a line in the input file, 
+        that substring will be removed (this doesn't delete it from the input file), defaults to set()
+        :type lines_to_remove_ash: set, optional
+        :param strings_to_filter_event: set of the substring to be removed from the lines read in the file
+        (this doesn't delete it from the input file), defaults to set()
+        :type strings_to_filter_event: set, optional
         """
         self.path_of_file_input = path_of_file_input
         self.path_of_file_output = path_of_file_output
@@ -915,9 +986,9 @@ class TracesController:
         self.network_traffic = []
         self.traces_pos_dict = {}
     
-    def load_paths_and_filters_from_config_file(self, config_file_path):
+    def load_paths_and_filters_from_config_file(self, config_file_path: str) -> None:
         """
-        loads all path and filters form the ini file
+        loads all path and filters form the *.ini file
 
         :param config_file_path: path of the configuration path
         :type config_file_path: str
@@ -968,7 +1039,7 @@ class TracesController:
             print('...reading complete')
         return self.preprocessed_lines
 
-    def print_preprocessed_lines_to_file(self):
+    def print_preprocessed_lines_to_file(self) -> None:
         """
         prints preprocessed lines to a file specified in the path_of_file_output
         field of this object
@@ -1079,7 +1150,7 @@ class TracesController:
                 self.network_traffic[self.traces_pos_dict[id]].add_event(event)
         print('...conversion completed')
         
-    def print_Trace_list_to_json_file(self):
+    def print_Trace_list_to_json_file(self) -> None:
         """prints all the Traces list to a json file
         """
         print('writing the list of Events to a json file...')
@@ -1114,6 +1185,15 @@ class TracesController:
         for attribute in attributes_list:
             attributes_value_dict[attribute] = []
 
+        orig_bytes_list = []
+        resp_bytes_list = []
+        missed_bytes_list = []
+        orig_pkts_list = []
+        duration_list = []
+        orig_ip_bytes_list = []
+        resp_pkts_list = []
+        resp_ip_bytes_list = []
+
         # getting all value for each list
         if 'orig_bytes' in attributes_value_dict:
             for trace in self.network_traffic:
@@ -1143,7 +1223,7 @@ class TracesController:
         return orig_bytes_list, resp_bytes_list, missed_bytes_list, orig_pkts_list, duration_list, orig_ip_bytes_list, resp_pkts_list, resp_ip_bytes_list
 
 
-    def discretize_attributes_equal_width(self, n_bins_dict: dict):
+    def discretize_attributes_equal_width(self, n_bins_dict: dict) -> None:
         """Discretizes all the attribute with equal width discretization
 
         Possible values of the attributes_list:
@@ -1160,36 +1240,27 @@ class TracesController:
         :type n_bins_dict: dict
         """        
         attribute_to_discretize = list(n_bins_dict.keys())
-        attribute_lists = self.__get_list_of_all_attributes(attribute_to_discretize)
         
         if 'orig_bytes' in attribute_to_discretize:
-            list_temp = attribute_lists['orig_bytes']
-            Event.disc_orig_bytes = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['orig_bytes'])
+            Event.disc_orig_bytes = Equal_Width_Discretizer(n_bins_dict['orig_bytes'])
         if 'resp_bytes' in attribute_to_discretize:
-            list_temp = attribute_lists['resp_bytes']
-            Event.disc_resp_bytes = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['resp_bytes'])
+            Event.disc_resp_bytes = Equal_Width_Discretizer(n_bins_dict['resp_bytes'])
         if 'missed_bytes' in attribute_to_discretize:
-            list_temp = attribute_lists['missed_bytes']
-            Event.disc_missed_bytes = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['missed_bytes'])
+            Event.disc_missed_bytes = Equal_Width_Discretizer(n_bins_dict['missed_bytes'])
         if 'orig_pkts' in attribute_to_discretize:
-            list_temp = attribute_lists['orig_pkts']
-            Event.disc_orig_pkts = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['orig_pkts'])
+            Event.disc_orig_pkts = Equal_Width_Discretizer(n_bins_dict['orig_pkts'])
         if 'duration' in attribute_to_discretize:
-            list_temp = attribute_lists['duration']
-            Event.disc_duration = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['duration'])
+            Event.disc_duration = Equal_Width_Discretizer(n_bins_dict['duration'])
         if 'orig_ip_bytes' in attribute_to_discretize:
-            list_temp = attribute_lists['orig_ip_bytes']
-            Event.disc_orig_ip_bytes = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['orig_ip_bytes'])
+            Event.disc_orig_ip_bytes = Equal_Width_Discretizer(n_bins_dict['orig_ip_bytes'])
         if 'resp_pkts' in attribute_to_discretize:
-            list_temp = attribute_lists['resp_pkts']
-            Event.disc_resp_pkts = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['resp_pkts'])
+            Event.disc_resp_pkts = Equal_Width_Discretizer(n_bins_dict['resp_pkts'])
         if 'resp_ip_bytes' in attribute_to_discretize: 
-            list_temp = attribute_lists['resp_ip_bytes']
-            Event.disc_resp_ip_bytes = Equal_Width_Discretizer(min(list_temp), max(list_temp), n_bins_dict['resp_ip_bytes'])
+            Event.disc_resp_ip_bytes = Equal_Width_Discretizer(n_bins_dict['resp_ip_bytes'])
         
         # TODO effettuare discretizzazione
 
-    def discretize_attributes_equal_height(self, attributes_list: list):
+    def discretize_attributes_equal_height(self, n_bins_dict: dict) -> None:
         """Discretizes all the attribute with equal height discretization
 
         Possible values of the attributes_list:
@@ -1202,26 +1273,26 @@ class TracesController:
         #. resp_pkts
         #. resp_ip_bytes
 
-        :param attributes_list: list of the attributes to be discretized
-        :type attributes_list: list
+        :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
+        :type n_bins_dict: dict
         """
-        attribute_lists = self.__get_list_of_all_attributes(attributes_list)
+        attributes_list = list(n_bins_dict.keys())
         
         if 'orig_bytes' in attributes_list:
-            Event.disc_orig_bytes = Equal_Height_Discretizer(attribute_lists['orig_bytes'])
+            Event.disc_orig_bytes = Equal_Height_Discretizer(attributes_list['orig_bytes'])
         if 'resp_bytes' in attributes_list:
-            Event.disc_resp_bytes = Equal_Height_Discretizer(attribute_lists['resp_bytes'])
+            Event.disc_resp_bytes = Equal_Height_Discretizer(attributes_list['resp_bytes'])
         if 'missed_bytes' in attributes_list:
-            Event.disc_missed_bytes = Equal_Height_Discretizer(attribute_lists['missed_bytes'])
+            Event.disc_missed_bytes = Equal_Height_Discretizer(attributes_list['missed_bytes'])
         if 'orig_pkts' in attributes_list:
-            Event.disc_orig_pkts = Equal_Height_Discretizer(attribute_lists['orig_pkts'])
+            Event.disc_orig_pkts = Equal_Height_Discretizer(attributes_list['orig_pkts'])
         if 'duration' in attributes_list:
-            Event.disc_duration = Equal_Height_Discretizer(attribute_lists['duration'])
+            Event.disc_duration = Equal_Height_Discretizer(attributes_list['duration'])
         if 'orig_ip_bytes' in attributes_list:
-            Event.disc_orig_ip_bytes = Equal_Height_Discretizer(attribute_lists['orig_ip_bytes'])
+            Event.disc_orig_ip_bytes = Equal_Height_Discretizer(attributes_list['orig_ip_bytes'])
         if 'resp_pkts' in attributes_list:
-            Event.disc_resp_pkts = Equal_Height_Discretizer(attribute_lists['resp_pkts'])
+            Event.disc_resp_pkts = Equal_Height_Discretizer(attributes_list['resp_pkts'])
         if 'resp_ip_bytes' in attributes_list: 
-            Event.disc_resp_ip_bytes = Equal_Height_Discretizer(attribute_lists['resp_ip_bytes'])
+            Event.disc_resp_ip_bytes = Equal_Height_Discretizer(attributes_list['resp_ip_bytes'])
 
         # TODO effettuare discretizzazione
