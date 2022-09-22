@@ -1047,7 +1047,7 @@ class TracesController:
         with open(self.path_of_file_output, 'w') as f_out:
             # writing lines to new file
             for line in self.preprocessed_lines:
-                f_out.write(line)
+                f_out.write(line + '\n')
         print('...printing complete')
 
     def normalize_lines(self) -> list:
@@ -1069,6 +1069,7 @@ class TracesController:
                 '#unset_field',
                 '#path',
                 '#open',
+                '#types',
                 '#close',
             ]
             for line in f_in:
@@ -1147,6 +1148,68 @@ class TracesController:
             else:
                 self.network_traffic[self.traces_pos_dict[id]].add_event(event)
         print('...conversion completed')
+    
+    '''
+    
+    '''
+    def apply_label_to_events_in_file(self, constraint_to_label: list) -> None:
+        """
+        this function applies the label according by the rules in the parameter. The constraints must have timestamp upper bound and lower bound, ip of the attacker, ip of the attacked and the label. If the row doesn't follow the constraint, the label will be BENIGN
+
+        The rules are described as follows
+        :math:`label(x) <- 
+            | lower_bound <= x.ts <= upper_bound && 
+            | ip_attacker = x.ip_orig && 
+            | ip_attacked = x.ip_resp`
+
+        The structure of the constraint will be a list of dict, where the keys will be 
+            * lower_bound, 
+            * upper_bound, 
+            * ip_attacker, 
+            * ip_attacked, 
+            * label
+        and the values will be the corresponding values
+
+        An example of the structure
+        | interval_to_label = [
+        |     { lower_bound, upper_bound, ip_attacker, ip_attacked, label },
+        |     { lower_bound, upper_bound, ip_attacker, ip_attacked, label },
+        |     ...
+        |     { lower_bound, upper_bound, ip_attacker, ip_attacked, label },
+        | ]
+
+        :param constraint_to_label: constraint to follow to apply the label correctly
+        :type constraint_to_label: list
+        """
+        print('applying label to the file...')
+        file = self.path_of_file_input.replace('_labeled', '')
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            del lines[:6]
+            del lines[1]
+            del lines[-1]
+            lines[0] = lines[0].replace("#fields\t", "")
+        with open(file, 'w') as f:
+            f.writelines(lines)
+        with open(self.path_of_file_input, 'w') as f_out:
+            with open(file, 'r') as f_in:
+                next(f_in)
+                for line in f_in:
+                    line = line.replace('\n', '')
+                    splitted = line.split('\t')
+                    ts = splitted[0]
+                    orig_ip = splitted[2]
+                    resp_ip = splitted[4]
+                    for constraints in constraint_to_label:
+                        if (float(constraints['lower_bound']) <= float(ts) <= float(constraints['upper_bound']) and
+                            constraints['ip_attacker'] == orig_ip and
+                            constraints['ip_attacked'] == resp_ip):
+                            line += '\t' + constraints['label']
+                            break
+                    else:
+                        line += '\t' + 'BENIGN'
+                    f_out.write(line + '\n')
+        print('...label application completed')
         
     def print_Trace_list_to_json_file(self) -> None:
         """prints all the Traces list to a json file
