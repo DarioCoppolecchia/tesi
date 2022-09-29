@@ -1,7 +1,8 @@
 import json
 from Trace import Trace
 from Event import Event
-from DiscretizerModule.Discretizer import Equal_Width_Discretizer, Equal_Height_Discretizer
+from DiscretizerModule.Equal_Height_Discretizer import Equal_Height_Discretizer
+from DiscretizerModule.Equal_Width_Discretizer import Equal_Width_Discretizer
 
 class TracesController:
     """
@@ -214,7 +215,6 @@ class TracesController:
                 self.network_traffic[self.traces_pos_dict[id]].add_event(event)
         print('...conversion completed')
     
-    '''
     
     '''
     def apply_label_to_events_in_file(self, constraint_to_label: list) -> None:
@@ -287,6 +287,7 @@ class TracesController:
             
             json.dump(to_json, f, indent=4)
         print('...writing completed')
+    '''
 
     def __get_list_of_all_attributes(self, attributes_list: list) -> dict:
         """Creates a dictionary of list of the values of each attribute

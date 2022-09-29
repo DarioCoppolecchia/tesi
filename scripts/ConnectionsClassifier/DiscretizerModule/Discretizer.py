@@ -42,14 +42,14 @@ class Discretizer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def discretize_attribute(self, value: float) -> tuple:
+    def discretize_attribute(self, value: float) -> str:
         """Given a value such that: min(discretized_bins) <= value <= max(discretized_bins), 
         this returns the bin associated to that value
 
         :param value: value to discretize
         :type value: float
-        :return: the return dipends on the value in input: if the value is between lower bound and upper bound, this returns the bounds as a tuple (lower bound, upper bound), else return a tuple with (0, 0)
+        :return: the return dipends on the value in input is a string representing the bounds of the interval
 
-        :rtype: tuple
+        :rtype: str
         """
         pass
