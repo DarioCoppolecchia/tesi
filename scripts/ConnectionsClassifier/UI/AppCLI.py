@@ -1,4 +1,4 @@
-from ConnectionsModule.Connections import TracesController
+from ConnectionsModule.TracesController import TracesController
 import os
 
 class MainApplicationCLI:

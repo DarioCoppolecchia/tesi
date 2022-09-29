@@ -105,7 +105,7 @@ def find_correlations_conn_column(file_dict_conn: dict, header_pos_conn: dict, f
 
 def get_all_values_of_columns(cols, file_dict, header_pos) -> set:
     values = set()
-    for _, v in file_dict.items():
+    for _, v in tqdm.tqdm(file_dict.items()):
         for c in v:
             val = ''
             for col in cols:
@@ -282,13 +282,14 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-day = 'monday'
+day = 'total_logs'
 file_name = 'conn.log'
 conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
 
 ################ getting file_dict_conn and header_pos_conn
+
 parsed_conn_file_path = f'./logs/{day}/parsed/{file_name}'
 import os
 from os.path import exists
@@ -300,6 +301,7 @@ else:
     file_dict_conn, header_pos_conn = read_file_dict_from_file(parsed_conn_file_path)
 
 ################ frequenza di history
+'''
 freq_dict = get_frequency_of_value_of_column_from_file('history', conn_file_path)
 list_to_save = [[k, v] for k, v in freq_dict.items()]
 list_to_save.sort(key=lambda row: row[-1], reverse=True)
@@ -316,13 +318,13 @@ list_to_save = [[k, v] for k, v in card_freq.items()]
 list_to_save.sort(key=lambda row: row[-1], reverse=True)
 list_to_save = [f'{l[0]}, {l[1]}' for l in list_to_save]
 print_list_to_file(f"outputs/correlations_between_files_history/", f"combinations_cardinality_frequency_history.csv", list_to_save)
+'''
 
-################ prendo tutti i valori usati di conn_state
-'''
-values = set([v.replace('\t', '') for v in get_all_values_of_columns(['conn_state'], file_dict_conn, header_pos_conn)])
-all_values = set(['S0','S1','SF','REJ','S2','S3','RSTO','RSTR','RSTOS0','RSTRH','SH','SHR','OTH'])
-print(all_values.difference(values))
-'''
+################ prendo tutti i valori usati di una variabile
+values = set([v.replace('\t', '') for v in get_all_values_of_columns(['proto'], file_dict_conn, header_pos_conn)])
+#all_values = set(['S0','S1','SF','REJ','S2','S3','RSTO','RSTR','RSTOS0','RSTRH','SH','SHR','OTH'])
+print(values)
+
 ################ discretizzazione
 '''
 import numpy as np
