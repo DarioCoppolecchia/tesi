@@ -13,8 +13,8 @@ class EventHistory:
     :type __orig_fin: float
     :param __orig_syn_ack: Origin sent this number of packets with a SYN with the ACK bit set
     :type __orig_syn_ack: float
-    :param __orig_rest: Origin sent this number of packets with a RST bit set
-    :type __orig_rest: float
+    :param __orig_rst: Origin sent this number of packets with a RST bit set
+    :type __orig_rst: float
     :param __resp_syn: Responder sent this number of packets with a SYN bit set w/o the ACK bit set
     :type __resp_syn: float
     :param __resp_fin: Responder sent this number of packets with a FIN bit set 
@@ -78,16 +78,16 @@ class EventHistory:
     :type disc_orig_bad_checksum: Discretizer
     :param disc_orig_content_gap: Discretizer of the relative attribute
     :type disc_orig_content_gap: Discretizer
-    :param disc_orig_retransmitted: Discretizer of the relative attribute
-    :type disc_orig_retransmitted: Discretizer
+    :param disc_orig_retransmitted_payload: Discretizer of the relative attribute
+    :type disc_orig_retransmitted_payload: Discretizer
     :param disc_orig_zero_window: Discretizer of the relative attribute
     :type disc_orig_zero_window: Discretizer
     :param disc_resp_bad_checksum: Discretizer of the relative attribute
     :type disc_resp_bad_checksum: Discretizer
-    :param disc_resp_conten_gap: Discretizer of the relative attribute
-    :type disc_resp_conten_gap: Discretizer
-    :param disc_resp_retransmitted: Discretizer of the relative attribute
-    :type disc_resp_retransmitted: Discretizer
+    :param disc_resp_content_gap: Discretizer of the relative attribute
+    :type disc_resp_content_gap: Discretizer
+    :param disc_resp_retransmitted_payload: Discretizer of the relative attribute
+    :type disc_resp_retransmitted_payload: Discretizer
     :param disc_resp_zero_window: Discretizer of the relative attribute
     :type disc_resp_zero_window: Discretizer
     '''
@@ -107,13 +107,13 @@ class EventHistory:
     # c, g, t, w Discretized
     disc_orig_bad_checksum: Discretizer = None
     disc_orig_content_gap: Discretizer = None
-    disc_orig_retransmitted: Discretizer = None
+    disc_orig_retransmitted_payload: Discretizer = None
     disc_orig_zero_window: Discretizer = None
 
     # C, G, T, W Discretized
     disc_resp_bad_checksum: Discretizer = None
-    disc_resp_conten_gap: Discretizer = None
-    disc_resp_retransmitted: Discretizer = None
+    disc_resp_content_gap: Discretizer = None
+    disc_resp_retransmitted_payload: Discretizer = None
     disc_resp_zero_window: Discretizer = None
 
     def __init__(self, history: str='') -> None:
@@ -129,13 +129,13 @@ class EventHistory:
         self.__orig_syn                   = 0
         self.__orig_fin                   = 0
         self.__orig_syn_ack               = 0
-        self.__orig_rest                  = 0
+        self.__orig_rst                  = 0
 
         # s, f, h, r
         self.__resp_syn                   = 0
         self.__resp_fin                   = 0
         self.__resp_syn_ack               = 0
-        self.__resp_rest                  = 0
+        self.__resp_rst                   = 0
         
         # A, D, I, Q
         self.__orig_ack                   = False
@@ -182,12 +182,12 @@ class EventHistory:
             if c == 'S': self.__orig_syn += 1
             elif c == 'F': self.__orig_fin += 1
             elif c == 'H': self.__orig_syn_ack += 1
-            elif c == 'R': self.__orig_rest += 1
+            elif c == 'R': self.__orig_rst += 1
             
             elif c == 's': self.__resp_syn += 1
             elif c == 'f': self.__resp_fin += 1
             elif c == 'h': self.__resp_syn_ack += 1
-            elif c == 'r': self.__resp_rest += 1
+            elif c == 'r': self.__resp_rst += 1
 
             elif c == 'A': self.__orig_ack = True
             elif c == 'D': self.__orig_payload = True
@@ -229,12 +229,12 @@ class EventHistory:
             ('S', self.__orig_syn),
             ('F', self.__orig_fin),
             ('H', self.__orig_syn_ack),
-            ('R', self.__orig_rest),
+            ('R', self.__orig_rst),
 
             ('s', self.__resp_syn),
             ('f', self.__resp_fin),
             ('h', self.__resp_syn_ack),
-            ('r', self.__resp_rest),
+            ('r', self.__resp_rst),
 
             ('A', self.__orig_ack),
             ('D', self.__orig_payload),
@@ -322,3 +322,133 @@ class EventHistory:
         :rtype: str
         """
         return self.__history
+
+    def get_discretized_orig_syn(self) -> str:
+        """Returns the discretized value of this objects orig_syn
+
+        :return: the discretized value of orig_syn
+        :rtype: str
+        """
+        return EventHistory.disc_orig_syn.discretize_attribute(self.__orig_syn)
+
+    
+    def get_discretized_orig_fin(self) -> str:
+        """Returns the discretized value of this objects orig_fin
+
+        :return: the discretized value of orig_fin
+        :rtype: str
+        """
+        return EventHistory.disc_orig_fin.discretize_attribute(self.__orig_fin)
+
+    def get_discretized_orig_syn_ack(self) -> str:
+        """Returns the discretized value of this objects orig_syn_ack
+
+        :return: the discretized value of orig_syn_ack
+        :rtype: str
+        """
+        return EventHistory.disc_orig_syn_ack.discretize_attribute(self.__orig_syn_ack)
+
+    def get_discretized_orig_rst(self) -> str:
+        """Returns the discretized value of this objects orig_rst
+
+        :return: the discretized value of orig_rst
+        :rtype: str
+        """
+        return EventHistory.disc_orig_rst.discretize_attribute(self.__orig_rst)
+
+    def get_discretized_resp_syn(self) -> str:
+        """Returns the discretized value of this objects resp_syn
+
+        :return: the discretized value of resp_syn
+        :rtype: str
+        """
+        return EventHistory.disc_resp_syn.discretize_attribute(self.__resp_syn)
+
+    def get_discretized_resp_fin(self) -> str:
+        """Returns the discretized value of this objects resp_fin
+
+        :return: the discretized value of resp_fin
+        :rtype: str
+        """
+        return EventHistory.disc_resp_fin.discretize_attribute(self.__resp_fin)
+
+    def get_discretized_resp_syn_ack(self) -> str:
+        """Returns the discretized value of this objects resp_syn_ack
+
+        :return: the discretized value of resp_syn_ack
+        :rtype: str
+        """
+        return EventHistory.disc_resp_syn_ack.discretize_attribute(self.__resp_syn_ack)
+
+    def get_discretized_resp_rst(self) -> str:
+        """Returns the discretized value of this objects resp_rst
+
+        :return: the discretized value of resp_rst
+        :rtype: str
+        """
+        return EventHistory.disc_resp_rst.discretize_attribute(self.__resp_rst)
+
+    def get_discretized_orig_bad_checksum(self) -> str:
+        """Returns the discretized value of this objects orig_bad_checksum
+
+        :return: the discretized value of orig_bad_checksum
+        :rtype: str
+        """
+        return EventHistory.disc_orig_bad_checksum.discretize_attribute(self.__orig_bad_checksum)
+
+    def get_discretized_orig_content_gap(self) -> str:
+        """Returns the discretized value of this objects orig_content_gap
+
+        :return: the discretized value of orig_content_gap
+        :rtype: str
+        """
+        return EventHistory.disc_orig_content_gap.discretize_attribute(self.__orig_content_gap)
+
+    def get_discretized_orig_retransmitted_payload(self) -> str:
+        """Returns the discretized value of this objects orig_retransmitted_payload
+
+        :return: the discretized value of orig_retransmitted_payload
+        :rtype: str
+        """
+        return EventHistory.disc_orig_retransmitted_payload.discretize_attribute(self.__orig_retransmitted_payload)
+
+    def get_discretized_orig_zero_window(self) -> str:
+        """Returns the discretized value of this objects orig_zero_window
+
+        :return: the discretized value of orig_zero_window
+        :rtype: str
+        """
+        return EventHistory.disc_orig_zero_window.discretize_attribute(self.__orig_zero_window)
+
+    def get_discretized_resp_bad_checksum(self) -> str:
+        """Returns the discretized value of this objects resp_bad_checksum
+
+        :return: the discretized value of resp_bad_checksum
+        :rtype: str
+        """
+        return EventHistory.disc_resp_bad_checksum.discretize_attribute(self.__resp_bad_checksum)
+
+    def get_discretized_resp_content_gap(self) -> str:
+        """Returns the discretized value of this objects resp_content_gap
+
+        :return: the discretized value of resp_content_gap
+        :rtype: str
+        """
+        return EventHistory.disc_resp_content_gap.discretize_attribute(self.__resp_content_gap)
+
+    def get_discretized_resp_retransmitted_payload(self) -> str:
+        """Returns the discretized value of this objects resp_retransmitted_payload
+
+        :return: the discretized value of resp_retransmitted_payload
+        :rtype: str
+        """
+        return EventHistory.disc_resp_retransmitted_payload.discretize_attribute(self.__resp_retransmitted_payload)
+
+    def get_discretized_resp_zero_window(self) -> str:
+        """Returns the discretized value of this objects resp_zero_window
+
+        :return: the discretized value of resp_zero_window
+        :rtype: str
+        """
+        return EventHistory.disc_resp_zero_window.discretize_attribute(self.__resp_zero_window)
+

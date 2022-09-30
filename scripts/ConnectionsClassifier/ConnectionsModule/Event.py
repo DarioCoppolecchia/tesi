@@ -247,3 +247,69 @@ class Event:
         :rtype: str
         """
         return self.__label
+
+    def get_discretized_duration(self) -> str:
+        """Returns the discretized value of this objects duration
+
+        :return: the discretized value of duration
+        :rtype: str
+        """
+        return Event.disc_duration.discretize_attribute(self.__duration)
+    
+    def get_discretized_orig_bytes(self) -> str:
+        """Returns the discretized value of this objects orig_bytes
+
+        :return: the discretized value of orig_bytes
+        :rtype: str
+        """
+        return Event.disc_orig_bytes.discretize_attribute(self.__orig_bytes)
+
+    def get_discretized_resp_bytes(self) -> str:
+        """Returns the discretized value of this objects resp_bytes
+
+        :return: the discretized value of resp_bytes
+        :rtype: str
+        """
+        return Event.disc_resp_bytes.discretize_attribute(self.__resp_bytes)
+
+    def get_discretized_missed_bytes(self) -> str:
+        """Returns the discretized value of this objects missed_bytes
+
+        :return: the discretized value of missed_bytes
+        :rtype: str
+        """
+        return Event.disc_missed_bytes.discretize_attribute(self.__missed_bytes)
+
+    def get_discretized_orig_pkts(self) -> str:
+        """Returns the discretized value of this objects orig_pkts
+
+        :return: the discretized value of orig_pkts
+        :rtype: str
+        """
+        return Event.disc_orig_pkts.discretize_attribute(self.__orig_pkts)
+
+    def get_discretized_orig_ip_bytes(self) -> str:
+        """Returns the discretized value of this objects orig_ip_bytes
+
+        :return: the discretized value of orig_ip_bytes
+        :rtype: str
+        """
+        return Event.disc_orig_ip_bytes.discretize_attribute(self.__orig_ip_bytes)
+
+    def get_discretized_resp_pkts(self) -> str:
+        """Returns the discretized value of this objects resp_pkts
+
+        :return: the discretized value of resp_pkts
+        :rtype: str
+        """
+        return Event.disc_resp_pkts.discretize_attribute(self.__resp_pkts)
+
+    def get_discretized_resp_ip_bytes(self) -> str:
+        """Returns the discretized value of this objects resp_ip_bytes
+
+        :return: the discretized value of resp_ip_bytes
+        :rtype: str
+        """
+        return Event.disc_resp_ip_bytes.discretize_attribute(self.__resp_ip_bytes)
+
+    
