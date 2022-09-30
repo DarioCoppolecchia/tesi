@@ -273,3 +273,69 @@ class Trace:
         :rtype: list[str]
         """
         return [event.get_label() for event in self.__events]
+
+    def get_list_of_discretized_duration(self) -> list:
+        """Getter of the discretized duration in this trace
+
+        :return: the list of all the discretized value of duration
+        :rtype: list
+        """
+        return [event.get_discretized_duration() for event in self.__events]
+
+    def get_list_of_discretized_orig_bytes(self) -> list:
+        """Getter of the discretized orig_bytes in this trace
+
+        :return: the list of all the discretized value of orig_bytes
+        :rtype: list
+        """
+        return [event.get_discretized_orig_bytes() for event in self.__events]
+        
+    def get_list_of_discretized_resp_bytes(self) -> list:
+        """Getter of the discretized resp_bytes in this trace
+
+        :return: the list of all the discretized value of resp_bytes
+        :rtype: list
+        """
+        return [event.get_discretized_resp_bytes() for event in self.__events]
+        
+    def get_list_of_discretized_missed_bytes(self) -> list:
+        """Getter of the discretized missed_bytes in this trace
+
+        :return: the list of all the discretized value of missed_bytes
+        :rtype: list
+        """
+        return [event.get_discretized_missed_bytes() for event in self.__events]
+        
+    def get_list_of_discretized_orig_pkts(self) -> list:
+        """Getter of the discretized orig_pkts in this trace
+
+        :return: the list of all the discretized value of orig_pkts
+        :rtype: list
+        """
+        return [event.get_discretized_orig_pkts() for event in self.__events]
+        
+    def get_list_of_discretized_orig_ip_bytes(self) -> list:
+        """Getter of the discretized orig_ip_bytes in this trace
+
+        :return: the list of all the discretized value of orig_ip_bytes
+        :rtype: list
+        """
+        return [event.get_discretized_orig_ip_bytes() for event in self.__events]
+        
+    def get_list_of_discretized_resp_pkts(self) -> list:
+        """Getter of the discretized resp_pkts in this trace
+
+        :return: the list of all the discretized value of resp_pkts
+        :rtype: list
+        """
+        return [event.get_discretized_resp_pkts() for event in self.__events]
+        
+    def get_list_of_discretized_resp_ip_bytes(self) -> list:
+        """Getter of the discretized resp_ip_bytes in this trace
+
+        :return: the list of all the discretized value of resp_ip_bytes
+        :rtype: list
+        """
+        return [event.get_discretized_resp_ip_bytes() for event in self.__events]
+    
+    
