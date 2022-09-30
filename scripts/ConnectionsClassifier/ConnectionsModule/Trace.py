@@ -1,5 +1,5 @@
-from Event import Event
-from PROTO import PROTO
+from .Event import Event
+from .PROTO import PROTO
 
 class Trace:
     """
@@ -135,8 +135,8 @@ class Trace:
             'orig_ip': self.__orig_ip,
             'orig_port': self.__orig_port,
             'resp_ip': self.__resp_ip,
-            'resp_port': PROTO.proto_to_str(self.__resp_port),
-            'proto': self.__proto,
+            'resp_port': self.__resp_port,
+            'proto': PROTO.proto_to_str(self.__proto),
             'ts_on_open': self.__ts_on_open,
             'events': [event.to_json_obj() for event in self.__events],
         }

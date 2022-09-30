@@ -1,6 +1,6 @@
 import json
-from Trace import Trace
-from Event import Event
+from .Trace import Trace
+from .Event import Event
 from DiscretizerModule.Equal_Height_Discretizer import Equal_Height_Discretizer
 from DiscretizerModule.Equal_Width_Discretizer import Equal_Width_Discretizer
 
@@ -74,60 +74,20 @@ class TracesController:
 
         # checks if Filters is in config.ini file
         if 'Filters' in config:
-            self.lines_to_remove_ash = config['Filters']['lines_to_remove_ash']  if 'lines_to_remove_ash' in config['Filters'] else ''
             self.strings_to_filter_event = config['Filters']['strings_to_filter_event']  if 'strings_to_filter_event' in config['Filters'] else ''
-
-            self.lines_to_remove_ash = self.lines_to_remove_ash.replace('\'', '').split(',')
             self.strings_to_filter_event = self.strings_to_filter_event.replace('\'', '').split(',')
         else:
-            self.lines_to_remove_ash = '' 
             self.strings_to_filter_event = '' 
 
         print('...reading complete')
 
-
-    def open_stored_preprocessed_lines(self) -> list:
+    def normalize_lines(self):
         """
-        read stored preprocessed lines from a file specified in the
-        path_of_file_output of this object
-
-        :return: pre-processed lines red from file
-        :rtype: list(str)
+        normalize lines from file and converting them to a list of trace (network_traffic field)
         """
-        print('reading stored lines from file...')
-        with open(self.path_of_file_output, 'r') as f:
-            self.preprocessed_lines = []
-            for line in f:
-                self.preprocessed_lines.append(line)
-
-            print('...reading complete')
-        return self.preprocessed_lines
-
-    def print_preprocessed_lines_to_file(self) -> None:
-        """
-        prints preprocessed lines to a file specified in the path_of_file_output
-        field of this object
-
-        """
-        print('printing preprocessed lines to file...')
-        with open(self.path_of_file_output, 'w') as f_out:
-            # writing lines to new file
-            for line in self.preprocessed_lines:
-                f_out.write(line + '\n')
-        print('...printing complete')
-
-    def normalize_lines(self) -> list:
-        """
-        normalize lines from file and if the path_of_file_output
-        is set, prints the lines to a file
-
-        :return: lines that have been normalized
-        :rtype: list(str)
-        """
-        print('normalizing lines...')
-        self.preprocessed_lines = []
+        print('normalizing and converting lines...')
         # normalizing lines
-        with open(self.path_of_file_input, "r+") as f_in:
+        with open(self.path_of_file_input, "r") as f_in:
             lines_to_remove = [
                 '#separator',
                 '#set_separator',
@@ -136,84 +96,74 @@ class TracesController:
                 '#path',
                 '#open',
                 '#types',
+                '#fields',
                 '#close',
             ]
+            next(f_in)
             for line in f_in:
                 # removing comment lines
-                to_remove = False
                 for line_to_check in lines_to_remove:
                     if line.startswith(line_to_check):
-                        to_remove = True
-                if not(to_remove):
-                    # replacing comment in field/types lines
-                    for line_to_check in self.lines_to_remove_ash:
-                        if line.startswith(line_to_check):
-                            line = line.replace(line_to_check, '')
-                            break
-
-                    # removing unnecessary strings
-                    for string in self.strings_to_filter_event: 
+                        break
+                else:
+                    # removing unnecessary sub strings
+                    for string in self.strings_to_filter_event:
                         line = line.replace(string, '')
-                    self.preprocessed_lines.append(line.replace('\n', ''))
-        print('...normalization completed')
-        return self.preprocessed_lines
+                    self.conv_line_and_add_to_trace(line.replace('\n', ''))
+        print('...normalization and conversion completed')
 
-    def conv_lines_to_Trace_list(self) -> list:
+    def conv_line_and_add_to_trace(self, line: str):
         """
-        Convert a list of preprocessed lines to a list of Event and inserts them into the 
-        Trace list
+        Convert a preprocessed line from the input file to an event and adds it to the network_traffic list
 
+        :param line: line of the event to be processed and added to a trace
+        :type line: str
         :return: list of strings that have been normalized
         :rtype: list(Traces)
         """
-        print('converting preprocessed lines to list of traces...')
-        count = 0
-        for line in self.preprocessed_lines[1:]:
-            list_to_pack = line.split('\t')
+        list_to_pack = line.split('\t')
 
-            ts = list_to_pack[0]
-            orig_ip = list_to_pack[2]
-            orig_port = list_to_pack[3]
-            resp_ip = list_to_pack[4]
-            resp_port = list_to_pack[5]
-            proto = list_to_pack[6]
-            service = list_to_pack[7]
-            duration = list_to_pack[8]
-            orig_bytes = list_to_pack[9]
-            resp_bytes = list_to_pack[10]
-            conn_state = list_to_pack[11]
-            missed_bytes = list_to_pack[14]
-            history = list_to_pack[15]
-            orig_pkts = list_to_pack[16]
-            orig_ip_bytes = list_to_pack[17]
-            resp_pkts = list_to_pack[18]
-            resp_ip_bytes = list_to_pack[19]
-            label = list_to_pack[21]
+        ts = list_to_pack[0]
+        orig_ip = list_to_pack[2]
+        orig_port = list_to_pack[3]
+        resp_ip = list_to_pack[4]
+        resp_port = list_to_pack[5]
+        proto = list_to_pack[6]
+        service = list_to_pack[7]
+        duration = list_to_pack[8]
+        orig_bytes = list_to_pack[9]
+        resp_bytes = list_to_pack[10]
+        conn_state = list_to_pack[11]
+        missed_bytes = list_to_pack[14]
+        history = list_to_pack[15]
+        orig_pkts = list_to_pack[16]
+        orig_ip_bytes = list_to_pack[17]
+        resp_pkts = list_to_pack[18]
+        resp_ip_bytes = list_to_pack[19]
+        label = list_to_pack[21]
 
-            event = Event(ts,
-                service,
-                duration,
-                orig_bytes,
-                resp_bytes,
-                conn_state,
-                missed_bytes,
-                history,
-                orig_pkts,
-                orig_ip_bytes,
-                resp_pkts,
-                resp_ip_bytes,
-                label)
-        
-            id = Trace.generate_id_static(orig_ip, orig_port, resp_ip, resp_port, proto)
+        event = Event(ts,
+            service,
+            duration,
+            orig_bytes,
+            resp_bytes,
+            conn_state,
+            missed_bytes,
+            history,
+            orig_pkts,
+            orig_ip_bytes,
+            resp_pkts,
+            resp_ip_bytes,
+            label)
+    
+        id = Trace.generate_id_static(orig_ip, orig_port, resp_ip, resp_port, proto)
 
-            if id not in self.traces_pos_dict:
-                self.network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts))
-                self.network_traffic[-1].add_event(event)
-                self.traces_pos_dict[id] = count
-                count += 1
-            else:
-                self.network_traffic[self.traces_pos_dict[id]].add_event(event)
-        print('...conversion completed')
+        if id not in self.traces_pos_dict:
+            self.traces_pos_dict[id] = len(self.network_traffic)
+            self.network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts))
+            self.network_traffic[-1].add_event(event)
+        else:
+            self.network_traffic[self.traces_pos_dict[id]].add_event(event)
     
     
     '''
@@ -275,19 +225,15 @@ class TracesController:
                         line += '\t' + 'BENIGN'
                     f_out.write(line + '\n')
         print('...label application completed')
+    '''
         
     def print_Trace_list_to_json_file(self) -> None:
         """prints all the Traces list to a json file
         """
         print('writing the list of Events to a json file...')
         with open(self.path_of_file_json, 'w') as f:
-            to_json = []
-            for trace in self.network_traffic:
-                to_json.append(trace.to_json_obj())
-            
-            json.dump(to_json, f, indent=4)
-        print('...writing completed')
-    '''
+            json.dump([trace.to_json_obj() for trace in self.network_traffic], f, indent=4)
+            print('...writing completed')
 
     def __get_list_of_all_attributes(self, attributes_list: list) -> dict:
         """Creates a dictionary of list of the values of each attribute

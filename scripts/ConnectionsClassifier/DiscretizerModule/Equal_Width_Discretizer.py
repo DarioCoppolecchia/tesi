@@ -1,4 +1,4 @@
-import Discretizer
+from . import Discretizer
 
 class Equal_Width_Discretizer(Discretizer):
     """

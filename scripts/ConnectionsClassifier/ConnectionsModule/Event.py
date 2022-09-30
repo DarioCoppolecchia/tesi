@@ -1,6 +1,6 @@
 from DiscretizerModule.Discretizer import Discretizer
-from EventHistory import EventHistory
-from CONN_STATE import CONN_STATE
+from .EventHistory import EventHistory
+from .CONN_STATE import CONN_STATE
 
 class Event:
     '''
