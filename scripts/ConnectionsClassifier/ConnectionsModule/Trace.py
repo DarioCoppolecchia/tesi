@@ -20,9 +20,11 @@ class Trace:
     :type __ts_on_open: str
     :param __events: list of the event between this 2 hosts with these ports
     :type __events: list[Event]
+    :param label: label based on the originator ip and port, the responder ip and port, and the ts of this trace
+    :type label: float
     """
 
-    def __init__(self, orig_ip: str, orig_port: str, resp_ip: str, resp_port: str, proto: str,  ts_on_open: str):
+    def __init__(self, orig_ip: str, orig_port: str, resp_ip: str, resp_port: str, proto: str, ts_on_open: str, label: str):
         """Constructor
 
         :param orig_ip: orig_ip of this Trace
@@ -37,6 +39,8 @@ class Trace:
         :type proto: str
         :param ts_on_open: the ts of the first packet found with this id (orig_ip, orig_port, resp_ip, resp_port, port)
         :type ts_on_open: str
+        :param label: label based on the originator ip and port, the responder ip and port, and the ts of this trace
+        :type label: float
         """        
         self.__orig_ip: str = orig_ip
         self.__orig_port: int = int(orig_port)
@@ -44,6 +48,7 @@ class Trace:
         self.__resp_port: int = int(resp_port)
         self.__proto: PROTO = PROTO.str_to_proto(proto)
         self.__ts_on_open: str = ts_on_open
+        self.__label: str = label
         self.__events: list = []
 
     def get_orig_ip(self) -> str:
@@ -94,6 +99,14 @@ class Trace:
         """        
         return self.__ts_on_open
 
+    def get_label(self) -> str:
+        """Getter of label
+
+        :return: the value of label
+        :rtype: str
+        """
+        return self.__label
+
     def get_events(self) -> list:
         """returns the events value of this object
 
@@ -138,6 +151,7 @@ class Trace:
             'resp_port': self.__resp_port,
             'proto': PROTO.proto_to_str(self.__proto),
             'ts_on_open': self.__ts_on_open,
+            'label': self.label,
             'events': [event.to_json_obj() for event in self.__events],
         }
         
@@ -265,14 +279,6 @@ class Trace:
         :rtype: list[float]
         """
         return [event.get_resp_ip_bytes() for event in self.__events]
-
-    def get_list_of_label(self) -> list:
-        """Getter of the label of the events in this trace
-
-        :return: the list of all the value of label
-        :rtype: list[str]
-        """
-        return [event.get_label() for event in self.__events]
 
     def get_list_of_discretized_duration(self) -> list:
         """Getter of the discretized duration in this trace

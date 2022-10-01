@@ -153,14 +153,13 @@ class TracesController:
             orig_pkts,
             orig_ip_bytes,
             resp_pkts,
-            resp_ip_bytes,
-            label)
+            resp_ip_bytes)
     
         id = Trace.generate_id_static(orig_ip, orig_port, resp_ip, resp_port, proto)
 
         if id not in self.traces_pos_dict:
             self.traces_pos_dict[id] = len(self.network_traffic)
-            self.network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts))
+            self.network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts, label))
             self.network_traffic[-1].add_event(event)
         else:
             self.network_traffic[self.traces_pos_dict[id]].add_event(event)

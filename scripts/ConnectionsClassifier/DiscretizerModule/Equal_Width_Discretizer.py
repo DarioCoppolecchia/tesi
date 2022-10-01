@@ -23,16 +23,9 @@ class Equal_Width_Discretizer(Discretizer):
         :return: the discretized list
         :rtype: list
         """
-        pass
+        from math import inf
+        min_val = min(values)
+        max_val = max(values)
+        step = (max_val - min_val) / self.n_bins
+        self.discretized_bins = [-inf] + [min_val + step * i for i in range(1, self.n_bins)] + [inf]
 
-    def discretize_attribute(self, value: float) -> str:
-        """Given a value such that: min(discretized_bins) <= value <= max(discretized_bins), 
-        this returns the bin associated to that value using the equal height algorithm
-
-        :param value: value to discretize
-        :type value: float
-        :return: the return dipends on the value in input is a string representing the bounds of the interval
-
-        :rtype: str
-        """
-        pass

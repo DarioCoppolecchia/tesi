@@ -35,8 +35,6 @@ class Event:
     :type resp_pkts: float
     :param resp_ip_bytes: Number of IP level bytes that the responder sent (as seen on the wire, taken from the IP total_length header field)
     :type resp_ip_bytes: float
-    :param label: label based on the originator ip and port, the responder ip and port, and the ts of this event
-    :type label: float
     
     :param disc_orig_bytes: Discretizer of the relative attribute
     :type disc_orig_bytes: Discretizer
@@ -76,8 +74,7 @@ class Event:
             orig_pkts: float,
             orig_ip_bytes: float,
             resp_pkts: float,
-            resp_ip_bytes: float,
-            label: str) -> None:
+            resp_ip_bytes: float) -> None:
         """Constructor
 
         :param ts: timestamp of the event
@@ -104,8 +101,6 @@ class Event:
         :type resp_pkts: float
         :param resp_ip_bytes: resp_ip_bytes of the event
         :type resp_ip_bytes: float
-        :param label: label of the event
-        :type label: str
         """             
         self.__ts = ts
         self.__service = service
@@ -119,7 +114,6 @@ class Event:
         self.__orig_ip_bytes = orig_ip_bytes
         self.__resp_pkts = resp_pkts
         self.__resp_ip_bytes = resp_ip_bytes
-        self.__label = label
 
     def to_json_obj(self) -> object:
         """
@@ -141,7 +135,6 @@ class Event:
             'orig_ip_bytes': self.__orig_ip_bytes,
             'resp_pkts': self.__resp_pkts,
             'resp_ip_bytes': self.__resp_ip_bytes,
-            'label': self.__label,
         }
 
     def get_ts(self) -> str:
@@ -239,14 +232,6 @@ class Event:
         :rtype: float
         """
         return self.__resp_ip_bytes
-
-    def get_label(self) -> str:
-        """Getter of label
-
-        :return: the value of label
-        :rtype: str
-        """
-        return self.__label
 
     def get_discretized_duration(self) -> str:
         """Returns the discretized value of this objects duration

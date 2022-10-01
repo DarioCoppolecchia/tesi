@@ -27,24 +27,37 @@ class Discretizer(metaclass=abc.ABCMeta):
         :param n_bins: number of bins, defaults to None
         :type n_bins: int, optional
         """
-        self.discretized_bins = []
-        self.n_bins = n_bins
+        self.__discretized_bins = []
+        self.__n_bins = n_bins
+
+    def get_discretized_bins(self) -> list:
+        """Getter of the discretized bins list
+
+        :return: the discretized list
+        :rtype: list
+        """
+        return self.__discretized_bins
+    
+    def get_n_bins(self) -> list:
+        """Getter of the number of bins for this discretizer
+
+        :return: the number of bins
+        :rtype: list
+        """
+        return self.__n_bins
 
     @abc.abstractmethod
-    def discretize(self, values: list) -> list:
+    def discretize(self, values: list):
         """Analizes the list of values in input to create the bins
 
         :param values: list of values to discretize
         :type values: list
-        :return: the discretized list
-        :rtype: list
         """
         pass
 
-    @abc.abstractmethod
     def discretize_attribute(self, value: float) -> str:
         """Given a value such that: min(discretized_bins) <= value <= max(discretized_bins), 
-        this returns the bin associated to that value
+        this returns the bin associated to that value using the equal height algorithm
 
         :param value: value to discretize
         :type value: float
@@ -52,4 +65,10 @@ class Discretizer(metaclass=abc.ABCMeta):
 
         :rtype: str
         """
-        pass
+        for i in range(len(self.discretized_bins) - 1):
+            lower = self.discretized_bins[i]
+            upper = self.discretized_bins[i + 1]
+            if lower <= value <= upper:
+                return f'[{lower}, {upper}['
+                
+        return 'value out of bounds'
