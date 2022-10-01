@@ -234,10 +234,10 @@ class TracesController:
             json.dump([trace.to_json_obj() for trace in self.network_traffic], f, indent=4)
             print('...writing completed')
 
-    def __get_list_of_all_attributes(self, attributes_list: list) -> dict:
+    def __get_list_of_all_attributes(self, attributes_to_discretize: set) -> dict:
         """Creates a dictionary of list of the values of each attribute
 
-        Possible values of the attributes_list:
+        Possible values of the attributes_to_discretize:
             #. orig_bytes
             #. resp_bytes
             #. missed_bytes
@@ -247,58 +247,41 @@ class TracesController:
             #. resp_pkts
             #. resp_ip_bytes
 
-        :param attributes_list: list of the attributes from where to collect data from
-        :type attributes_list: list
+        :param attributes_to_discretize: list of the attributes from where to collect data from
+        :type attributes_to_discretize: list
         :return: dictionary of list of the attributes of all item
         :rtype: dict
         """
 
         attributes_value_dict = {}
-        for attribute in attributes_list:
+        for attribute in attributes_to_discretize:
             attributes_value_dict[attribute] = []
 
-        orig_bytes_list = []
-        resp_bytes_list = []
-        missed_bytes_list = []
-        orig_pkts_list = []
-        duration_list = []
-        orig_ip_bytes_list = []
-        resp_pkts_list = []
-        resp_ip_bytes_list = []
-
-        # getting all value for each list
+        # getting all value for each key of the dict
         if 'orig_bytes' in attributes_value_dict:
-            for trace in self.network_traffic:
-                orig_bytes_list += trace.get_list_of_orig_bytes()
+            attributes_value_dict['orig_bytes'] = [trace.get_list_of_orig_bytes() for trace in self.network_traffic]
         if 'resp_bytes' in attributes_value_dict:
-            for trace in self.network_traffic:
-                resp_bytes_list += trace.get_list_of_resp_bytes()
+            attributes_value_dict['resp_bytes'] = [trace.get_list_of_resp_bytes() for trace in self.network_traffic]
         if 'missed_bytes' in attributes_value_dict:
-            for trace in self.network_traffic:
-                missed_bytes_list += trace.get_list_of_missed_bytes()
+            attributes_value_dict['missed_bytes'] = [trace.get_list_of_missed_bytes() for trace in self.network_traffic]
         if 'orig_pkts' in attributes_value_dict:
-            for trace in self.network_traffic:
-                orig_pkts_list += trace.get_list_of_orig_pkts()
+            attributes_value_dict['orig_pkts'] = [trace.get_list_of_orig_pkts() for trace in self.network_traffic]
         if 'duration' in attributes_value_dict:
-            for trace in self.network_traffic:
-                duration_list += trace.get_list_of_duration()
+            attributes_value_dict['duration'] = [trace.get_list_of_duration() for trace in self.network_traffic]
         if 'orig_ip_bytes' in attributes_value_dict:
-            for trace in self.network_traffic:
-                orig_ip_bytes_list += trace.get_list_of_orig_ip_bytes()
+            attributes_value_dict['orig_ip_bytes'] = [trace.get_list_of_orig_ip_bytes() for trace in self.network_traffic]
         if 'resp_pkts' in attributes_value_dict:
-            for trace in self.network_traffic:
-                resp_pkts_list += trace.get_list_of_resp_pkts()
+            attributes_value_dict['resp_pkts'] = [trace.get_list_of_resp_pkts() for trace in self.network_traffic]
         if 'resp_ip_bytes' in attributes_value_dict:
-            for trace in self.network_traffic:
-                resp_ip_bytes_list += trace.get_list_of_resp_ip_bytes()
+            attributes_value_dict['resp_ip_bytes'] = [trace.get_list_of_resp_ip_bytes() for trace in self.network_traffic]
 
-        return orig_bytes_list, resp_bytes_list, missed_bytes_list, orig_pkts_list, duration_list, orig_ip_bytes_list, resp_pkts_list, resp_ip_bytes_list
+        return attributes_value_dict
 
 
     def discretize_attributes_equal_width(self, n_bins_dict: dict) -> None:
         """Discretizes all the attribute with equal width discretization
 
-        Possible values of the attributes_list:
+        Possible values of the attributes_to_discretize:
             #. orig_bytes
             #. resp_bytes
             #. missed_bytes
@@ -311,31 +294,31 @@ class TracesController:
         :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
         :type n_bins_dict: dict
         """        
-        attribute_to_discretize = list(n_bins_dict.keys())
+        attributes_to_discretize = list(n_bins_dict.keys())
         
-        if 'orig_bytes' in attribute_to_discretize:
+        if 'orig_bytes' in attributes_to_discretize:
             Event.disc_orig_bytes = Equal_Width_Discretizer(n_bins_dict['orig_bytes'])
-        if 'resp_bytes' in attribute_to_discretize:
+        if 'resp_bytes' in attributes_to_discretize:
             Event.disc_resp_bytes = Equal_Width_Discretizer(n_bins_dict['resp_bytes'])
-        if 'missed_bytes' in attribute_to_discretize:
+        if 'missed_bytes' in attributes_to_discretize:
             Event.disc_missed_bytes = Equal_Width_Discretizer(n_bins_dict['missed_bytes'])
-        if 'orig_pkts' in attribute_to_discretize:
+        if 'orig_pkts' in attributes_to_discretize:
             Event.disc_orig_pkts = Equal_Width_Discretizer(n_bins_dict['orig_pkts'])
-        if 'duration' in attribute_to_discretize:
+        if 'duration' in attributes_to_discretize:
             Event.disc_duration = Equal_Width_Discretizer(n_bins_dict['duration'])
-        if 'orig_ip_bytes' in attribute_to_discretize:
+        if 'orig_ip_bytes' in attributes_to_discretize:
             Event.disc_orig_ip_bytes = Equal_Width_Discretizer(n_bins_dict['orig_ip_bytes'])
-        if 'resp_pkts' in attribute_to_discretize:
+        if 'resp_pkts' in attributes_to_discretize:
             Event.disc_resp_pkts = Equal_Width_Discretizer(n_bins_dict['resp_pkts'])
-        if 'resp_ip_bytes' in attribute_to_discretize: 
+        if 'resp_ip_bytes' in attributes_to_discretize: 
             Event.disc_resp_ip_bytes = Equal_Width_Discretizer(n_bins_dict['resp_ip_bytes'])
         
-        # TODO effettuare discretizzazione
+        self.__apply_discretization(attributes_to_discretize)
 
     def discretize_attributes_equal_height(self, n_bins_dict: dict) -> None:
         """Discretizes all the attribute with equal height discretization
 
-        Possible values of the attributes_list:
+        Possible values of the attributes_to_discretize:
             #. orig_bytes
             #. resp_bytes
             #. missed_bytes
@@ -348,23 +331,59 @@ class TracesController:
         :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
         :type n_bins_dict: dict
         """
-        attributes_list = list(n_bins_dict.keys())
+        attributes_to_discretize = set(n_bins_dict.keys())
         
-        if 'orig_bytes' in attributes_list:
-            Event.disc_orig_bytes = Equal_Height_Discretizer(attributes_list['orig_bytes'])
-        if 'resp_bytes' in attributes_list:
-            Event.disc_resp_bytes = Equal_Height_Discretizer(attributes_list['resp_bytes'])
-        if 'missed_bytes' in attributes_list:
-            Event.disc_missed_bytes = Equal_Height_Discretizer(attributes_list['missed_bytes'])
-        if 'orig_pkts' in attributes_list:
-            Event.disc_orig_pkts = Equal_Height_Discretizer(attributes_list['orig_pkts'])
-        if 'duration' in attributes_list:
-            Event.disc_duration = Equal_Height_Discretizer(attributes_list['duration'])
-        if 'orig_ip_bytes' in attributes_list:
-            Event.disc_orig_ip_bytes = Equal_Height_Discretizer(attributes_list['orig_ip_bytes'])
-        if 'resp_pkts' in attributes_list:
-            Event.disc_resp_pkts = Equal_Height_Discretizer(attributes_list['resp_pkts'])
-        if 'resp_ip_bytes' in attributes_list: 
-            Event.disc_resp_ip_bytes = Equal_Height_Discretizer(attributes_list['resp_ip_bytes'])
+        if 'orig_bytes' in attributes_to_discretize:
+            Event.disc_orig_bytes = Equal_Height_Discretizer(n_bins_dict['orig_bytes'])
+        if 'resp_bytes' in attributes_to_discretize:
+            Event.disc_resp_bytes = Equal_Height_Discretizer(n_bins_dict['resp_bytes'])
+        if 'missed_bytes' in attributes_to_discretize:
+            Event.disc_missed_bytes = Equal_Height_Discretizer(n_bins_dict['missed_bytes'])
+        if 'orig_pkts' in attributes_to_discretize:
+            Event.disc_orig_pkts = Equal_Height_Discretizer(n_bins_dict['orig_pkts'])
+        if 'duration' in attributes_to_discretize:
+            Event.disc_duration = Equal_Height_Discretizer(n_bins_dict['duration'])
+        if 'orig_ip_bytes' in attributes_to_discretize:
+            Event.disc_orig_ip_bytes = Equal_Height_Discretizer(n_bins_dict['orig_ip_bytes'])
+        if 'resp_pkts' in attributes_to_discretize:
+            Event.disc_resp_pkts = Equal_Height_Discretizer(n_bins_dict['resp_pkts'])
+        if 'resp_ip_bytes' in attributes_to_discretize: 
+            Event.disc_resp_ip_bytes = Equal_Height_Discretizer(n_bins_dict['resp_ip_bytes'])
 
-        # TODO effettuare discretizzazione
+        self.__apply_discretization(attributes_to_discretize)
+
+    def __apply_discretization(self, attributes_to_discretize: set):
+        """Creates bins for every attribute
+
+        Possible values of the attributes_to_discretize:
+            #. orig_bytes
+            #. resp_bytes
+            #. missed_bytes
+            #. orig_pkts
+            #. duration
+            #. orig_ip_bytes
+            #. resp_pkts
+            #. resp_ip_bytes
+
+        :param attributes_to_discretize: set of all the attribute for which to create the bins
+        :type attributes_to_discretize: set
+        """
+        attributes_value_dict = self.__get_list_of_all_attributes(attributes_to_discretize)
+
+        if 'orig_bytes' in attributes_to_discretize:
+            Event.disc_orig_bytes.discretize(attributes_value_dict['orig_bytes'])
+        if 'resp_bytes' in attributes_to_discretize:
+            Event.disc_resp_bytes.discretize(attributes_value_dict['resp_bytes'])
+        if 'missed_bytes' in attributes_to_discretize:
+            Event.disc_missed_bytes.discretize(attributes_value_dict['missed_bytes'])
+        if 'orig_pkts' in attributes_to_discretize:
+            Event.disc_orig_pkts.discretize(attributes_value_dict['orig_pkts'])
+        if 'duration' in attributes_to_discretize:
+            Event.disc_duration.discretize(attributes_value_dict['duration'])
+        if 'orig_ip_bytes' in attributes_to_discretize:
+            Event.disc_orig_ip_bytes.discretize(attributes_value_dict['orig_ip_bytes'])
+        if 'resp_pkts' in attributes_to_discretize:
+            Event.disc_resp_pkts.discretize(attributes_value_dict['resp_pkts'])
+        if 'resp_ip_bytes' in attributes_to_discretize: 
+            Event.disc_resp_ip_bytes.discretize(attributes_value_dict['resp_ip_bytes'])
+            
