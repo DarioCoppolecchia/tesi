@@ -115,6 +115,24 @@ class Event:
         self.__resp_pkts = resp_pkts
         self.__resp_ip_bytes = resp_ip_bytes
 
+    def __repr__(self):
+        from datetime import datetime
+        return f'''
+    connection created at {datetime.fromtimestamp(self.__ts)}
+    using the {self.__service} service
+    lasted {self.__duration} seconds
+    the originator sent {self.__orig_bytes} and the responder set {self.__resp_bytes}
+    the state of the connection is {CONN_STATE.state_to_str(self.__conn_state)}
+    {self.__missed_bytes} bytes were missed during the lifetime of this connection
+    the history of this connection is {self.__history}
+    the orginator sent {self.__orig_pkts} ({self.__orig_ip_bytes} bytes in the packet header)
+    the orginator sent {self.__resp_pkts} ({self.__resp_ip_bytes} bytes in the packet header)
+    
+'''
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     def to_json_obj(self) -> object:
         """
         converts this class object to an object that can be easily dumped in a json file

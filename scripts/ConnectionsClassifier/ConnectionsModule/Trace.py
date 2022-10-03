@@ -51,6 +51,18 @@ class Trace:
         self.__label: str = label
         self.__events: list = []
 
+    def __repr__(self):
+        from datetime import datetime
+        return f'''
+traces of connection {self.__orig_ip}:{self.__orig_port} {self.__resp_ip}:{self.__resp_port}
+with protocol: {self.__proto}
+first packet sent in: {datetime.fromtimestamp(self.__ts_on_open)}
+with label: {self.__label}
+''' + '\n    '.join([str(e) for e in self.__events])
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     def get_orig_ip(self) -> str:
         """returns the orig_ip value of this object
 

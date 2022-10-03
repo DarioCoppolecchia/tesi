@@ -27,7 +27,6 @@ class TracesController:
         path_of_file_input: str='',
         path_of_file_output: str='',
         path_of_file_json: str='',
-        lines_to_remove_ash: set=set(),
         strings_to_filter_event: set=set()) -> None:
         """Constructor method
 
@@ -42,13 +41,12 @@ class TracesController:
         :param strings_to_filter_event: set of the substring to be removed from the lines read in the file (this doesn't delete it from the input file), defaults to set()
         :type strings_to_filter_event: set, optional
         """
-        self.path_of_file_input = path_of_file_input
-        self.path_of_file_output = path_of_file_output
-        self.path_of_file_json = path_of_file_json
-        self.lines_to_remove_ash = lines_to_remove_ash
-        self.strings_to_filter_event = strings_to_filter_event
-        self.network_traffic = []
-        self.traces_pos_dict = {}
+        self.__path_of_file_input = path_of_file_input
+        self.__path_of_file_output = path_of_file_output
+        self.__path_of_file_json = path_of_file_json
+        self.__strings_to_filter_event = strings_to_filter_event
+        self.__network_traffic = []
+        self.__traces_pos_dict = {}
     
     def load_paths_and_filters_from_config_file(self, config_file_path: str) -> None:
         """
@@ -64,22 +62,30 @@ class TracesController:
 
         # checks if Files is in config.ini file
         if 'Files' in config:
-            self.path_of_file_input = config['Files']['path_of_file_input'] if 'path_of_file_input' in config['Files'] else ''
-            self.path_of_file_output = config['Files']['path_of_file_output'] if 'path_of_file_output' in config['Files'] else ''
-            self.path_of_file_json = config['Files']['path_of_file_json']  if 'path_of_file_json' in config['Files'] else ''
+            self.__path_of_file_input = config['Files']['path_of_file_input'] if 'path_of_file_input' in config['Files'] else ''
+            self.__path_of_file_output = config['Files']['path_of_file_output'] if 'path_of_file_output' in config['Files'] else ''
+            self.__path_of_file_json = config['Files']['path_of_file_json']  if 'path_of_file_json' in config['Files'] else ''
         else:
-            self.path_of_file_input = self.path_of_file_input if self.path_of_file_input != '' else ''
-            self.path_of_file_output = self.path_of_file_output if self.path_of_file_output != '' else ''
-            self.path_of_file_json = self.path_of_file_json if self.path_of_file_json != '' else ''
+            self.__path_of_file_input = self.__path_of_file_input if self.__path_of_file_input != '' else ''
+            self.__path_of_file_output = self.__path_of_file_output if self.__path_of_file_output != '' else ''
+            self.__path_of_file_json = self.__path_of_file_json if self.__path_of_file_json != '' else ''
 
         # checks if Filters is in config.ini file
         if 'Filters' in config:
-            self.strings_to_filter_event = config['Filters']['strings_to_filter_event']  if 'strings_to_filter_event' in config['Filters'] else ''
-            self.strings_to_filter_event = self.strings_to_filter_event.replace('\'', '').split(',')
+            self.__strings_to_filter_event = config['Filters']['strings_to_filter_event']  if 'strings_to_filter_event' in config['Filters'] else ''
+            self.__strings_to_filter_event = self.__strings_to_filter_event.replace('\'', '').split(',')
         else:
-            self.strings_to_filter_event = '' 
+            self.__strings_to_filter_event = '' 
 
         print('...reading complete')
+
+    def get_network_traffic(self) -> list:
+        return self.__network_traffic
+
+    def get_n_traces_and_event(self, max_n_trace: int=10, max_n_event: int=10, randomize: bool=False) -> list:
+        from random import shuffle
+        list_of_traces = self.__network_traffic[:max_n_trace]
+        return shuffle(list_of_traces) if randomize else list_of_traces
 
     def normalize_lines(self):
         """
@@ -87,7 +93,7 @@ class TracesController:
         """
         print('normalizing and converting lines...')
         # normalizing lines
-        with open(self.path_of_file_input, "r") as f_in:
+        with open(self.__path_of_file_input, "r") as f_in:
             lines_to_remove = [
                 '#separator',
                 '#set_separator',
@@ -107,7 +113,7 @@ class TracesController:
                         break
                 else:
                     # removing unnecessary sub strings
-                    for string in self.strings_to_filter_event:
+                    for string in self.__strings_to_filter_event:
                         line = line.replace(string, '')
                     self.conv_line_and_add_to_trace(line.replace('\n', ''))
         print('...normalization and conversion completed')
@@ -157,12 +163,12 @@ class TracesController:
     
         id = Trace.generate_id_static(orig_ip, orig_port, resp_ip, resp_port, proto)
 
-        if id not in self.traces_pos_dict:
-            self.traces_pos_dict[id] = len(self.network_traffic)
-            self.network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts, label))
-            self.network_traffic[-1].add_event(event)
+        if id not in self.__traces_pos_dict:
+            self.__traces_pos_dict[id] = len(self.__network_traffic)
+            self.__network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts, label))
+            self.__network_traffic[-1].add_event(event)
         else:
-            self.network_traffic[self.traces_pos_dict[id]].add_event(event)
+            self.__network_traffic[self.__traces_pos_dict[id]].add_event(event)
     
     
     '''
@@ -196,7 +202,7 @@ class TracesController:
         :type constraint_to_label: list
         """
         print('applying label to the file...')
-        file = self.path_of_file_input.replace('_labeled', '')
+        file = self.__path_of_file_input.replace('_labeled', '')
         with open(file, 'r') as f:
             lines = f.readlines()
             del lines[:6]
@@ -205,7 +211,7 @@ class TracesController:
             lines[0] = lines[0].replace("#fields\t", "")
         with open(file, 'w') as f:
             f.writelines(lines)
-        with open(self.path_of_file_input, 'w') as f_out:
+        with open(self.__path_of_file_input, 'w') as f_out:
             with open(file, 'r') as f_in:
                 next(f_in)
                 for line in f_in:
@@ -230,8 +236,8 @@ class TracesController:
         """prints all the Traces list to a json file
         """
         print('writing the list of Events to a json file...')
-        with open(self.path_of_file_json, 'w') as f:
-            json.dump([trace.to_json_obj() for trace in self.network_traffic], f, indent=4)
+        with open(self.__path_of_file_json, 'w') as f:
+            json.dump([trace.to_json_obj() for trace in self.__network_traffic], f, indent=4)
             print('...writing completed')
 
     def __get_list_of_all_attributes(self, attributes_to_discretize: set) -> dict:
@@ -259,21 +265,21 @@ class TracesController:
 
         # getting all value for each key of the dict
         if 'orig_bytes' in attributes_value_dict:
-            attributes_value_dict['orig_bytes'] = [trace.get_list_of_orig_bytes() for trace in self.network_traffic]
+            attributes_value_dict['orig_bytes'] = [trace.get_list_of_orig_bytes() for trace in self.__network_traffic]
         if 'resp_bytes' in attributes_value_dict:
-            attributes_value_dict['resp_bytes'] = [trace.get_list_of_resp_bytes() for trace in self.network_traffic]
+            attributes_value_dict['resp_bytes'] = [trace.get_list_of_resp_bytes() for trace in self.__network_traffic]
         if 'missed_bytes' in attributes_value_dict:
-            attributes_value_dict['missed_bytes'] = [trace.get_list_of_missed_bytes() for trace in self.network_traffic]
+            attributes_value_dict['missed_bytes'] = [trace.get_list_of_missed_bytes() for trace in self.__network_traffic]
         if 'orig_pkts' in attributes_value_dict:
-            attributes_value_dict['orig_pkts'] = [trace.get_list_of_orig_pkts() for trace in self.network_traffic]
+            attributes_value_dict['orig_pkts'] = [trace.get_list_of_orig_pkts() for trace in self.__network_traffic]
         if 'duration' in attributes_value_dict:
-            attributes_value_dict['duration'] = [trace.get_list_of_duration() for trace in self.network_traffic]
+            attributes_value_dict['duration'] = [trace.get_list_of_duration() for trace in self.__network_traffic]
         if 'orig_ip_bytes' in attributes_value_dict:
-            attributes_value_dict['orig_ip_bytes'] = [trace.get_list_of_orig_ip_bytes() for trace in self.network_traffic]
+            attributes_value_dict['orig_ip_bytes'] = [trace.get_list_of_orig_ip_bytes() for trace in self.__network_traffic]
         if 'resp_pkts' in attributes_value_dict:
-            attributes_value_dict['resp_pkts'] = [trace.get_list_of_resp_pkts() for trace in self.network_traffic]
+            attributes_value_dict['resp_pkts'] = [trace.get_list_of_resp_pkts() for trace in self.__network_traffic]
         if 'resp_ip_bytes' in attributes_value_dict:
-            attributes_value_dict['resp_ip_bytes'] = [trace.get_list_of_resp_ip_bytes() for trace in self.network_traffic]
+            attributes_value_dict['resp_ip_bytes'] = [trace.get_list_of_resp_ip_bytes() for trace in self.__network_traffic]
 
         return attributes_value_dict
 
