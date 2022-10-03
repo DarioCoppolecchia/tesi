@@ -24,8 +24,18 @@ class Equal_Width_Discretizer(Discretizer):
         :rtype: list
         """
         from math import inf
-        min_val = min(values)
-        max_val = max(values)
-        step = (max_val - min_val) / self.n_bins
-        self.discretized_bins = [-inf] + [min_val + step * i for i in range(1, self.n_bins)] + [inf]
+        print(values[:10], sep='\n')
+        new_values = []
+        for in_list in values:
+            new_values += in_list
+            
+        for i, val in enumerate(new_values):
+            if val == '-':
+               new_values[i] = 0.0
+        new_values = [float(val) for val in new_values]
+
+        min_val = min(new_values)
+        max_val = max(new_values)
+        step = (max_val - min_val) / super().__n_bins
+        super().__discretized_bins = [-inf] + [min_val + step * i for i in range(1, super().__n_bins)] + [inf]
 

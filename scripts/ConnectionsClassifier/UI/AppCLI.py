@@ -89,7 +89,7 @@ class MainApplicationCLI:
             res = input(f'''
 current attribute selected:
     ''' + str('\n    '.join([str(element) for element in list(attr_bins_dict.items())])).translate(str.maketrans({"'": '', "(": '', ")": '', ",": ':', })) + 
-'''
+f'''
 
 Type the number of the attribute to discretize from the following list followed by the number of bins (if not specified, default is {default_n}):
 ''' + 
@@ -98,7 +98,11 @@ Type the number of the attribute to discretize from the following list followed 
 > ''')
             self.__cls()
             if res == '' or res == '0':
-                return attr_bins_dict
+                if len(attr_bins_dict) == 0:
+                    print('ERROR: at least one attribute must be selected')
+                    continue
+                else:
+                    return attr_bins_dict
             ans = res.replace(' ', '').split(',')
 
             # check if the argument are 1 or 2
