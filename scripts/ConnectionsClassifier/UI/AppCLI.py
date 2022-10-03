@@ -134,7 +134,7 @@ Type the number of the attribute to discretize from the following list followed 
             self.traces_controller.discretize_attributes_equal_height(attr_bins_dict)
         else:
             raise ValueError('invalid discretization specified')
-        for trace in self.traces_controller.get_n_traces_and_event():
+        for trace in self.traces_controller.get_n_traces_and_event(randomize=True):
             print(trace)
     
     def __get_lines_from_input(self, message: str) -> list:

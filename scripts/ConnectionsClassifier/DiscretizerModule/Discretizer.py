@@ -18,8 +18,10 @@ class Discretizer(metaclass=abc.ABCMeta):
     where :math:`u_{i-1}/l_i` means that the element is both the upper bound of
     the :math:`(i-1)`-nth interval and the lower bound of the :math:`i`-nth element
 
-    :param discretized_bins: list that contains the intervals after calling discretize
-    :type discretized_bins: list
+    :param __discretized_bins: list that contains the intervals after calling discretize
+    :type __discretized_bins: list
+    :param __n_bins: number of bins for this discretization
+    :type __n_bins: int
     """
     def __init__(self, n_bins: int=None) -> None:
         """Constructor that initialize discretized_bins with and empty list
@@ -27,8 +29,8 @@ class Discretizer(metaclass=abc.ABCMeta):
         :param n_bins: number of bins, defaults to None
         :type n_bins: int, optional
         """
-        self.__discretized_bins = []
-        self.__n_bins = n_bins
+        self._discretized_bins = []
+        self._n_bins = n_bins
 
     def get_discretized_bins(self) -> list:
         """Getter of the discretized bins list
@@ -36,7 +38,7 @@ class Discretizer(metaclass=abc.ABCMeta):
         :return: the discretized list
         :rtype: list
         """
-        return self.__discretized_bins
+        return self._discretized_bins
     
     def get_n_bins(self) -> list:
         """Getter of the number of bins for this discretizer
@@ -44,10 +46,10 @@ class Discretizer(metaclass=abc.ABCMeta):
         :return: the number of bins
         :rtype: list
         """
-        return self.__n_bins
+        return self._n_bins
 
     @abc.abstractmethod
-    def discretize(self, values: list):
+    def discretize(self, values: list) -> None:
         """Analizes the list of values in input to create the bins
 
         :param values: list of values to discretize
@@ -65,9 +67,9 @@ class Discretizer(metaclass=abc.ABCMeta):
 
         :rtype: str
         """
-        for i in range(len(self.discretized_bins) - 1):
-            lower = self.discretized_bins[i]
-            upper = self.discretized_bins[i + 1]
+        for i in range(len(self._discretized_bins) - 1):
+            lower = self._discretized_bins[i]
+            upper = self._discretized_bins[i + 1]
             if lower <= value <= upper:
                 return f'[{lower}, {upper}['
                 

@@ -56,7 +56,7 @@ class Trace:
         return f'''
 traces of connection {self.__orig_ip}:{self.__orig_port} {self.__resp_ip}:{self.__resp_port}
 with protocol: {self.__proto}
-first packet sent in: {datetime.fromtimestamp(self.__ts_on_open)}
+first packet sent in: {datetime.fromtimestamp(float(self.__ts_on_open))}
 with label: {self.__label}
 ''' + '\n    '.join([str(e) for e in self.__events])
 

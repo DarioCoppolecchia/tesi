@@ -15,16 +15,14 @@ class Equal_Width_Discretizer(Discretizer):
         """
         super().__init__(n_bins)
 
-    def discretize(self, values: list) -> list:
+
+    def discretize(self, values: list) -> None:
         """Analizes the list of values in input to create the bins
 
         :param values: list of values to discretize with equal width
         :type values: list
-        :return: the discretized list
-        :rtype: list
         """
         from math import inf
-        print(values[:10], sep='\n')
         new_values = []
         for in_list in values:
             new_values += in_list
@@ -33,9 +31,8 @@ class Equal_Width_Discretizer(Discretizer):
             if val == '-':
                new_values[i] = 0.0
         new_values = [float(val) for val in new_values]
-
         min_val = min(new_values)
         max_val = max(new_values)
-        step = (max_val - min_val) / super().__n_bins
-        super().__discretized_bins = [-inf] + [min_val + step * i for i in range(1, super().__n_bins)] + [inf]
+        step = (max_val - min_val) / self._n_bins
+        self._discretized_bins = [-inf] + [min_val + step * i for i in range(1, self._n_bins)] + [inf]
 
