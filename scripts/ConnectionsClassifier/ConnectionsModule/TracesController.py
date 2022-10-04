@@ -80,11 +80,25 @@ class TracesController:
         print('...reading complete')
 
     def get_network_traffic(self) -> list:
+        """returns the list of all the traces processed
+
+        :return: the list of traces
+        :rtype: list
+        """        
         return self.__network_traffic
 
     def get_n_traces_and_event(self, max_n_trace: int=10, randomize: bool=False) -> list:
+        """returns n traces random or non random and their respective events
+
+        :param max_n_trace: number of traces to return, defaults to 10
+        :type max_n_trace: int, optional
+        :param randomize: set to true if the traces will be taken at random from network traffic, defaults to False
+        :type randomize: bool, optional
+        :return: the list of n traces
+        :rtype: list
+        """        
         from random import sample
-        return sample(self.__network_traffic, max_n_trace) if randomize else self.__network_traffic
+        return sample(self.__network_traffic, max_n_trace) if randomize else self.__network_traffic[:10]
 
     def normalize_lines(self):
         """

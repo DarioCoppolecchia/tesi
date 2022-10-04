@@ -115,7 +115,12 @@ class Event:
         self.__resp_pkts = resp_pkts
         self.__resp_ip_bytes = resp_ip_bytes
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """returns a string version of this object
+
+        :return: string version of this object
+        :rtype: str
+        """ 
         from datetime import datetime
         return f'''
     connection created at {datetime.fromtimestamp(float(self.__ts))}
@@ -131,6 +136,11 @@ class Event:
 '''
 
     def __str__(self) -> str:
+        """returns a string version of this object
+
+        :return: string version of this object
+        :rtype: str
+        """ 
         return self.__repr__()
 
     def to_json_obj(self) -> object:

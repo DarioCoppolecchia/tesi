@@ -39,15 +39,21 @@ class MainApplicationCLI:
             self.traces_controller.path_of_file_output = input('the path of the file that will contain the preprocessed lines (optional)\n> ')
             self.traces_controller.path_of_file_json = input('the path of the json file where to store the json of the list of NetworkConversation (optional)\n> ')
     
-    def __cls(self):
+    def __cls(self) -> None:
+        """clears the screen on either windows or non windows system
+        """        
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def main_loop(self):
+    def main_loop(self) -> None:
         """
         main loop of the application containig the UI elements that control the TracesController
         for every iteration this allows the user to do one of the following operations:
             #. Normalize lines and convert them to a Traces list
             #. print traces list to a json file
+            #. apply equal width discretization and print some trace
+            #. apply equal height discretization and print some trace
+            #. print N traces and events
+            #. print N discretized traces and events
             #. exit program
         """
         while True:
@@ -79,7 +85,9 @@ class MainApplicationCLI:
             else:
                 print('command not valid, enter an integer number between 1 and 3')
     
-    def __input_attributes_and_n_bins_per_attribute(self):
+    def __input_attributes_and_n_bins_per_attribute(self) -> None:
+        """This method let's the user choose what attribute to discretize and with how many bins
+        """        
         attr_bins_dict = {}
         attrs = [
             'orig_bytes',
@@ -136,6 +144,8 @@ to apply discretization with these attribute type 0 or just enter (leave blank)
                 print('ERROR: the number of parameter must be 1 or 2')
     
     def __print_n_traces_and_events(self) -> None:
+        """prints n random or non random traces and all the events of those traces
+        """        
         n = 0
         randomize = False
         while(True):
@@ -162,6 +172,8 @@ to apply discretization with these attribute type 0 or just enter (leave blank)
             print(trace)
 
     def __print_n_discretized_traces_and_events(self) -> None:
+        """prints the characteristics of the discretization algorithms (n bins and the bins) and some traces with their respective events
+        """        
         from datetime import datetime
         # printing the bins
         if Event.disc_duration is not None:
@@ -201,6 +213,12 @@ with label: {trace.get_label()}
 ''')
                 
     def __handle_attribute_discretization(self, discretization: str='equal_width') -> None:
+        """applies discretization algorithm based on the parameter's value
+
+        :param discretization: discretization algorithm to use, defaults to 'equal_width'
+        :type discretization: str, optional
+        :raises ValueError: if the discretization algorithm isn't equal_width or equal_height, a ValueError will be thrown
+        """        
         attr_bins_dict = self.__input_attributes_and_n_bins_per_attribute()
         if discretization == 'equal_width':
             self.traces_controller.discretize_attributes_equal_width(attr_bins_dict)

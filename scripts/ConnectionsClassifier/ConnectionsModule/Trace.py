@@ -51,7 +51,12 @@ class Trace:
         self.__label: str = label
         self.__events: list = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """returns a string version of this object
+
+        :return: string version of this object
+        :rtype: str
+        """        
         from datetime import datetime
         return f'''
 traces of connection {self.__orig_ip}:{self.__orig_port} {self.__resp_ip}:{self.__resp_port}
@@ -61,6 +66,11 @@ with label: {self.__label}
 ''' + '\n    '.join([str(e) for e in self.__events])
 
     def __str__(self) -> str:
+        """returns a string version of this object
+
+        :return: string version of this object
+        :rtype: str
+        """ 
         return self.__repr__()
 
     def get_orig_ip(self) -> str:
