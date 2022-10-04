@@ -1,5 +1,7 @@
 from ConnectionsModule.TracesController import TracesController
+from ConnectionsModule.Event import Event
 import os
+from ConnectionsModule.CONN_STATE import CONN_STATE
 
 class MainApplicationCLI:
     """
@@ -54,6 +56,8 @@ class MainApplicationCLI:
     2) print traces list to a json file
     3) apply equal width discretization and print some trace
     4) apply equal height discretization and print some trace
+    5) print N traces and events
+    6) print N discretized traces and events
     0) exit program\n> """)
             self.__cls()
             if op == "1":
@@ -64,6 +68,10 @@ class MainApplicationCLI:
                 self.__handle_attribute_discretization('equal_width')
             elif op == "4":
                 self.__handle_attribute_discretization('equal_height')
+            elif op == "5":
+                self.__print_n_traces_and_events()
+            elif op == "6":
+                self.__print_n_discretized_traces_and_events()
             elif op == "0":
                 res = input('are you sure you want to exit? (y or Y or just enter a blank line):\n> ')
                 if res == '' or res.lower() == 'y':
@@ -94,7 +102,8 @@ f'''
 Type the number of the attribute to discretize from the following list followed by the number of bins (if not specified, default is {default_n}):
 ''' + 
 '\n'.join([f'    {element[0] + 1}) {element[1]}' for element in list(enumerate(attrs))]) + 
-'''to apply discretization with these attribute type 0 or just enter (leave blank)
+'''
+to apply discretization with these attribute type 0 or just enter (leave blank)
 > ''')
             self.__cls()
             if res == '' or res == '0':
@@ -116,7 +125,7 @@ Type the number of the attribute to discretize from the following list followed 
                     n_bins = int(ans[1])
                     if attr in range(1, len(attrs) + 1):
                         if 1 < n_bins < MAX_N_BINS:
-                            attr_bins_dict[attrs[attr]] = n_bins
+                            attr_bins_dict[attrs[attr - 1]] = n_bins
                         else:
                             print(f'ERROR: the number of bins must be between 1 and {MAX_N_BINS}')
                     else:
@@ -125,6 +134,71 @@ Type the number of the attribute to discretize from the following list followed 
                     print('ERROR: the parameter must be number')
             else:
                 print('ERROR: the number of parameter must be 1 or 2')
+    
+    def __print_n_traces_and_events(self) -> None:
+        n = 0
+        randomize = False
+        while(True):
+            ans = input('Type the number of traces to print: ')
+            if ans.isdigit():
+                n = int(ans)
+                if n <= 0:
+                    print('ERROR: number of traces to print must be greater than 0')
+                else:
+                    break
+            else:
+                print('ERROR: invalid integer')
+        while(True):
+            ans = input(f'Do you want to print random traces? (y, Y or "enter" for yes; n or N for the first {n} traces)')
+            if ans == 'y' or ans == 'Y' or ans == '':
+                randomize = True
+                break
+            elif ans == 'n' or ans == 'N':
+                randomize = False
+                break
+            else:
+                print('ERROR: value entered not valid')
+        for trace in self.traces_controller.get_n_traces_and_event(max_n_trace=n, randomize=randomize):
+            print(trace)
+
+    def __print_n_discretized_traces_and_events(self) -> None:
+        from datetime import datetime
+        # printing the bins
+        if Event.disc_duration is not None:
+            print(f'duration discretization:\n\tnumber of bins: {Event.disc_duration.get_n_bins()}\n\tbins: {Event.disc_duration.get_discretized_bins()}')
+        if Event.disc_orig_bytes is not None:
+            print(f'origin bytes discretization :\n\tnumber of bins: {Event.disc_orig_bytes.get_n_bins()}\n\tbins: {Event.disc_orig_bytes.get_discretized_bins()}')
+        if Event.disc_resp_bytes is not None:
+            print(f'responder bytes discretization:\n\tnumber of bins: {Event.disc_resp_bytes.get_n_bins()}\n\tbins: {Event.disc_resp_bytes.get_discretized_bins()}')
+        if Event.disc_missed_bytes is not None:
+            print(f'missed bytes discretization:\n\tnumber of bins: {Event.disc_missed_bytes.get_n_bins()}\n\tbins: {Event.disc_missed_bytes.get_discretized_bins()}')
+        if Event.disc_orig_pkts is not None:
+            print(f'origin packets discretization:\n\tnumber of bins: {Event.disc_orig_pkts.get_n_bins()}\n\tbins: {Event.disc_orig_pkts.get_discretized_bins()}')
+        if Event.disc_orig_ip_bytes is not None:
+            print(f'origin bytes ip protocol discretization:\n\tnumber of bins: {Event.disc_orig_ip_bytes.get_n_bins()}\n\tbins: {Event.disc_orig_ip_bytes.get_discretized_bins()}')
+        if Event.disc_resp_pkts is not None:
+            print(f'responder packets discretization:\n\tnumber of bins: {Event.disc_resp_pkts.get_n_bins()}\n\tbins: {Event.disc_resp_pkts.get_discretized_bins()}')
+        if Event.disc_resp_ip_bytes is not None:
+            print(f'responder bytes ip discretization:\n\tnumber of bins: {Event.disc_resp_ip_bytes.get_n_bins()}\n\tbins: {Event.disc_resp_ip_bytes.get_discretized_bins()}')
+
+        for trace in self.traces_controller.get_n_traces_and_event(randomize=True):
+            print(f'''
+traces of connection {trace.get_orig_ip()}:{trace.get_orig_port()} {trace.get_resp_ip()}:{trace.get_resp_port()}
+with protocol: {trace.get_proto()}
+first packet sent in: {datetime.fromtimestamp(float(trace.get_ts_on_open()))}
+with label: {trace.get_label()}
+''')
+            for event in trace.get_events():
+                print(f'''    connection created at {datetime.fromtimestamp(float(event.get_ts()))}
+    using the {event.get_service()} service
+    lasted {event.get_discretized_duration()} seconds
+    the originator sent {event.get_discretized_orig_bytes()} and the responder sent {event.get_discretized_resp_bytes()}
+    the state of the connection is {CONN_STATE.state_to_str(event.get_conn_state())}
+    {event.get_discretized_missed_bytes()} bytes were missed during the lifetime of this connection
+    the history of this connection is {event.get_history().get_history()}
+    the orginator sent {event.get_discretized_orig_pkts()} ({event.get_discretized_orig_ip_bytes()} bytes in the packet header)
+    the orginator sent {event.get_discretized_resp_pkts()} ({event.get_discretized_resp_ip_bytes()} bytes in the packet header)
+''')
                 
     def __handle_attribute_discretization(self, discretization: str='equal_width') -> None:
         attr_bins_dict = self.__input_attributes_and_n_bins_per_attribute()
@@ -133,9 +207,8 @@ Type the number of the attribute to discretize from the following list followed 
         elif discretization == 'equal_height':
             self.traces_controller.discretize_attributes_equal_height(attr_bins_dict)
         else:
-            raise ValueError('invalid discretization specified')
-        for trace in self.traces_controller.get_n_traces_and_event(randomize=True):
-            print(trace)
+            raise ValueError('invalid specified discretization method')
+        self.__print_n_discretized_traces_and_events()
     
     def __get_lines_from_input(self, message: str) -> list:
         """returns a list filled from the std input and for each element of the list

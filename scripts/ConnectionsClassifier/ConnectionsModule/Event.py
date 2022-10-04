@@ -121,7 +121,7 @@ class Event:
     connection created at {datetime.fromtimestamp(float(self.__ts))}
     using the {self.__service} service
     lasted {self.__duration} seconds
-    the originator sent {self.__orig_bytes} and the responder set {self.__resp_bytes}
+    the originator sent {self.__orig_bytes} and the responder sent {self.__resp_bytes}
     the state of the connection is {CONN_STATE.state_to_str(self.__conn_state)}
     {self.__missed_bytes} bytes were missed during the lifetime of this connection
     the history of this connection is {self.__history.get_history()}
@@ -257,7 +257,9 @@ class Event:
         :return: the discretized value of duration
         :rtype: str
         """
-        return Event.disc_duration.discretize_attribute(self.__duration)
+        if self.__duration == '-':
+            self.__duration = 0
+        return Event.disc_duration.discretize_attribute(float(self.__duration)) if Event.disc_duration is not None else 'n/a'
     
     def get_discretized_orig_bytes(self) -> str:
         """Returns the discretized value of this objects orig_bytes
@@ -265,7 +267,9 @@ class Event:
         :return: the discretized value of orig_bytes
         :rtype: str
         """
-        return Event.disc_orig_bytes.discretize_attribute(self.__orig_bytes)
+        if self.__orig_bytes == '-':
+            self.__orig_bytes = 0
+        return Event.disc_orig_bytes.discretize_attribute(float(self.__orig_bytes)) if Event.disc_orig_bytes is not None else 'n/a'
 
     def get_discretized_resp_bytes(self) -> str:
         """Returns the discretized value of this objects resp_bytes
@@ -273,7 +277,9 @@ class Event:
         :return: the discretized value of resp_bytes
         :rtype: str
         """
-        return Event.disc_resp_bytes.discretize_attribute(self.__resp_bytes)
+        if self.__resp_bytes == '-':
+            self.__resp_bytes = 0
+        return Event.disc_resp_bytes.discretize_attribute(float(self.__resp_bytes)) if Event.disc_resp_bytes is not None else 'n/a'
 
     def get_discretized_missed_bytes(self) -> str:
         """Returns the discretized value of this objects missed_bytes
@@ -281,7 +287,9 @@ class Event:
         :return: the discretized value of missed_bytes
         :rtype: str
         """
-        return Event.disc_missed_bytes.discretize_attribute(self.__missed_bytes)
+        if self.__missed_bytes == '-':
+            self.__missed_bytes = 0
+        return Event.disc_missed_bytes.discretize_attribute(float(self.__missed_bytes)) if Event.disc_missed_bytes is not None else 'n/a'
 
     def get_discretized_orig_pkts(self) -> str:
         """Returns the discretized value of this objects orig_pkts
@@ -289,7 +297,9 @@ class Event:
         :return: the discretized value of orig_pkts
         :rtype: str
         """
-        return Event.disc_orig_pkts.discretize_attribute(self.__orig_pkts)
+        if self.__orig_pkts == '-':
+            self.__orig_pkts = 0
+        return Event.disc_orig_pkts.discretize_attribute(float(self.__orig_pkts)) if Event.disc_orig_pkts is not None else 'n/a'
 
     def get_discretized_orig_ip_bytes(self) -> str:
         """Returns the discretized value of this objects orig_ip_bytes
@@ -297,7 +307,9 @@ class Event:
         :return: the discretized value of orig_ip_bytes
         :rtype: str
         """
-        return Event.disc_orig_ip_bytes.discretize_attribute(self.__orig_ip_bytes)
+        if self.__orig_ip_bytes == '-':
+            self.__orig_ip_bytes = 0
+        return Event.disc_orig_ip_bytes.discretize_attribute(float(self.__orig_ip_bytes)) if Event.disc_orig_ip_bytes is not None else 'n/a'
 
     def get_discretized_resp_pkts(self) -> str:
         """Returns the discretized value of this objects resp_pkts
@@ -305,7 +317,9 @@ class Event:
         :return: the discretized value of resp_pkts
         :rtype: str
         """
-        return Event.disc_resp_pkts.discretize_attribute(self.__resp_pkts)
+        if self.__resp_pkts == '-':
+            self.__resp_pkts = 0
+        return Event.disc_resp_pkts.discretize_attribute(float(self.__resp_pkts)) if Event.disc_resp_pkts is not None else 'n/a'
 
     def get_discretized_resp_ip_bytes(self) -> str:
         """Returns the discretized value of this objects resp_ip_bytes
@@ -313,6 +327,8 @@ class Event:
         :return: the discretized value of resp_ip_bytes
         :rtype: str
         """
-        return Event.disc_resp_ip_bytes.discretize_attribute(self.__resp_ip_bytes)
+        if self.__resp_ip_bytes == '-':
+            self.__resp_ip_bytes = 0
+        return Event.disc_resp_ip_bytes.discretize_attribute(float(self.__resp_ip_bytes)) if Event.disc_resp_ip_bytes is not None else 'n/a'
 
     

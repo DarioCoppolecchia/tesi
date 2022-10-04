@@ -84,7 +84,7 @@ class TracesController:
 
     def get_n_traces_and_event(self, max_n_trace: int=10, randomize: bool=False) -> list:
         from random import sample
-        return sample(self.__network_traffic, 10) if randomize else self.__network_traffic
+        return sample(self.__network_traffic, max_n_trace) if randomize else self.__network_traffic
 
     def normalize_lines(self):
         """
