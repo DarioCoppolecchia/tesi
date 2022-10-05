@@ -1,3 +1,3 @@
 from .Discretizer import Discretizer
-from .Equal_Height_Discretizer import Equal_Height_Discretizer
+from .Equal_Frequency_Discretizer import Equal_Frequency_Discretizer
 from .Equal_Width_Discretizer import Equal_Width_Discretizer

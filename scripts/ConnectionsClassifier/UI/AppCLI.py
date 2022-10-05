@@ -1,7 +1,8 @@
-from ConnectionsModule.TracesController import TracesController
-from ConnectionsModule.Event import Event
 import os
-from ConnectionsModule.CONN_STATE import CONN_STATE
+from ConnectionsModule.TracesController     import TracesController
+from ConnectionsModule.Event                import Event
+from ConnectionsModule.CONN_STATE           import CONN_STATE
+from DiscretizerModule.DISCRETIZATION_TYPE  import DISCRETIZATION_TYPE
 
 class MainApplicationCLI:
     """
@@ -48,7 +49,7 @@ class MainApplicationCLI:
         """
         main loop of the application containig the UI elements that control the TracesController
         for every iteration this allows the user to do one of the following operations:
-            #. Normalize lines and convert them to a Traces list
+            #. Read network data and convert them to a Traces list
             #. print traces list to a json file
             #. apply equal width discretization and print some trace
             #. apply equal height discretization and print some trace
@@ -58,7 +59,7 @@ class MainApplicationCLI:
         """
         while True:
             op = input("""\ntype the number for the various options:
-    1) Normalize lines and convert them to a Traces list
+    1) Read network data and convert them to a Traces list
     2) print traces list to a json file
     3) apply equal width discretization and print some trace
     4) apply equal height discretization and print some trace
@@ -67,13 +68,9 @@ class MainApplicationCLI:
     0) exit program\n> """)
             self.__cls()
             if op == "1":
-                self.traces_controller.normalize_lines()
+                self.traces_controller.read_and_convert_lines()
             elif op == "2":
-                self.traces_controller.print_Trace_list_to_json_file()
-            elif op == "3":
-                self.__handle_attribute_discretization('equal_width')
-            elif op == "4":
-                self.__handle_attribute_discretization('equal_height')
+                self.traces_controller.print_Trace_list_to_xes_file()
             elif op == "5":
                 self.__print_n_traces_and_events()
             elif op == "6":
@@ -212,7 +209,7 @@ with label: {trace.get_label()}
     the orginator sent {event.get_discretized_resp_pkts()} ({event.get_discretized_resp_ip_bytes()} bytes in the packet header)
 ''')
                 
-    def __handle_attribute_discretization(self, discretization: str='equal_width') -> None:
+    def __handle_attribute_discretization(self, discretization: DISCRETIZATION_TYPE=DISCRETIZATION_TYPE.EQUAL_FREQUENCY) -> None:
         """applies discretization algorithm based on the parameter's value
 
         :param discretization: discretization algorithm to use, defaults to 'equal_width'
@@ -220,9 +217,9 @@ with label: {trace.get_label()}
         :raises ValueError: if the discretization algorithm isn't equal_width or equal_height, a ValueError will be thrown
         """        
         attr_bins_dict = self.__input_attributes_and_n_bins_per_attribute()
-        if discretization == 'equal_width':
+        if discretization == DISCRETIZATION_TYPE.EQUAL_WIDTH:
             self.traces_controller.discretize_attributes_equal_width(attr_bins_dict)
-        elif discretization == 'equal_height':
+        elif discretization == DISCRETIZATION_TYPE.EQUAL_FREQUENCY:
             self.traces_controller.discretize_attributes_equal_height(attr_bins_dict)
         else:
             raise ValueError('invalid specified discretization method')
