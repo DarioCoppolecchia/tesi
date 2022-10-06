@@ -25,7 +25,7 @@ class Equal_Frequency_Discretizer(Discretizer):
         """
         from math import inf
         values.sort()
-        step = int(len(values) / self.n_bins)
-        self.discretized_bins = [-inf] + [values[step * i] for i in range(1, self.n_bins)] + [inf]
+        step = int(len(values) / self._n_bins)
+        self.discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
 
         

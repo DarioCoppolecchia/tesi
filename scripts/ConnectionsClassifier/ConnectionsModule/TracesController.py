@@ -2,6 +2,7 @@ from .Trace import Trace
 from .Event import Event
 from DiscretizerModule.Equal_Frequency_Discretizer import Equal_Frequency_Discretizer
 from DiscretizerModule.Equal_Width_Discretizer import Equal_Width_Discretizer
+from DiscretizerModule.DISCRETIZATION_TYPE import DISCRETIZATION_TYPE
 
 class TracesController:
     """
@@ -290,8 +291,8 @@ class TracesController:
         return attributes_value_dict
 
 
-    def discretize_attributes_equal_width(self, n_bins_dict: dict) -> None:
-        """Discretizes all the attribute with equal width discretization
+    def discretize_attributes(self, disc_type: DISCRETIZATION_TYPE, n_bins_dict: dict) -> None:
+        """Discretizes all the attribute with equal width of frequency discretization depending of the type given in disc_type
 
         Possible values of the attributes_to_discretize:
             #. orig_bytes
@@ -303,65 +304,51 @@ class TracesController:
             #. resp_pkts
             #. resp_ip_bytes
 
+        :param disc_type: the type of discretization to instantiate
+        :type disc_type: DISCRETIZATION_TYPE
         :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
         :type n_bins_dict: dict
-        """        
+        :raises ValueError: raised if the disc_type is not either EQUAL_WIDTH or EQUAL_FREQUENCY
+        """
         attributes_to_discretize = list(n_bins_dict.keys())
         
-        if 'orig_bytes' in attributes_to_discretize:
-            Event.disc_orig_bytes = Equal_Width_Discretizer(n_bins_dict['orig_bytes'])
-        if 'resp_bytes' in attributes_to_discretize:
-            Event.disc_resp_bytes = Equal_Width_Discretizer(n_bins_dict['resp_bytes'])
-        if 'missed_bytes' in attributes_to_discretize:
-            Event.disc_missed_bytes = Equal_Width_Discretizer(n_bins_dict['missed_bytes'])
-        if 'orig_pkts' in attributes_to_discretize:
-            Event.disc_orig_pkts = Equal_Width_Discretizer(n_bins_dict['orig_pkts'])
-        if 'duration' in attributes_to_discretize:
-            Event.disc_duration = Equal_Width_Discretizer(n_bins_dict['duration'])
-        if 'orig_ip_bytes' in attributes_to_discretize:
-            Event.disc_orig_ip_bytes = Equal_Width_Discretizer(n_bins_dict['orig_ip_bytes'])
-        if 'resp_pkts' in attributes_to_discretize:
-            Event.disc_resp_pkts = Equal_Width_Discretizer(n_bins_dict['resp_pkts'])
-        if 'resp_ip_bytes' in attributes_to_discretize: 
-            Event.disc_resp_ip_bytes = Equal_Width_Discretizer(n_bins_dict['resp_ip_bytes'])
+        if disc_type == DISCRETIZATION_TYPE.EQUAL_WIDTH:
+            if 'orig_bytes' in attributes_to_discretize:
+                Event.disc_orig_bytes = Equal_Width_Discretizer(n_bins_dict['orig_bytes'])
+            if 'resp_bytes' in attributes_to_discretize:
+                Event.disc_resp_bytes = Equal_Width_Discretizer(n_bins_dict['resp_bytes'])
+            if 'missed_bytes' in attributes_to_discretize:
+                Event.disc_missed_bytes = Equal_Width_Discretizer(n_bins_dict['missed_bytes'])
+            if 'orig_pkts' in attributes_to_discretize:
+                Event.disc_orig_pkts = Equal_Width_Discretizer(n_bins_dict['orig_pkts'])
+            if 'duration' in attributes_to_discretize:
+                Event.disc_duration = Equal_Width_Discretizer(n_bins_dict['duration'])
+            if 'orig_ip_bytes' in attributes_to_discretize:
+                Event.disc_orig_ip_bytes = Equal_Width_Discretizer(n_bins_dict['orig_ip_bytes'])
+            if 'resp_pkts' in attributes_to_discretize:
+                Event.disc_resp_pkts = Equal_Width_Discretizer(n_bins_dict['resp_pkts'])
+            if 'resp_ip_bytes' in attributes_to_discretize: 
+                Event.disc_resp_ip_bytes = Equal_Width_Discretizer(n_bins_dict['resp_ip_bytes'])
+        elif disc_type == DISCRETIZATION_TYPE.EQUAL_FREQUENCY:
+            if 'orig_bytes' in attributes_to_discretize:
+                Event.disc_orig_bytes = Equal_Frequency_Discretizer(n_bins_dict['orig_bytes'])
+            if 'resp_bytes' in attributes_to_discretize:
+                Event.disc_resp_bytes = Equal_Frequency_Discretizer(n_bins_dict['resp_bytes'])
+            if 'missed_bytes' in attributes_to_discretize:
+                Event.disc_missed_bytes = Equal_Frequency_Discretizer(n_bins_dict['missed_bytes'])
+            if 'orig_pkts' in attributes_to_discretize:
+                Event.disc_orig_pkts = Equal_Frequency_Discretizer(n_bins_dict['orig_pkts'])
+            if 'duration' in attributes_to_discretize:
+                Event.disc_duration = Equal_Frequency_Discretizer(n_bins_dict['duration'])
+            if 'orig_ip_bytes' in attributes_to_discretize:
+                Event.disc_orig_ip_bytes = Equal_Frequency_Discretizer(n_bins_dict['orig_ip_bytes'])
+            if 'resp_pkts' in attributes_to_discretize:
+                Event.disc_resp_pkts = Equal_Frequency_Discretizer(n_bins_dict['resp_pkts'])
+            if 'resp_ip_bytes' in attributes_to_discretize: 
+                Event.disc_resp_ip_bytes = Equal_Frequency_Discretizer(n_bins_dict['resp_ip_bytes'])
+        else:
+            raise ValueError('the type of discretization is not valid')
         
-        self.__apply_discretization(attributes_to_discretize)
-
-    def discretize_attributes_equal_height(self, n_bins_dict: dict) -> None:
-        """Discretizes all the attribute with equal height discretization
-
-        Possible values of the attributes_to_discretize:
-            #. orig_bytes
-            #. resp_bytes
-            #. missed_bytes
-            #. orig_pkts
-            #. duration
-            #. orig_ip_bytes
-            #. resp_pkts
-            #. resp_ip_bytes
-
-        :param n_bins_dict: dictionary where the key is the attribute to witch apply discretization and the value is the number of bins for that attribute
-        :type n_bins_dict: dict
-        """
-        attributes_to_discretize = set(n_bins_dict.keys())
-        
-        if 'orig_bytes' in attributes_to_discretize:
-            Event.disc_orig_bytes = Equal_Height_Discretizer(n_bins_dict['orig_bytes'])
-        if 'resp_bytes' in attributes_to_discretize:
-            Event.disc_resp_bytes = Equal_Height_Discretizer(n_bins_dict['resp_bytes'])
-        if 'missed_bytes' in attributes_to_discretize:
-            Event.disc_missed_bytes = Equal_Height_Discretizer(n_bins_dict['missed_bytes'])
-        if 'orig_pkts' in attributes_to_discretize:
-            Event.disc_orig_pkts = Equal_Height_Discretizer(n_bins_dict['orig_pkts'])
-        if 'duration' in attributes_to_discretize:
-            Event.disc_duration = Equal_Height_Discretizer(n_bins_dict['duration'])
-        if 'orig_ip_bytes' in attributes_to_discretize:
-            Event.disc_orig_ip_bytes = Equal_Height_Discretizer(n_bins_dict['orig_ip_bytes'])
-        if 'resp_pkts' in attributes_to_discretize:
-            Event.disc_resp_pkts = Equal_Height_Discretizer(n_bins_dict['resp_pkts'])
-        if 'resp_ip_bytes' in attributes_to_discretize: 
-            Event.disc_resp_ip_bytes = Equal_Height_Discretizer(n_bins_dict['resp_ip_bytes'])
-
         self.__apply_discretization(attributes_to_discretize)
 
     def __apply_discretization(self, attributes_to_discretize: set):
