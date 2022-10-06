@@ -137,8 +137,6 @@ class TracesController:
 
         :param line: line of the event to be processed and added to a trace
         :type line: str
-        :return: list of strings that have been normalized
-        :rtype: list(Traces)
         """
         list_to_pack = line.split('\t')
 
