@@ -1,8 +1,8 @@
 from . import Discretizer
 
-class Equal_Height_Discretizer(Discretizer):
+class Equal_Frequency_Discretizer(Discretizer):
     """
-    Class that discretize with the Equal height algorithm a list of values and 
+    Class that discretize with the Equal Frequency algorithm a list of values and 
     returns the bin relative to a particulare value
     """    
 
@@ -18,7 +18,7 @@ class Equal_Height_Discretizer(Discretizer):
     def discretize(self, values: list) -> list:
         """Analizes the list of values in input to create the bins
 
-        :param values: list of values to discretize with equal height
+        :param values: list of values to discretize with equal Frequency
         :type values: list
         :return: the discretized list
         :rtype: list
@@ -26,6 +26,6 @@ class Equal_Height_Discretizer(Discretizer):
         from math import inf
         values.sort()
         step = int(len(values) / self.n_bins)
-        self.discretized_bins = [-inf] + [values[step * i] for i in range(self.n_bins)] + [inf]
+        self.discretized_bins = [-inf] + [values[step * i] for i in range(1, self.n_bins)] + [inf]
 
         

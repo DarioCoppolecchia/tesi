@@ -1,7 +1,6 @@
-import json
 from .Trace import Trace
 from .Event import Event
-from DiscretizerModule.Equal_Height_Discretizer import Equal_Height_Discretizer
+from DiscretizerModule.Equal_Frequency_Discretizer import Equal_Frequency_Discretizer
 from DiscretizerModule.Equal_Width_Discretizer import Equal_Width_Discretizer
 
 class TracesController:
@@ -12,8 +11,8 @@ class TracesController:
     :type path_of_file_input: str
     :param path_of_file_output: path of the file where the preprocessed lines are stored or will be stored
     :type path_of_file_output: str
-    :param path_of_file_json: path of the file where to write the json file
-    :type path_of_file_json: str
+    :param path_of_file_xes: path of the file where to write the xes file
+    :type path_of_file_xes: str
     :param lines_to_remove_ash: set of the # to remove from the file
     :type lines_to_remove_ash: set[str]
     :param strings_to_filter_event: set of string to be filtered out
@@ -25,8 +24,7 @@ class TracesController:
     """
     def __init__(self, 
         path_of_file_input: str='',
-        path_of_file_output: str='',
-        path_of_file_json: str='',
+        path_of_file_xes: str='',
         strings_to_filter_event: set=set()) -> None:
         """Constructor method
 
@@ -34,16 +32,15 @@ class TracesController:
         :type path_of_file_input: str, optional
         :param path_of_file_output: path of the file where to store the preprocessed lines, defaults to ''
         :type path_of_file_output: str, optional
-        :param path_of_file_json: path of the file where to dump the traces converted to json, defaults to ''
-        :type path_of_file_json: str, optional
+        :param path_of_file_xes: path of the file where to dump the traces converted to xes, defaults to ''
+        :type path_of_file_xes: str, optional
         :param lines_to_remove_ash: set of the strings that if match the start of a line in the input file, that substring will be removed (this doesn't delete it from the input file), defaults to set()
         :type lines_to_remove_ash: set, optional
         :param strings_to_filter_event: set of the substring to be removed from the lines read in the file (this doesn't delete it from the input file), defaults to set()
         :type strings_to_filter_event: set, optional
         """
         self.__path_of_file_input = path_of_file_input
-        self.__path_of_file_output = path_of_file_output
-        self.__path_of_file_json = path_of_file_json
+        self.__path_of_file_xes = path_of_file_xes
         self.__strings_to_filter_event = strings_to_filter_event
         self.__network_traffic = []
         self.__traces_pos_dict = {}
@@ -63,12 +60,10 @@ class TracesController:
         # checks if Files is in config.ini file
         if 'Files' in config:
             self.__path_of_file_input = config['Files']['path_of_file_input'] if 'path_of_file_input' in config['Files'] else ''
-            self.__path_of_file_output = config['Files']['path_of_file_output'] if 'path_of_file_output' in config['Files'] else ''
-            self.__path_of_file_json = config['Files']['path_of_file_json']  if 'path_of_file_json' in config['Files'] else ''
+            self.__path_of_file_xes = config['Files']['path_of_file_xes']  if 'path_of_file_xes' in config['Files'] else ''
         else:
             self.__path_of_file_input = self.__path_of_file_input if self.__path_of_file_input != '' else ''
-            self.__path_of_file_output = self.__path_of_file_output if self.__path_of_file_output != '' else ''
-            self.__path_of_file_json = self.__path_of_file_json if self.__path_of_file_json != '' else ''
+            self.__path_of_file_xes = self.__path_of_file_xes if self.__path_of_file_xes != '' else ''
 
         # checks if Filters is in config.ini file
         if 'Filters' in config:
@@ -100,9 +95,9 @@ class TracesController:
         from random import sample
         return sample(self.__network_traffic, max_n_trace) if randomize else self.__network_traffic[:10]
 
-    def normalize_lines(self):
+    def read_and_convert_lines(self):
         """
-        normalize lines from file and converting them to a list of trace (network_traffic field)
+        read lines from file and converting them to a list of trace (network_traffic field)
         """
         print('normalizing and converting lines...')
         # normalizing lines
@@ -174,12 +169,13 @@ class TracesController:
     
         id = Trace.generate_id_static(orig_ip, orig_port, resp_ip, resp_port, proto)
 
-        if id not in self.__traces_pos_dict:
+        try:
+            self.__network_traffic[self.__traces_pos_dict[id]].add_event(event)
+        except KeyError:
             self.__traces_pos_dict[id] = len(self.__network_traffic)
             self.__network_traffic.append(Trace(orig_ip, orig_port, resp_ip, resp_port, proto, ts, label))
             self.__network_traffic[-1].add_event(event)
-        else:
-            self.__network_traffic[self.__traces_pos_dict[id]].add_event(event)
+            
     
     
     '''
@@ -243,13 +239,12 @@ class TracesController:
         print('...label application completed')
     '''
         
-    def print_Trace_list_to_json_file(self) -> None:
-        """prints all the Traces list to a json file
+    def print_Trace_list_to_xes_file(self) -> None:
+        """prints all the Traces list to a xes file
         """
-        print('writing the list of Events to a json file...')
-        with open(self.__path_of_file_json, 'w') as f:
-            json.dump([trace.to_json_obj() for trace in self.__network_traffic], f, indent=4)
-            print('...writing completed')
+        # TODO
+        print('writing the list of Traces to a xes file...')
+        pass
 
     def __get_list_of_all_attributes(self, attributes_to_discretize: set) -> dict:
         """Creates a dictionary of list of the values of each attribute
