@@ -265,6 +265,7 @@ class TracesController:
         :return: dictionary of list of the attributes of all item
         :rtype: dict
         """
+        from itertools import chain
 
         attributes_value_dict = {}
         for attribute in attributes_to_discretize:
@@ -272,21 +273,21 @@ class TracesController:
 
         # getting all value for each key of the dict
         if 'orig_bytes' in attributes_value_dict:
-            attributes_value_dict['orig_bytes'] = [trace.get_list_of_orig_bytes() for trace in self.__network_traffic]
+            attributes_value_dict['orig_bytes'] = list(chain.from_iterable([trace.get_list_of_orig_bytes() for trace in self.__network_traffic]))
         if 'resp_bytes' in attributes_value_dict:
-            attributes_value_dict['resp_bytes'] = [trace.get_list_of_resp_bytes() for trace in self.__network_traffic]
+            attributes_value_dict['resp_bytes'] = list(chain.from_iterable([trace.get_list_of_resp_bytes() for trace in self.__network_traffic]))
         if 'missed_bytes' in attributes_value_dict:
-            attributes_value_dict['missed_bytes'] = [trace.get_list_of_missed_bytes() for trace in self.__network_traffic]
+            attributes_value_dict['missed_bytes'] = list(chain.from_iterable([trace.get_list_of_missed_bytes() for trace in self.__network_traffic]))
         if 'orig_pkts' in attributes_value_dict:
-            attributes_value_dict['orig_pkts'] = [trace.get_list_of_orig_pkts() for trace in self.__network_traffic]
+            attributes_value_dict['orig_pkts'] = list(chain.from_iterable([trace.get_list_of_orig_pkts() for trace in self.__network_traffic]))
         if 'duration' in attributes_value_dict:
-            attributes_value_dict['duration'] = [trace.get_list_of_duration() for trace in self.__network_traffic]
+            attributes_value_dict['duration'] = list(chain.from_iterable([trace.get_list_of_duration() for trace in self.__network_traffic]))
         if 'orig_ip_bytes' in attributes_value_dict:
-            attributes_value_dict['orig_ip_bytes'] = [trace.get_list_of_orig_ip_bytes() for trace in self.__network_traffic]
+            attributes_value_dict['orig_ip_bytes'] = list(chain.from_iterable([trace.get_list_of_orig_ip_bytes() for trace in self.__network_traffic]))
         if 'resp_pkts' in attributes_value_dict:
-            attributes_value_dict['resp_pkts'] = [trace.get_list_of_resp_pkts() for trace in self.__network_traffic]
+            attributes_value_dict['resp_pkts'] = list(chain.from_iterable([trace.get_list_of_resp_pkts() for trace in self.__network_traffic]))
         if 'resp_ip_bytes' in attributes_value_dict:
-            attributes_value_dict['resp_ip_bytes'] = [trace.get_list_of_resp_ip_bytes() for trace in self.__network_traffic]
+            attributes_value_dict['resp_ip_bytes'] = list(chain.from_iterable([trace.get_list_of_resp_ip_bytes() for trace in self.__network_traffic]))
 
         return attributes_value_dict
 

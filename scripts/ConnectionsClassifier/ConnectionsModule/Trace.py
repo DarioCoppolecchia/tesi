@@ -212,7 +212,7 @@ with label: {self.__label}
         :return: the list of all the value of ts
         :rtype: list[str]
         """
-        return [event.get_ts() for event in self.__events]
+        return [float(event.get_ts()) if event.get_ts() != '-' else 0 for event in self.__events]
 
     def get_list_of_service(self) -> list:
         """Getter of the service of the events in this trace
@@ -220,7 +220,7 @@ with label: {self.__label}
         :return: the list of all the value of service
         :rtype: list[str]
         """
-        return [event.get_service() for event in self.__events]
+        return [float(event.get_service()) if event.get_service() != '-' else 0 for event in self.__events]
 
     def get_list_of_duration(self) -> list:
         """Getter of the duration of the events in this trace
@@ -228,7 +228,7 @@ with label: {self.__label}
         :return: the list of all the value of duration
         :rtype: list[float]
         """
-        return [event.get_duration() for event in self.__events]
+        return [float(event.get_duration()) if event.get_duration() != '-' else 0 for event in self.__events]
 
     def get_list_of_orig_bytes(self) -> list:
         """Getter of the orig_bytes of the events in this trace
@@ -236,7 +236,7 @@ with label: {self.__label}
         :return: the list of all the value of orig_bytes
         :rtype: list[float]
         """
-        return [event.get_orig_bytes() for event in self.__events]
+        return [float(event.get_orig_bytes()) if event.get_orig_bytes() != '-' else 0 for event in self.__events]
 
     def get_list_of_resp_bytes(self) -> list:
         """Getter of the resp_bytes of the events in this trace
@@ -244,7 +244,7 @@ with label: {self.__label}
         :return: the list of all the value of resp_bytes
         :rtype: list[float]
         """
-        return [event.get_resp_bytes() for event in self.__events]
+        return [float(event.get_resp_bytes()) if event.get_resp_bytes() != '-' else 0 for event in self.__events]
 
     def get_list_of_conn_state(self) -> list:
         """Getter of the conn_state of the events in this trace
@@ -252,7 +252,7 @@ with label: {self.__label}
         :return: the list of all the value of conn_state
         :rtype: list[CONN_STATE]
         """
-        return [event.get_conn_state() for event in self.__events]
+        return [float(event.get_conn_state()) if event.get_conn_state() != '-' else 0 for event in self.__events]
 
     def get_list_of_missed_bytes(self) -> list:
         """Getter of the missed_bytes of the events in this trace
@@ -260,7 +260,7 @@ with label: {self.__label}
         :return: the list of all the value of missed_bytes
         :rtype: list[float]
         """
-        return [event.get_missed_bytes() for event in self.__events]
+        return [float(event.get_missed_bytes()) if event.get_missed_bytes() != '-' else 0 for event in self.__events]
 
     def get_list_of_history(self) -> list:
         """Getter of the history of the events in this trace
@@ -268,7 +268,7 @@ with label: {self.__label}
         :return: the list of all the value of history
         :rtype: list[EventHistory]
         """
-        return [event.get_history() for event in self.__events]
+        return [float(event.get_history()) if event.get_history() != '-' else 0 for event in self.__events]
 
     def get_list_of_orig_pkts(self) -> list:
         """Getter of the orig_pkts of the events in this trace
@@ -276,7 +276,7 @@ with label: {self.__label}
         :return: the list of all the value of orig_pkts
         :rtype: list[float]
         """
-        return [event.get_orig_pkts() for event in self.__events]
+        return [float(event.get_orig_pkts()) if event.get_orig_pkts() != '-' else 0 for event in self.__events]
 
     def get_list_of_orig_ip_bytes(self) -> list:
         """Getter of the orig_ip_bytes of the events in this trace
@@ -284,7 +284,7 @@ with label: {self.__label}
         :return: the list of all the value of orig_ip_bytes
         :rtype: list[float]
         """
-        return [event.get_orig_ip_bytes() for event in self.__events]
+        return [float(event.get_orig_ip_bytes()) if event.get_orig_ip_bytes() != '-' else 0 for event in self.__events]
 
     def get_list_of_resp_pkts(self) -> list:
         """Getter of the resp_pkts of the events in this trace
@@ -292,7 +292,7 @@ with label: {self.__label}
         :return: the list of all the value of resp_pkts
         :rtype: list[float]
         """
-        return [event.get_resp_pkts() for event in self.__events]
+        return [float(event.get_resp_pkts()) if event.get_resp_pkts() != '-' else 0 for event in self.__events]
 
     def get_list_of_resp_ip_bytes(self) -> list:
         """Getter of the resp_ip_bytes of the events in this trace
@@ -300,7 +300,7 @@ with label: {self.__label}
         :return: the list of all the value of resp_ip_bytes
         :rtype: list[float]
         """
-        return [event.get_resp_ip_bytes() for event in self.__events]
+        return [float(event.get_resp_ip_bytes()) if event.get_resp_ip_bytes() != '-' else 0 for event in self.__events]
 
     def get_list_of_discretized_duration(self) -> list:
         """Getter of the discretized duration in this trace
