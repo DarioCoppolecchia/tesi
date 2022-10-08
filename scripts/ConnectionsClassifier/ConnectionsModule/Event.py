@@ -261,6 +261,138 @@ class Event:
         """
         return self.__resp_ip_bytes
 
+    ###### EVENT HISTORY ######
+
+    def get_orig_syn(self) -> str:
+        """Returns the value of this history objects orig_syn
+
+        :return: the value of orig_syn
+        :rtype: str
+        """
+        return self.__history.get_orig_syn()
+
+    def get_orig_fin(self) -> str:
+        """Returns the value of this history objects orig_fin
+
+        :return: the value of orig_fin
+        :rtype: str
+        """
+        return self.__history.get_orig_fin()
+
+    def get_orig_syn_ack(self) -> str:
+        """Returns the value of this objects history orig_syn_ack
+
+        :return: the value of orig_syn_ack
+        :rtype: str
+        """
+        return self.__history.get_orig_syn_ack()
+
+    def get_orig_rst(self) -> str:
+        """Returns the value of this history objects orig_rst
+
+        :return: the value of orig_rst
+        :rtype: str
+        """
+        return self.__history.get_orig_rst()
+
+    def get_resp_syn(self) -> str:
+        """Returns the value of this history objects resp_syn
+
+        :return: the value of resp_syn
+        :rtype: str
+        """
+        return self.__history.get_resp_syn()
+
+    def get_resp_fin(self) -> str:
+        """Returns the value of this history objects resp_fin
+
+        :return: the value of resp_fin
+        :rtype: str
+        """
+        return self.__history.get_resp_fin()
+
+    def get_resp_syn_ack(self) -> str:
+        """Returns the value of this objects history resp_syn_ack
+
+        :return: the value of resp_syn_ack
+        :rtype: str
+        """
+        return self.__history.get_resp_syn_ack()
+
+    def get_resp_rst(self) -> str:
+        """Returns the value of this history objects resp_rst
+
+        :return: the value of resp_rst
+        :rtype: str
+        """
+        return self.__history.get_resp_rst()
+
+    def get_orig_bad_checksum(self) -> str:
+        """Returns the value of this objects history orig_bad_checksum
+
+        :return: the value of orig_bad_checksum
+        :rtype: str
+        """
+        return self.__history.get_orig_bad_checksum()
+
+    def get_orig_content_gap(self) -> str:
+        """Returns the value of this objects history orig_content_gap
+
+        :return: the value of orig_content_gap
+        :rtype: str
+        """
+        return self.__history.get_orig_content_gap()
+
+    def get_orig_retransmitted_payload(self) -> str:
+        """Returns the value of this objects history orig_retransmitted_payload
+
+        :return: the value of orig_retransmitted_payload
+        :rtype: str
+        """
+        return self.__history.get_orig_retransmitted_payload()
+
+    def get_orig_zero_window(self) -> str:
+        """Returns the value of this objects history orig_zero_window
+
+        :return: the value of orig_zero_window
+        :rtype: str
+        """
+        return self.__history.get_orig_zero_window()
+
+    def get_resp_bad_checksum(self) -> str:
+        """Returns the value of this objects history resp_bad_checksum
+
+        :return: the value of resp_bad_checksum
+        :rtype: str
+        """
+        return self.__history.get_resp_bad_checksum()
+
+    def get_resp_content_gap(self) -> str:
+        """Returns the value of this objects history resp_content_gap
+
+        :return: the value of resp_content_gap
+        :rtype: str
+        """
+        return self.__history.get_resp_content_gap()
+
+    def get_resp_retransmitted_payload(self) -> str:
+        """Returns the value of this objects history resp_retransmitted_payload
+
+        :return: the value of resp_retransmitted_payload
+        :rtype: str
+        """
+        return self.__history.get_resp_retransmitted_payload()
+
+    def get_resp_zero_window(self) -> str:
+        """Returns the value of this objects history resp_zero_window
+
+        :return: the value of resp_zero_window
+        :rtype: str
+        """
+        return self.__history.get_resp_zero_window()
+
+    ###### DISCRETIZED EVENT ######
+
     def get_discretized_duration(self) -> str:
         """Returns the discretized value of this objects duration
 
@@ -341,4 +473,133 @@ class Event:
             self.__resp_ip_bytes = 0
         return Event.disc_resp_ip_bytes.discretize_attribute(float(self.__resp_ip_bytes)) if Event.disc_resp_ip_bytes is not None else 'n/a'
 
+    ###### DISCRETIZED HISTORY ######
+
+    def get_discretized_orig_syn(self) -> str:
+        """Returns the discretized value of this objects __history orig_syn
+
+        :return: the discretized value of orig_syn
+        :rtype: str
+        """
+        return EventHistory.disc_orig_syn.discretize_attribute(self.__orig_syn)
+    
+    def get_discretized_orig_fin(self) -> str:
+        """Returns the discretized value of this objects __history orig_fin
+
+        :return: the discretized value of orig_fin
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_fin()
+    
+    def get_discretized_orig_syn_ack(self) -> str:
+        """Returns the discretized value of this objects __history orig_syn_ack
+
+        :return: the discretized value of orig_syn_ack
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_syn_ack()
+    
+    def get_discretized_orig_rst(self) -> str:
+        """Returns the discretized value of this objects __history orig_rst
+
+        :return: the discretized value of orig_rst
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_rst()
+    
+    def get_discretized_resp_syn(self) -> str:
+        """Returns the discretized value of this objects __history resp_syn
+
+        :return: the discretized value of resp_syn
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_syn()
+    
+    def get_discretized_resp_fin(self) -> str:
+        """Returns the discretized value of this objects __history resp_fin
+
+        :return: the discretized value of resp_fin
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_fin()
+    
+    def get_discretized_resp_syn_ack(self) -> str:
+        """Returns the discretized value of this objects __history resp_syn_ack
+
+        :return: the discretized value of resp_syn_ack
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_syn_ack()
+    
+    def get_discretized_resp_rst(self) -> str:
+        """Returns the discretized value of this objects __history resp_rst
+
+        :return: the discretized value of resp_rst
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_rst()
+    
+    def get_discretized_orig_bad_checksum(self) -> str:
+        """Returns the discretized value of this objects __history orig_bad_checksum
+
+        :return: the discretized value of orig_bad_checksum
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_bad_checksum()
+    
+    def get_discretized_orig_content_gap(self) -> str:
+        """Returns the discretized value of this objects __history orig_content_gap
+
+        :return: the discretized value of orig_content_gap
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_content_gap()
+    
+    def get_discretized_orig_retransmitted_payload(self) -> str:
+        """Returns the discretized value of this objects __history orig_retransmitted_payload
+
+        :return: the discretized value of orig_retransmitted_payload
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_retransmitted_payload()
+    
+    def get_discretized_orig_zero_window(self) -> str:
+        """Returns the discretized value of this objects __history orig_zero_window
+
+        :return: the discretized value of orig_zero_window
+        :rtype: str
+        """
+        return self.__history.get_discretized_orig_zero_window()
+    
+    def get_discretized_resp_bad_checksum(self) -> str:
+        """Returns the discretized value of this objects __history resp_bad_checksum
+
+        :return: the discretized value of resp_bad_checksum
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_bad_checksum()
+    
+    def get_discretized_resp_content_gap(self) -> str:
+        """Returns the discretized value of this objects __history resp_content_gap
+
+        :return: the discretized value of resp_content_gap
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_content_gap()
+    
+    def get_discretized_resp_retransmitted_payload(self) -> str:
+        """Returns the discretized value of this objects __history resp_retransmitted_payload
+
+        :return: the discretized value of resp_retransmitted_payload
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_retransmitted_payload()
+    
+    def get_discretized_resp_zero_window(self) -> str:
+        """Returns the discretized value of this objects __history resp_zero_window
+
+        :return: the discretized value of resp_zero_window
+        :rtype: str
+        """
+        return self.__history.get_discretized_resp_zero_window()
     

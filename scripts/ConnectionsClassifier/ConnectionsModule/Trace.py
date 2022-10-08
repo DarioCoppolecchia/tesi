@@ -365,5 +365,264 @@ with label: {self.__label}
         :rtype: list
         """
         return [event.get_discretized_resp_ip_bytes() for event in self.__events]
-    
+
+    ###### HISTORY ######
+
+    def get_list_of_orig_syn(self) -> list:
+        """Getter of get_orig_syn in this trace
+
+        :return: the list of all the values of get_orig_syn
+        :rtype: list
+        """
+        return [event.get_orig_syn() for event in self.__events]
+
+    def get_list_of_orig_fin(self) -> list:
+        """Getter of get_orig_fin in this trace
+
+        :return: the list of all the values of orig_fin
+        :rtype: list
+        """
+        return [event.get_orig_fin() for event in self.__events]
+
+    def get_list_of_orig_syn_ack(self) -> list:
+        """Getter of get_orig_syn_ack in this trace
+
+        :return: the list of all the values of orig_syn_ack
+        :rtype: list
+        """
+        return [event.get_orig_syn_ack() for event in self.__events]
+
+    def get_list_of_orig_rst(self) -> list:
+        """Getter of get_orig_rst in this trace
+
+        :return: the list of all the values of orig_rst
+        :rtype: list
+        """
+        return [event.get_orig_rst() for event in self.__events]
+
+    def get_list_of_resp_syn(self) -> list:
+        """Getter of get_resp_syn in this trace
+
+        :return: the list of all the values of resp_syn
+        :rtype: list
+        """
+        return [event.get_resp_syn() for event in self.__events]
+
+    def get_list_of_resp_fin(self) -> list:
+        """Getter of get_resp_fin in this trace
+
+        :return: the list of all the values of resp_fin
+        :rtype: list
+        """
+        return [event.get_resp_fin() for event in self.__events]
+
+    def get_list_of_resp_syn_ack(self) -> list:
+        """Getter of get_resp_syn_ack in this trace
+
+        :return: the list of all the values of resp_syn_ack
+        :rtype: list
+        """
+        return [event.get_resp_syn_ack() for event in self.__events]
+
+    def get_list_of_resp_rst(self) -> list:
+        """Getter of get_resp_rst in this trace
+
+        :return: the list of all the values of resp_rst
+        :rtype: list
+        """
+        return [event.get_resp_rst() for event in self.__events]
+
+    def get_list_of_orig_bad_checksum(self) -> list:
+        """Getter of get_orig_bad_checksum in this trace
+
+        :return: the list of all the values of orig_bad_checksum
+        :rtype: list
+        """
+        return [event.get_orig_bad_checksum() for event in self.__events]
+
+    def get_list_of_orig_content_gap(self) -> list:
+        """Getter of get_orig_content_gap in this trace
+
+        :return: the list of all the values of orig_content_gap
+        :rtype: list
+        """
+        return [event.get_orig_content_gap() for event in self.__events]
+
+    def get_list_of_orig_retransmitted_payload(self) -> list:
+        """Getter of get_orig_retransmitted_payload in this trace
+
+        :return: the list of all the values of orig_retransmitted_payload
+        :rtype: list
+        """
+        return [event.get_orig_retransmitted_payload() for event in self.__events]
+
+    def get_list_of_orig_zero_window(self) -> list:
+        """Getter of get_orig_zero_window in this trace
+
+        :return: the list of all the values of orig_zero_window
+        :rtype: list
+        """
+        return [event.get_orig_zero_window() for event in self.__events]
+
+    def get_list_of_resp_bad_checksum(self) -> list:
+        """Getter of get_resp_bad_checksum in this trace
+
+        :return: the list of all the values of resp_bad_checksum
+        :rtype: list
+        """
+        return [event.get_resp_bad_checksum() for event in self.__events]
+
+    def get_list_of_resp_content_gap(self) -> list:
+        """Getter of get_resp_content_gap in this trace
+
+        :return: the list of all the values of resp_content_gap
+        :rtype: list
+        """
+        return [event.get_resp_content_gap() for event in self.__events]
+
+    def get_list_of_resp_retransmitted_payload(self) -> list:
+        """Getter of get_resp_retransmitted_payload in this trace
+
+        :return: the list of all the values of resp_retransmitted_payload
+        :rtype: list
+        """
+        return [event.get_resp_retransmitted_payload() for event in self.__events]
+
+    def get_list_of_resp_zero_window(self) -> list:
+        """Getter of get_resp_zero_window in this trace
+
+        :return: the list of all the values of resp_zero_window
+        :rtype: list
+        """
+        return [event.get_resp_zero_window() for event in self.__events]
+
+    ###### HISTORY DISCRETIZED ######
+
+    def get_list_of_discretized_orig_syn(self) -> list:
+        """Getter of the discretized get_orig_syn in this trace
+
+        :return: the list of all the discretized values of disc_orig_syn
+        :rtype: list
+        """
+        return [event.get_disc_orig_syn() for event in self.__events]
+
+    def get_list_of_discretized_orig_fin(self) -> list:
+        """Getter of the discretized get_orig_fin in this trace
+
+        :return: the list of all the discretized values of disc_orig_fin
+        :rtype: list
+        """
+        return [event.get_disc_orig_fin() for event in self.__events]
+
+    def get_list_of_discretized_orig_syn_ack(self) -> list:
+        """Getter of the discretized get_orig_syn_ack in this trace
+
+        :return: the list of all the discretized values of disc_orig_syn_ack
+        :rtype: list
+        """
+        return [event.get_disc_orig_syn_ack() for event in self.__events]
+
+    def get_list_of_discretized_orig_rst(self) -> list:
+        """Getter of the discretized get_orig_rst in this trace
+
+        :return: the list of all the discretized values of disc_orig_rst
+        :rtype: list
+        """
+        return [event.get_disc_orig_rst() for event in self.__events]
+
+    def get_list_of_discretized_resp_syn(self) -> list:
+        """Getter of the discretized get_resp_syn in this trace
+
+        :return: the list of all the discretized values of disc_resp_syn
+        :rtype: list
+        """
+        return [event.get_disc_resp_syn() for event in self.__events]
+
+    def get_list_of_discretized_resp_fin(self) -> list:
+        """Getter of the discretized get_resp_fin in this trace
+
+        :return: the list of all the discretized values of disc_resp_fin
+        :rtype: list
+        """
+        return [event.get_disc_resp_fin() for event in self.__events]
+
+    def get_list_of_discretized_resp_syn_ack(self) -> list:
+        """Getter of the discretized get_resp_syn_ack in this trace
+
+        :return: the list of all the discretized values of disc_resp_syn_ack
+        :rtype: list
+        """
+        return [event.get_disc_resp_syn_ack() for event in self.__events]
+
+    def get_list_of_discretized_resp_rst(self) -> list:
+        """Getter of the discretized get_resp_rst in this trace
+
+        :return: the list of all the discretized values of disc_resp_rst
+        :rtype: list
+        """
+        return [event.get_disc_resp_rst() for event in self.__events]
+
+    def get_list_of_discretized_orig_bad_checksum(self) -> list:
+        """Getter of the discretized get_orig_bad_checksum in this trace
+
+        :return: the list of all the discretized values of disc_orig_bad_checksum
+        :rtype: list
+        """
+        return [event.get_disc_orig_bad_checksum() for event in self.__events]
+
+    def get_list_of_discretized_orig_content_gap(self) -> list:
+        """Getter of the discretized get_orig_content_gap in this trace
+
+        :return: the list of all the discretized values of disc_orig_content_gap
+        :rtype: list
+        """
+        return [event.get_disc_orig_content_gap() for event in self.__events]
+
+    def get_list_of_discretized_orig_retransmitted_payload(self) -> list:
+        """Getter of the discretized get_orig_retransmitted_payload in this trace
+
+        :return: the list of all the discretized values of disc_orig_retransmitted_payload
+        :rtype: list
+        """
+        return [event.get_disc_orig_retransmitted_payload() for event in self.__events]
+
+    def get_list_of_discretized_orig_zero_window(self) -> list:
+        """Getter of the discretized get_orig_zero_window in this trace
+
+        :return: the list of all the discretized values of disc_orig_zero_window
+        :rtype: list
+        """
+        return [event.get_disc_orig_zero_window() for event in self.__events]
+
+    def get_list_of_discretized_resp_bad_checksum(self) -> list:
+        """Getter of the discretized get_resp_bad_checksum in this trace
+
+        :return: the list of all the discretized values of disc_resp_bad_checksum
+        :rtype: list
+        """
+        return [event.get_disc_resp_bad_checksum() for event in self.__events]
+
+    def get_list_of_discretized_resp_content_gap(self) -> list:
+        """Getter of the discretized get_resp_content_gap in this trace
+
+        :return: the list of all the discretized values of disc_resp_content_gap
+        :rtype: list
+        """
+        return [event.get_disc_resp_content_gap() for event in self.__events]
+
+    def get_list_of_discretized_resp_retransmitted_payload(self) -> list:
+        """Getter of the discretized get_resp_retransmitted_payload in this trace
+
+        :return: the list of all the discretized values of disc_resp_retransmitted_payload
+        :rtype: list
+        """
+        return [event.get_disc_resp_retransmitted_payload() for event in self.__events]
+
+    def get_list_of_discretized_resp_zero_window(self) -> list:
+        """Getter of the discretized get_resp_zero_window in this trace
+
+        :return: the list of all the discretized values of disc_resp_zero_window
+        :rtype: list
+        """
+        return [event.get_disc_resp_zero_window() for event in self.__events]
     
