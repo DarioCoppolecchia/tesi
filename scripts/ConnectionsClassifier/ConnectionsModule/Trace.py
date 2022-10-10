@@ -1,5 +1,6 @@
 from .Event import Event
 from .PROTO import PROTO
+from .CONN_LABEL import CONN_LABEL
 
 class Trace:
     """
@@ -48,7 +49,7 @@ class Trace:
         self.__resp_port: int = int(resp_port)
         self.__proto: PROTO = PROTO.str_to_proto(proto)
         self.__ts_on_open: str = ts_on_open
-        self.__label: str = label
+        self.__label: str = CONN_LABEL.str_to_conn_label(label)
         self.__events: list = []
 
     def __repr__(self) -> str:
@@ -60,9 +61,9 @@ class Trace:
         from datetime import datetime
         return f'''
 traces of connection {self.__orig_ip}:{self.__orig_port} {self.__resp_ip}:{self.__resp_port}
-with protocol: {self.__proto}
+with protocol: {PROTO.proto_to_str(self.__proto)}
 first packet sent in: {datetime.fromtimestamp(float(self.__ts_on_open))}
-with label: {self.__label}
+with label: {CONN_LABEL.conn_label_to_str(self.__label)}
 ''' + '\n    '.join([str(e) for e in self.__events])
 
     def __str__(self) -> str:

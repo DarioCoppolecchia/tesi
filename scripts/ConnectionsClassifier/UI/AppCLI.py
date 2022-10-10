@@ -1,7 +1,9 @@
 import os
 from ConnectionsModule.TracesController     import TracesController
 from ConnectionsModule.Event                import Event
+from ConnectionsModule.CONN_LABEL           import CONN_LABEL
 from ConnectionsModule.CONN_STATE           import CONN_STATE
+from ConnectionsModule.PROTO                import PROTO
 from DiscretizerModule.DISCRETIZATION_TYPE  import DISCRETIZATION_TYPE
 from ConnectionsModule.EventHistory         import EventHistory
 
@@ -84,10 +86,10 @@ class MainApplicationCLI:
         """
         self.__cls()
         self.traces_controller.read_and_convert_lines()
-        #self.traces_controller.print_Trace_list_to_xes_file()
         self.__print_n_traces_and_events()
         self.__handle_attribute_discretization()
         self.__print_n_discretized_traces_and_events()
+        self.traces_controller.print_Trace_list_to_xes_file()
     
     def __print_n_traces_and_events(self) -> None:
         """prints n random or non random traces and all the events of those traces
@@ -153,9 +155,9 @@ class MainApplicationCLI:
         for trace in self.traces_controller.get_n_traces_and_event(randomize=True):
             print(f'''
 traces of connection {trace.get_orig_ip()}:{trace.get_orig_port()} {trace.get_resp_ip()}:{trace.get_resp_port()}
-with protocol: {trace.get_proto()}
+with protocol: {PROTO.proto_to_str(trace.get_proto())}
 first packet sent in: {datetime.fromtimestamp(float(trace.get_ts_on_open()))}
-with label: {trace.get_label()}
+with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
 ''')
             for event in trace.get_events():
                 print(f'''    connection created at {datetime.fromtimestamp(float(event.get_ts()))}
