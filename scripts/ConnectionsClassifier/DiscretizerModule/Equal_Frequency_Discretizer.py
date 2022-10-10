@@ -31,4 +31,14 @@ class Equal_Frequency_Discretizer(Discretizer):
         step = int(len(values) / self._n_bins)
         self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
 
+        # from math import inf
+        # values_set = set(values)
+        # value_set_len = len(values_set) - 1
+        # values = sorted(list(values_set))
+        # if value_set_len < self._n_bins:
+        #     print(set(values))
+        #     self._n_bins = value_set_len
+        # step = int(len(values) / self._n_bins)
+        # self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
+
         
