@@ -41,4 +41,55 @@ class Equal_Frequency_Discretizer(Discretizer):
         # step = int(len(values) / self._n_bins)
         # self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
 
+
+
+
+
+
+# from random import randint
+
+# dict_perc = {
+#     '0.0-0.5': 0,
+#     '0.5-0.55': 1,
+#     '0.55-0.6': 2,
+#     '0.6-0.8': 3,
+#     '0.8-0.9': 4,
+#     '0.9-0.92': 5,
+#     '0.92-0.94': 6,
+#     '0.94-0.96': 7,
+#     '0.96-0.98': 8,
+#     '0.98-1': 9,
+# }
+
+# def random_with_perc(dict_perc: dict, n: int) -> list:
+#     from random import uniform
+#     arr = [0 for _ in range(n)]
+#     for i, _ in enumerate(arr):
+#         val = uniform(0, 1)
+#         for interval, value in dict_perc.items():
+#             int_parsed = [float(bound) for bound in interval.split('-')]
+#             arr[i] += value if int_parsed[0] <= val < int_parsed[1] else 0
+#     return arr
+    
+# def count_if(arr, val):
+#     return sum([1 for e in arr if e == val])
+
+# _n_bins = 10
+# values = random_with_perc(dict_perc, 1000)
+# for val in dict_perc.values():
+#     print(f"{val}: {count_if(values, val)}")
+# #values.sort()
+
+# from math import inf
+# values_set = set(values)
+# value_set_len = len(values_set) - 1
+# values = sorted(list(values_set))
+# if value_set_len < _n_bins:
+#     print(set(values))
+#     _n_bins = value_set_len
+# step = int(len(values) / _n_bins)
+# _discretized_bins = [-inf] + [values[step * i] for i in range(1, _n_bins)] + [inf]
+# print(_discretized_bins)
+
+
         
