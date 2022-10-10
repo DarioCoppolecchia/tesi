@@ -47,23 +47,30 @@ class MainApplicationCLI:
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY
 
         if 'Attributes' in config:
-            attr_2_disc = config['Attributes']['attributes_to_discretize'].split(',') if 'attributes_to_discretize' in config['Attributes'] else ['duration', 'orig_bytes', 'resp_bytes', 'missed_bytes', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']
+            attr_2_disc = config['Attributes']['attributes_to_discretize'].split(',') if 'attributes_to_discretize' in config['Attributes'] else ['duration', 'orig_bytes', 'resp_bytes', 'missed_bytes', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window']
             n_bins = [int(bin) for bin in config['Attributes']['n_bins'].split(',')] if 'n_bins' in config['Attributes'] else [10 for _ in attr_2_disc]
             if len(attr_2_disc) != len(n_bins):
                 raise ValueError('The length of the attributes to discretize don\it match with the length of the number of bins')
             else:
                 self.__attr_bins_dict = dict(zip(attr_2_disc, n_bins))
-            self.__attr_to_xes = config['Attributes']['attributes_to_xes'].split(',') if 'attributes_to_xes' in config['Attributes'] else ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','history','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+            self.__activity_attr = config['Attributes']['activity_attr'] if 'activity_attr' in config['Attributes'] else 'history'
+            self.__attr_to_xes_traces = config['Attributes']['attributes_to_xes_traces'].split(',') if 'attributes_to_xes_traces' in config['Attributes'] else ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
+            self.__attr_to_xes_events = config['Attributes']['attributes_to_xes_events'].split(',') if 'attributes_to_xes_events' in config['Attributes'] else ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','history','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+            self.__attr_to_xes_events = [attr for attr in self.__attr_to_xes_events if attr != self.__activity_attr]
         else:
-            attr_2_disc = ['duration', 'orig_bytes', 'resp_bytes', 'missed_bytes', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']
+            attr_2_disc = ['duration', 'orig_bytes', 'resp_bytes', 'missed_bytes', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window']
             n_bins = [10 for _ in attr_2_disc]
             self.__attr_bins_dict = dict(zip(attr_2_disc, n_bins))
-            self.__attr_to_xes = ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','history','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+            self.__attr_to_xes_events = ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
+            self.__attr_to_xes_traces = ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+            self.__activity_attr = 'history'
 
         if 'Print' in config:
+            self.__show_examples = bool(int(config['Print']['show_examples'])) if 'show_examples' in config['Print'] else True
             self.__n_trace_to_print = int(config['Print']['n_trace_to_print']) if 'n_trace_to_print' in config['Print'] else 10
-            self.__randomize_print = bool(config['Print']['randomize_print']) if 'randomize_print' in config['Print'] else True
+            self.__randomize_print = bool(int(config['Print']['randomize_print'])) if 'randomize_print' in config['Print'] else True
         else:
+            self.__show_examples = True
             self.__n_trace_to_print = 10
             self.__randomize_print = True
     
@@ -86,10 +93,10 @@ class MainApplicationCLI:
         """
         self.__cls()
         self.traces_controller.read_and_convert_lines()
-        self.__print_n_traces_and_events()
-        self.__handle_attribute_discretization()
-        self.__print_n_discretized_traces_and_events()
-        self.traces_controller.print_Trace_list_to_xes_file()
+        self.__print_n_traces_and_events() if self.__show_examples else ''
+        self.traces_controller.discretize_attributes(self.__discretization_type, self.__attr_bins_dict)
+        self.__print_n_discretized_traces_and_events() if self.__show_examples else ''
+        self.traces_controller.print_Trace_list_to_xes_file(self.__attr_to_xes_traces, self.__attr_to_xes_events, self.__activity_attr)
     
     def __print_n_traces_and_events(self) -> None:
         """prints n random or non random traces and all the events of those traces
@@ -170,13 +177,3 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
     the orginator sent {event.get_discretized_orig_pkts()} ({event.get_discretized_orig_ip_bytes()} bytes in the packet header)
     the orginator sent {event.get_discretized_resp_pkts()} ({event.get_discretized_resp_ip_bytes()} bytes in the packet header)
 ''')
-                
-    def __handle_attribute_discretization(self) -> None:
-        """applies discretization algorithm based on the parameter's value
-
-        :param discretization: discretization algorithm to use, defaults to 'equal_width'
-        :type discretization: str, optional
-        :raises ValueError: if the discretization algorithm isn't equal_width or equal_height, a ValueError will be thrown
-        """
-        self.traces_controller.discretize_attributes(self.__discretization_type, self.__attr_bins_dict)
-        self.__print_n_discretized_traces_and_events()

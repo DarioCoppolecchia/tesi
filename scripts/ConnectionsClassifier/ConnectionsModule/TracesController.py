@@ -102,8 +102,11 @@ class TracesController:
         """
         read lines from file and converting them to a list of trace (network_traffic field)
         """
-        print('normalizing and converting lines...')
-        # normalizing lines
+        print('reading and converting lines...')
+        num_lines = 0
+        with open(self.__path_of_file_input) as f_in:
+            num_lines = sum(1 for _ in f_in) - 1
+        # reading lines
         with open(self.__path_of_file_input, "r") as f_in:
             lines_to_remove = [
                 '#separator',
@@ -117,7 +120,8 @@ class TracesController:
                 '#close',
             ]
             next(f_in)
-            for line in f_in:
+            for _ in tqdm(range(num_lines)):
+                line = next(f_in)
                 # removing comment lines
                 for line_to_check in lines_to_remove:
                     if line.startswith(line_to_check):
@@ -127,7 +131,6 @@ class TracesController:
                     for string in self.__strings_to_filter_event:
                         line = line.replace(string, '')
                     self.conv_line_and_add_to_trace(line.replace('\n', ''))
-        print('...normalization and conversion completed')
 
     def conv_line_and_add_to_trace(self, line: str):
         """
@@ -242,88 +245,170 @@ class TracesController:
         print('...label application completed')
     '''
         
-    def print_Trace_list_to_xes_file(self) -> None:
+    def print_Trace_list_to_xes_file(self, attr_trace: list, attr_event: list, activity_attr: str) -> None:
         """prints all the Traces list to a xes file
         """
         from xml.etree.ElementTree import Element, SubElement, tostring
-        from xml.dom import minidom
 
         from ConnectionsModule.PROTO import PROTO
         from ConnectionsModule.CONN_LABEL import CONN_LABEL
         from ConnectionsModule.CONN_STATE import CONN_STATE
 
-        print('writing the list of Traces to a xes file...')
+        print('creating the xml object to print...')
 
-        
         tree = Element('log', {'xes.version': '1.0', 'xmlns': 'http://code.deckfour.org/xes'})
         SubElement(tree, 'extension', {'name': "Concept", 'prefix': "concept", 'uri': "http://code.deckfour.org/xes/concept.xesext"})
         SubElement(tree, 'extension', {'name': "Time", 'prefix': "time", 'uri': "http://code.deckfour.org/xes/time.xesext"})
         globalTagTrace = SubElement(tree, 'global', {'scope': 'trace'})
-        SubElement(globalTagTrace, 'string', {'key': 'concept:orig_ip', 'value':'orig_ip'})
-        SubElement(globalTagTrace, 'string', {'key': 'concept:orig_port', 'value':'orig_port'})
-        SubElement(globalTagTrace, 'string', {'key': 'concept:resp_ip', 'value':'resp_ip'})
-        SubElement(globalTagTrace, 'string', {'key': 'concept:resp_port', 'value':'resp_port'})
-        SubElement(globalTagTrace, 'string', {'key': 'concept:proto', 'value':'proto'})
-        SubElement(globalTagTrace, 'string', {'key': 'concept:label', 'value':'label'})
+        for attr in attr_trace:
+            SubElement(globalTagTrace, 'string', {'key': f'concept:{attr}', 'value': f'{attr}'})
 
         globalTagEvent = SubElement(tree, 'global', {'scope': 'event'})
-        SubElement(globalTagEvent, 'string', {'key': 'time:ts', 'value':'ts'})
-        SubElement(globalTagEvent, 'string', {'key': 'service', 'value':'service'})
-        SubElement(globalTagEvent, 'string', {'key': 'duration', 'value':'duration'})
-        SubElement(globalTagEvent, 'string', {'key': 'orig_bytes', 'value':'orig_bytes'})
-        SubElement(globalTagEvent, 'string', {'key': 'resp_bytes', 'value':'resp_bytes'})
-        SubElement(globalTagEvent, 'string', {'key': 'conn_state', 'value':'conn_state'})
-        SubElement(globalTagEvent, 'string', {'key': 'missed_bytes', 'value':'missed_bytes'})
-        SubElement(globalTagEvent, 'string', {'key': 'Activity', 'value':'string'})
-        SubElement(globalTagEvent, 'string', {'key': 'orig_pkts', 'value':'orig_pkts'})
-        SubElement(globalTagEvent, 'string', {'key': 'orig_ip_bytes', 'value':'orig_ip_bytes'})
-        SubElement(globalTagEvent, 'string', {'key': 'resp_pkts', 'value':'resp_pkts'})
-        SubElement(globalTagEvent, 'string', {'key': 'resp_ip_bytes', 'value':'string'})
 
+        # optimizing ifs with an array of booleans of presence
+        trace_attr_presence = [
+            'orig_ip' in attr_trace,
+            'orig_port' in attr_trace,
+            'resp_ip' in attr_trace,
+            'resp_port' in attr_trace,
+            'proto' in attr_trace,
+            'label' in attr_trace,
+        ]
+
+        event_attr_presence = [
+            'ts' in attr_event,
+            'service' in attr_event,
+            'duration' in attr_event,
+            'orig_bytes' in attr_event,
+            'resp_bytes' in attr_event,
+            'conn_state' in attr_event,
+            'missed_bytes' in attr_event,
+            'history' in attr_event,
+            'orig_pkts' in attr_event,
+            'orig_ip_bytes' in attr_event,
+            'resp_pkts' in attr_event,
+            'resp_ip_bytes' in attr_event,
+        ]
+
+        activity_attr_presence = [
+            'ts' == activity_attr,
+            'service' == activity_attr,
+            'duration' == activity_attr,
+            'orig_bytes' == activity_attr,
+            'resp_bytes' == activity_attr,
+            'conn_state' == activity_attr,
+            'missed_bytes' == activity_attr,
+            'history' == activity_attr,
+            'orig_pkts' == activity_attr,
+            'orig_ip_bytes' == activity_attr,
+            'resp_pkts' == activity_attr,
+            'resp_ip_bytes' == activity_attr,
+        ]
+
+        if event_attr_presence[0]:
+            SubElement(globalTagEvent, 'string', {'key': 'time:ts', 'value':'ts'})
+
+        attr_event = [attr for attr in attr_event if attr != 'ts']
+
+        for attr in attr_event:
+            SubElement(globalTagEvent, 'string', {'key': attr, 'value':attr})
+        SubElement(globalTagEvent, 'string', {'key': 'Activity', 'value':'string'})
+        
         SubElement(tree, 'classifier', {'name': 'Activity', 'keys':'Activity'})
         SubElement(tree, 'classifier', {'name': 'activity classifier', 'keys':'Activity'})
 
-        for trace in tqdm(self.__network_traffic[:10]):
+
+        for trace in tqdm(self.__network_traffic):
             traceTag = SubElement(tree, 'trace')
-            SubElement(traceTag, 'string', {'key': 'concept:orig_ip', 'value': trace.get_orig_ip()})
-            SubElement(traceTag, 'string', {'key': 'concept:orig_port', 'value': str(trace.get_orig_port())})
-            SubElement(traceTag, 'string', {'key': 'concept:resp_ip', 'value': trace.get_resp_ip()})
-            SubElement(traceTag, 'string', {'key': 'concept:resp_port', 'value': str(trace.get_resp_port())})
-            SubElement(traceTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
-            SubElement(traceTag, 'string', {'key': 'concept:label', 'value': CONN_LABEL.conn_label_to_str(trace.get_label())})
+            
+            if trace_attr_presence[0]:
+                SubElement(traceTag, 'string', {'key': 'concept:orig_ip', 'value': trace.get_orig_ip()})
+            if trace_attr_presence[1]:
+                SubElement(traceTag, 'string', {'key': 'concept:orig_port', 'value': str(trace.get_orig_port())})
+            if trace_attr_presence[2]:
+                SubElement(traceTag, 'string', {'key': 'concept:resp_ip', 'value': trace.get_resp_ip()})
+            if trace_attr_presence[3]:
+                SubElement(traceTag, 'string', {'key': 'concept:resp_port', 'value': str(trace.get_resp_port())})
+            if trace_attr_presence[4]:
+                SubElement(traceTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
+            if trace_attr_presence[5]:
+                SubElement(traceTag, 'string', {'key': 'concept:label', 'value': CONN_LABEL.conn_label_to_str(trace.get_label())})
 
             for event in trace.get_events():
                 eventTag = SubElement(traceTag, 'event')
-                SubElement(eventTag, 'string', {'key': 'concept:orig_ip', 'value': trace.get_orig_ip()})
-                SubElement(eventTag, 'string', {'key': 'concept:orig_port', 'value': str(trace.get_orig_port())})
-                SubElement(eventTag, 'string', {'key': 'concept:resp_ip', 'value': trace.get_resp_ip()})
-                SubElement(eventTag, 'string', {'key': 'concept:resp_port', 'value': str(trace.get_resp_port())})
-                SubElement(eventTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
-                SubElement(eventTag, 'string', {'key': 'concept:label', 'value': CONN_LABEL.conn_label_to_str(trace.get_label())})
-                SubElement(eventTag, 'string', {'key': 'time:ts', 'value': event.get_ts()})
-                SubElement(eventTag, 'string', {'key': 'service', 'value': event.get_service()})
-                SubElement(eventTag, 'string', {'key': 'duration', 'value': event.get_discretized_duration()})
-                SubElement(eventTag, 'string', {'key': 'orig_bytes', 'value': event.get_discretized_orig_bytes()})
-                SubElement(eventTag, 'string', {'key': 'resp_bytes', 'value': event.get_discretized_resp_bytes()})
-                SubElement(eventTag, 'string', {'key': 'conn_state', 'value': CONN_STATE.state_to_str(event.get_conn_state())})
-                SubElement(eventTag, 'string', {'key': 'missed_bytes', 'value': event.get_discretized_missed_bytes()})
-                SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_history().get_history()})
-                SubElement(eventTag, 'string', {'key': 'orig_pkts', 'value': event.get_discretized_orig_pkts()})
-                SubElement(eventTag, 'string', {'key': 'orig_ip_bytes', 'value': event.get_discretized_orig_ip_bytes()})
-                SubElement(eventTag, 'string', {'key': 'resp_pkts', 'value': event.get_discretized_resp_pkts()})
-                SubElement(eventTag, 'string', {'key': 'resp_ip_bytes', 'value': event.get_discretized_resp_ip_bytes()})
+                if trace_attr_presence[0]:
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_ip', 'value': trace.get_orig_ip()})
+                if trace_attr_presence[1]:
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_port', 'value': str(trace.get_orig_port())})
+                if trace_attr_presence[2]:
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_ip', 'value': trace.get_resp_ip()})
+                if trace_attr_presence[3]:
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_port', 'value': str(trace.get_resp_port())})
+                if trace_attr_presence[4]:
+                    SubElement(eventTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
+                if trace_attr_presence[5]:
+                    SubElement(eventTag, 'string', {'key': 'concept:label', 'value': CONN_LABEL.conn_label_to_str(trace.get_label())})
+
+                if event_attr_presence[0]:
+                    SubElement(eventTag, 'string', {'key': 'time:ts', 'value': event.get_ts()})
+                if event_attr_presence[1]:
+                    SubElement(eventTag, 'string', {'key': 'service', 'value': event.get_service()})
+                if event_attr_presence[2]:
+                    SubElement(eventTag, 'string', {'key': 'duration', 'value': event.get_discretized_duration()})
+                if event_attr_presence[3]:
+                    SubElement(eventTag, 'string', {'key': 'orig_bytes', 'value': event.get_discretized_orig_bytes()})
+                if event_attr_presence[4]:
+                    SubElement(eventTag, 'string', {'key': 'resp_bytes', 'value': event.get_discretized_resp_bytes()})
+                if event_attr_presence[5]:
+                    SubElement(eventTag, 'string', {'key': 'conn_state', 'value': CONN_STATE.state_to_str(event.get_conn_state())})
+                if event_attr_presence[6]:
+                    SubElement(eventTag, 'string', {'key': 'missed_bytes', 'value': event.get_discretized_missed_bytes()})
+                if event_attr_presence[7]:
+                    SubElement(eventTag, 'string', {'key': 'history', 'value': event.get_history().get_history()})
+                if event_attr_presence[8]:
+                    SubElement(eventTag, 'string', {'key': 'orig_pkts', 'value': event.get_discretized_orig_pkts()})
+                if event_attr_presence[9]:
+                    SubElement(eventTag, 'string', {'key': 'orig_ip_bytes', 'value': event.get_discretized_orig_ip_bytes()})
+                if event_attr_presence[10]:
+                    SubElement(eventTag, 'string', {'key': 'resp_pkts', 'value': event.get_discretized_resp_pkts()})
+                if event_attr_presence[11]:
+                    SubElement(eventTag, 'string', {'key': 'resp_ip_bytes', 'value': event.get_discretized_resp_ip_bytes()})
+
+                # handling the activity
+                if activity_attr_presence[0]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_ts()})
+                elif activity_attr_presence[1]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_service()})
+                elif activity_attr_presence[2]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_duration()})
+                elif activity_attr_presence[3]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_bytes()})
+                elif activity_attr_presence[4]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_bytes()})
+                elif activity_attr_presence[5]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': CONN_STATE.state_to_str(event.get_conn_state())})
+                elif activity_attr_presence[6]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_missed_bytes()})
+                elif activity_attr_presence[7]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_history().get_history()})
+                elif activity_attr_presence[8]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_pkts()})
+                elif activity_attr_presence[9]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_ip_bytes()})
+                elif activity_attr_presence[10]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_pkts()})
+                elif activity_attr_presence[11]:
+                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_ip_bytes()})
 
         # rough_string = tostring(tree, 'utf-8')
         # print('finito rough_string')
         # reparsed = minidom.parseString(rough_string)
         # print('finito reparsed')
-        with open('output.xml', 'w') as f:
-            print('iniziata scrittura')
+        with open(self.__path_of_file_xes, 'w') as f:
+            print(f'started writing to xes file named {self.__path_of_file_xes}')
             f.write(str(tostring(tree, 'utf-8'))[2:-1])
-            print('finita scrittura')
-        print('...writing the list of Traces to a xes file completed')
+            print('...writing the list of Traces to a xes file completed')
         
-
     def __get_list_of_attribute(self, attribute: str) -> list:
         """Returns a list of the values of the attribute specified in attribute
 
@@ -523,6 +608,7 @@ class TracesController:
         else:
             raise ValueError('the type of discretization is not valid')
         
+        print('discretizing all values of every event...')
         for attribute in tqdm(attributes_to_discretize):
             self.__apply_discretization(attribute)
 
