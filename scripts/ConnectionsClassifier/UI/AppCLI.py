@@ -3,6 +3,7 @@ from ConnectionsModule.TracesController     import TracesController
 from ConnectionsModule.Event                import Event
 from ConnectionsModule.CONN_STATE           import CONN_STATE
 from DiscretizerModule.DISCRETIZATION_TYPE  import DISCRETIZATION_TYPE
+from ConnectionsModule.EventHistory         import EventHistory
 
 class MainApplicationCLI:
     """
@@ -115,6 +116,39 @@ class MainApplicationCLI:
             print(f'responder packets discretization:\n\tnumber of bins: {Event.disc_resp_pkts.get_n_bins()}\n\tbins: {Event.disc_resp_pkts.get_discretized_bins()}')
         if Event.disc_resp_ip_bytes is not None:
             print(f'responder bytes ip discretization:\n\tnumber of bins: {Event.disc_resp_ip_bytes.get_n_bins()}\n\tbins: {Event.disc_resp_ip_bytes.get_discretized_bins()}')
+
+        if EventHistory.disc_orig_syn is not None:
+            print(f'originator syn discretization:\n\tnumber of bins: {EventHistory.disc_orig_syn.get_n_bins()}\n\tbins: {EventHistory.disc_orig_syn.get_discretized_bins()}')
+        if EventHistory.disc_orig_fin is not None:
+            print(f'originator fin discretization:\n\tnumber of bins: {EventHistory.disc_orig_fin.get_n_bins()}\n\tbins: {EventHistory.disc_orig_fin.get_discretized_bins()}')
+        if EventHistory.disc_orig_syn_ack is not None:
+            print(f'originator syn-ack discretization:\n\tnumber of bins: {EventHistory.disc_orig_syn_ack.get_n_bins()}\n\tbins: {EventHistory.disc_orig_syn_ack.get_discretized_bins()}')
+        if EventHistory.disc_orig_rst is not None:
+            print(f'originator rst discretization:\n\tnumber of bins: {EventHistory.disc_orig_rst.get_n_bins()}\n\tbins: {EventHistory.disc_orig_rst.get_discretized_bins()}')
+        if EventHistory.disc_resp_syn is not None:
+            print(f'responder syn discretization:\n\tnumber of bins: {EventHistory.disc_resp_syn.get_n_bins()}\n\tbins: {EventHistory.disc_resp_syn.get_discretized_bins()}')
+        if EventHistory.disc_resp_fin is not None:
+            print(f'responder fin discretization:\n\tnumber of bins: {EventHistory.disc_resp_fin.get_n_bins()}\n\tbins: {EventHistory.disc_resp_fin.get_discretized_bins()}')
+        if EventHistory.disc_resp_syn_ack is not None:
+            print(f'responder syn-ack discretization:\n\tnumber of bins: {EventHistory.disc_resp_syn_ack.get_n_bins()}\n\tbins: {EventHistory.disc_resp_syn_ack.get_discretized_bins()}')
+        if EventHistory.disc_resp_rst is not None:
+            print(f'responder rst discretization:\n\tnumber of bins: {EventHistory.disc_resp_rst.get_n_bins()}\n\tbins: {EventHistory.disc_resp_rst.get_discretized_bins()}')
+        if EventHistory.disc_orig_bad_checksum is not None:
+            print(f'originator bad checksum discretization:\n\tnumber of bins: {EventHistory.disc_orig_bad_checksum.get_n_bins()}\n\tbins: {EventHistory.disc_orig_bad_checksum.get_discretized_bins()}')
+        if EventHistory.disc_orig_content_gap is not None:
+            print(f'originator content gap discretization:\n\tnumber of bins: {EventHistory.disc_orig_content_gap.get_n_bins()}\n\tbins: {EventHistory.disc_orig_content_gap.get_discretized_bins()}')
+        if EventHistory.disc_orig_retransmitted_payload is not None:
+            print(f'originator retransmitted payload discretization:\n\tnumber of bins: {EventHistory.disc_orig_retransmitted_payload.get_n_bins()}\n\tbins: {EventHistory.disc_orig_retransmitted_payload.get_discretized_bins()}')
+        if EventHistory.disc_orig_zero_window is not None:
+            print(f'originator zero window discretization:\n\tnumber of bins: {EventHistory.disc_orig_zero_window.get_n_bins()}\n\tbins: {EventHistory.disc_orig_zero_window.get_discretized_bins()}')
+        if EventHistory.disc_resp_bad_checksum is not None:
+            print(f'responder bad checksum discretization:\n\tnumber of bins: {EventHistory.disc_resp_bad_checksum.get_n_bins()}\n\tbins: {EventHistory.disc_resp_bad_checksum.get_discretized_bins()}')
+        if EventHistory.disc_resp_content_gap is not None:
+            print(f'responder content gap discretization:\n\tnumber of bins: {EventHistory.disc_resp_content_gap.get_n_bins()}\n\tbins: {EventHistory.disc_resp_content_gap.get_discretized_bins()}')
+        if EventHistory.disc_resp_retransmitted_payload is not None:
+            print(f'responder retransmitted payload discretization:\n\tnumber of bins: {EventHistory.disc_resp_retransmitted_payload.get_n_bins()}\n\tbins: {EventHistory.disc_resp_retransmitted_payload.get_discretized_bins()}')
+        if EventHistory.disc_resp_zero_window is not None:
+            print(f'responder zero window discretization:\n\tnumber of bins: {EventHistory.disc_resp_zero_window.get_n_bins()}\n\tbins: {EventHistory.disc_resp_zero_window.get_discretized_bins()}')
 
         for trace in self.traces_controller.get_n_traces_and_event(randomize=True):
             print(f'''
