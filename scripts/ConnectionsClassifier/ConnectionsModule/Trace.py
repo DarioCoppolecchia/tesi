@@ -159,24 +159,6 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
                 self.__events.append(e)
                 return True
             return False
-            
-    
-    def to_json_obj(self) -> object:
-        """Convert this object to an object that can be easily converted to a json
-
-        :return: this object as a dumpable object
-        :rtype: object
-        """
-        return {
-            'orig_ip': self.__orig_ip,
-            'orig_port': self.__orig_port,
-            'resp_ip': self.__resp_ip,
-            'resp_port': self.__resp_port,
-            'proto': PROTO.proto_to_str(self.__proto),
-            'ts_on_open': self.__ts_on_open,
-            'label': self.label,
-            'events': [event.to_json_obj() for event in self.__events],
-        }
         
     @classmethod
     def generate_id_static(cls, orig_ip: str=None, orig_port: int=None, resp_ip: str=None, resp_port: int=None, proto: str=None) -> str:
@@ -433,6 +415,70 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
         """
         return [event.get_resp_rst() for event in self.__events]
 
+    def get_list_of_orig_ack(self) -> list:
+        """Getter of orig_ack in this trace
+
+        :return: the list of all the values of orig_ack
+        :rtype: list
+        """
+        return [event.get_orig_ack() for event in self.__events]
+
+    def get_list_of_orig_payload(self) -> list:
+        """Getter of orig_payload in this trace
+
+        :return: the list of all the values of orig_payload
+        :rtype: list
+        """
+        return [event.get_orig_payload() for event in self.__events]
+
+    def get_list_of_orig_inconsistent(self) -> list:
+        """Getter of orig_inconsistent in this trace
+
+        :return: the list of all the values of orig_inconsistent
+        :rtype: list
+        """
+        return [event.get_orig_inconsistent() for event in self.__events]
+
+    def get_list_of_orig_multi_flag(self) -> list:
+        """Getter of orig_multi_flag in this trace
+
+        :return: the list of all the values of orig_multi_flag
+        :rtype: list
+        """
+        return [event.get_orig_multi_flag() for event in self.__events]
+
+    def get_list_of_resp_ack(self) -> list:
+        """Getter of resp_ack in this trace
+
+        :return: the list of all the values of resp_ack
+        :rtype: list
+        """
+        return [event.get_resp_ack() for event in self.__events]
+
+    def get_list_of_resp_payload(self) -> list:
+        """Getter of resp_payload in this trace
+
+        :return: the list of all the values of resp_payload
+        :rtype: list
+        """
+        return [event.get_resp_payload() for event in self.__events]
+
+    def get_list_of_resp_inconsistent(self) -> list:
+        """Getter of resp_inconsistent in this trace
+
+        :return: the list of all the values of resp_inconsistent
+        :rtype: list
+        """
+        return [event.get_resp_inconsistent() for event in self.__events]
+
+    def get_list_of_resp_multi_flag(self) -> list:
+        """Getter of resp_multi_flag in this trace
+
+        :return: the list of all the values of resp_multi_flag
+        :rtype: list
+        """
+        return [event.get_resp_multi_flag() for event in self.__events]
+
     def get_list_of_orig_bad_checksum(self) -> list:
         """Getter of get_orig_bad_checksum in this trace
 
@@ -496,6 +542,14 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
         :rtype: list
         """
         return [event.get_resp_zero_window() for event in self.__events]
+
+    def get_list_of_conn_dir_flipped(self) -> list:
+        """Getter of get_resp_zero_window in this trace
+
+        :return: the list of all the values of resp_zero_window
+        :rtype: list
+        """
+        return [event.get_conn_dir_flipped() for event in self.__events]
 
     ###### HISTORY DISCRETIZED ######
 

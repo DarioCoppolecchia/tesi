@@ -246,7 +246,14 @@ class TracesController:
     '''
         
     def print_Trace_list_to_xes_file(self, attr_trace: list, attr_event: list, activity_attr: str) -> None:
-        """prints all the Traces list to a xes file
+        """prints all the Traces list to a xes file according the the attr_trace and attr_event list of attributes, and the activity_attr that is used to indicate the attribute selected as the Activity
+
+        :param attr_trace: list of the attributes to select for the traces
+        :type attr_trace: list[str]
+        :param attr_event: list of the attributes to select for the events
+        :type attr_event: list[str]
+        :param activity_attr: attribute selected as the Activity
+        :type activity_attr: str
         """
         from xml.etree.ElementTree import Element, SubElement, tostring
 
@@ -318,7 +325,7 @@ class TracesController:
         SubElement(tree, 'classifier', {'name': 'activity classifier', 'keys':'Activity'})
 
 
-        for trace in tqdm(self.__network_traffic):
+        for trace in tqdm(self.__network_traffic[:100]):
             traceTag = SubElement(tree, 'trace')
             
             if trace_attr_presence[0]:

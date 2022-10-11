@@ -7,14 +7,12 @@ class Event:
     Class of a single event registered
 
     This class contains all of the data that are going to be used
-    to classify this event
+    to classify an event
 
     :param ts: timestamp of this event
     :type ts: str
     :param service: An identification of an application protocol being sent over the event.
     :type service: str
-    :param state: state of the event
-    :type state: str
     :param duration: How long the event lasted. For 3-way or 4-way event tear-downs, this will not include the final ACK.
     :type duration: float
     :param orig_bytes: number of bytes sent by the origin
@@ -143,28 +141,6 @@ class Event:
         """ 
         return self.__repr__()
 
-    def to_json_obj(self) -> object:
-        """
-        converts this class object to an object that can be easily dumped in a json file
-
-        :return: object that can be converted to a json file
-        :rtype: object
-        """
-        return {
-            'ts': self.__ts,
-            'services': self.__service,
-            'duration': self.__duration,
-            'orig_bytes': self.__orig_bytes,
-            'resp_bytes': self.__resp_bytes,
-            'conn_state': CONN_STATE.state_to_str(self.__conn_state),
-            'missed_bytes': self.__missed_bytes,
-            'history': self.__history.get_history(),
-            'orig_pkts': self.__orig_pkts,
-            'orig_ip_bytes': self.__orig_ip_bytes,
-            'resp_pkts': self.__resp_pkts,
-            'resp_ip_bytes': self.__resp_ip_bytes,
-        }
-
     def get_ts(self) -> str:
         """Getter of ts
 
@@ -263,133 +239,198 @@ class Event:
 
     ###### EVENT HISTORY ######
 
-    def get_orig_syn(self) -> str:
+    def get_orig_syn(self) -> float:
         """Returns the value of this history objects orig_syn
 
         :return: the value of orig_syn
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_syn()
 
-    def get_orig_fin(self) -> str:
+    def get_orig_fin(self) -> float:
         """Returns the value of this history objects orig_fin
 
         :return: the value of orig_fin
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_fin()
 
-    def get_orig_syn_ack(self) -> str:
+    def get_orig_syn_ack(self) -> float:
         """Returns the value of this objects history orig_syn_ack
 
         :return: the value of orig_syn_ack
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_syn_ack()
 
-    def get_orig_rst(self) -> str:
+    def get_orig_rst(self) -> float:
         """Returns the value of this history objects orig_rst
 
         :return: the value of orig_rst
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_rst()
 
-    def get_resp_syn(self) -> str:
+    def get_resp_syn(self) -> float:
         """Returns the value of this history objects resp_syn
 
         :return: the value of resp_syn
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_syn()
 
-    def get_resp_fin(self) -> str:
+    def get_resp_fin(self) -> float:
         """Returns the value of this history objects resp_fin
 
         :return: the value of resp_fin
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_fin()
 
-    def get_resp_syn_ack(self) -> str:
+    def get_resp_syn_ack(self) -> float:
         """Returns the value of this objects history resp_syn_ack
 
         :return: the value of resp_syn_ack
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_syn_ack()
 
-    def get_resp_rst(self) -> str:
+    def get_resp_rst(self) -> float:
         """Returns the value of this history objects resp_rst
 
         :return: the value of resp_rst
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_rst()
 
-    def get_orig_bad_checksum(self) -> str:
+    def get_orig_ack(self) -> bool:
+        """Returns the value of this objects orig_ack
+
+        :return: the value of orig_ack
+        :rtype: bool
+        """
+        return self.__history.get_orig_ack()
+    def get_orig_payload(self) -> bool:
+        """Returns the value of this objects orig_payload
+
+        :return: the value of orig_payload
+        :rtype: bool
+        """
+        return self.__history.get_orig_payload()
+    def get_orig_inconsistent(self) -> bool:
+        """Returns the value of this objects history  orig_inconsistent
+
+        :return: the value of orig_inconsistent
+        :rtype: bool
+        """
+        return self.__history.get_orig_inconsistent()
+    def get_orig_multi_flag(self) -> bool:
+        """Returns the value of this objects history  orig_multi_flag
+
+        :return: the value of orig_multi_flag
+        :rtype: bool
+        """
+        return self.__history.get_orig_multi_flag()
+    def get_resp_ack(self) -> bool:
+        """Returns the value of this objects history  resp_ack
+
+        :return: the value of resp_ack
+        :rtype: bool
+        """
+        return self.__history.get_resp_ack()
+    def get_resp_payload(self) -> bool:
+        """Returns the value of this objects history  resp_payload
+
+        :return: the value of resp_payload
+        :rtype: bool
+        """
+        return self.__history.get_resp_payload()
+    def get_resp_inconsistent(self) -> bool:
+        """Returns the value of this objects history  resp_inconsistent
+
+        :return: the value of resp_inconsistent
+        :rtype: bool
+        """
+        return self.__history.get_resp_inconsistent()
+    def get_resp_multi_flag(self) -> bool:
+        """Returns the value of this objects history  resp_multi_flag
+
+        :return: the value of resp_multi_flag
+        :rtype: bool
+        """
+        return self.__history.get_resp_multi_flag()
+
+    def get_orig_bad_checksum(self) -> float:
         """Returns the value of this objects history orig_bad_checksum
 
         :return: the value of orig_bad_checksum
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_bad_checksum()
 
-    def get_orig_content_gap(self) -> str:
+    def get_orig_content_gap(self) -> float:
         """Returns the value of this objects history orig_content_gap
 
         :return: the value of orig_content_gap
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_content_gap()
 
-    def get_orig_retransmitted_payload(self) -> str:
+    def get_orig_retransmitted_payload(self) -> float:
         """Returns the value of this objects history orig_retransmitted_payload
 
         :return: the value of orig_retransmitted_payload
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_retransmitted_payload()
 
-    def get_orig_zero_window(self) -> str:
+    def get_orig_zero_window(self) -> float:
         """Returns the value of this objects history orig_zero_window
 
         :return: the value of orig_zero_window
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_orig_zero_window()
 
-    def get_resp_bad_checksum(self) -> str:
+    def get_resp_bad_checksum(self) -> float:
         """Returns the value of this objects history resp_bad_checksum
 
         :return: the value of resp_bad_checksum
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_bad_checksum()
 
-    def get_resp_content_gap(self) -> str:
+    def get_resp_content_gap(self) -> float:
         """Returns the value of this objects history resp_content_gap
 
         :return: the value of resp_content_gap
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_content_gap()
 
-    def get_resp_retransmitted_payload(self) -> str:
+    def get_resp_retransmitted_payload(self) -> float:
         """Returns the value of this objects history resp_retransmitted_payload
 
         :return: the value of resp_retransmitted_payload
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_retransmitted_payload()
 
-    def get_resp_zero_window(self) -> str:
+    def get_resp_zero_window(self) -> float:
         """Returns the value of this objects history resp_zero_window
 
         :return: the value of resp_zero_window
-        :rtype: str
+        :rtype: float
         """
         return self.__history.get_resp_zero_window()
+
+    def get_conn_dir_flipped(self) -> bool:
+        """Returns the value of this objects history conn_dir_flipped
+
+        :return: the value of conn_dir_flipped
+        :rtype: bool
+        """        
+        return self.__history.get_conn_dir_flipped()
 
     ###### DISCRETIZED EVENT ######
 

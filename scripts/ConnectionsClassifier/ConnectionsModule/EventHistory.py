@@ -324,120 +324,184 @@ class EventHistory:
         return self.__history
 
 
-    def get_orig_syn(self) -> str:
+    def get_orig_syn(self) -> float:
         """Returns the value of this objects orig_syn
 
         :return: the value of orig_syn
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_syn
-    def get_orig_fin(self) -> str:
+    def get_orig_fin(self) -> float:
         """Returns the value of this objects orig_fin
 
         :return: the value of orig_fin
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_fin
-    def get_orig_syn_ack(self) -> str:
+    def get_orig_syn_ack(self) -> float:
         """Returns the value of this objects orig_syn_ack
 
         :return: the value of orig_syn_ack
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_syn_ack
-    def get_orig_rst(self) -> str:
+    def get_orig_rst(self) -> float:
         """Returns the value of this objects orig_rst
 
         :return: the value of orig_rst
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_rst
-    def get_resp_syn(self) -> str:
+    def get_resp_syn(self) -> float:
         """Returns the value of this objects resp_syn
 
         :return: the value of resp_syn
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_syn
-    def get_resp_fin(self) -> str:
+    def get_resp_fin(self) -> float:
         """Returns the value of this objects resp_fin
 
         :return: the value of resp_fin
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_fin
-    def get_resp_syn_ack(self) -> str:
+    def get_resp_syn_ack(self) -> float:
         """Returns the value of this objects resp_syn_ack
 
         :return: the value of resp_syn_ack
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_syn_ack
-    def get_resp_rst(self) -> str:
+    def get_resp_rst(self) -> float:
         """Returns the value of this objects resp_rst
 
         :return: the value of resp_rst
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_rst
-    def get_orig_bad_checksum(self) -> str:
+    def get_orig_ack(self) -> bool:
+        """Returns the value of this objects orig_ack
+
+        :return: the value of orig_ack
+        :rtype: bool
+        """
+        return self.__orig_ack
+    def get_orig_payload(self) -> bool:
+        """Returns the value of this objects orig_payload
+
+        :return: the value of orig_payload
+        :rtype: bool
+        """
+        return self.__orig_payload
+    def get_orig_inconsistent(self) -> bool:
+        """Returns the value of this objects orig_inconsistent
+
+        :return: the value of orig_inconsistent
+        :rtype: bool
+        """
+        return self.__orig_inconsistent
+    def get_orig_multi_flag(self) -> bool:
+        """Returns the value of this objects orig_multi_flag
+
+        :return: the value of orig_multi_flag
+        :rtype: bool
+        """
+        return self.__orig_multi_flag
+    def get_resp_ack(self) -> bool:
+        """Returns the value of this objects resp_ack
+
+        :return: the value of resp_ack
+        :rtype: bool
+        """
+        return self.__resp_ack
+    def get_resp_payload(self) -> bool:
+        """Returns the value of this objects resp_payload
+
+        :return: the value of resp_payload
+        :rtype: bool
+        """
+        return self.__resp_payload
+    def get_resp_inconsistent(self) -> bool:
+        """Returns the value of this objects resp_inconsistent
+
+        :return: the value of resp_inconsistent
+        :rtype: bool
+        """
+        return self.__resp_inconsistent
+    def get_resp_multi_flag(self) -> bool:
+        """Returns the value of this objects resp_multi_flag
+
+        :return: the value of resp_multi_flag
+        :rtype: bool
+        """
+        return self.__resp_multi_flag
+    def get_orig_bad_checksum(self) -> float:
         """Returns the value of this objects orig_bad_checksum
 
         :return: the value of orig_bad_checksum
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_bad_checksum
-    def get_orig_content_gap(self) -> str:
+    def get_orig_content_gap(self) -> float:
         """Returns the value of this objects orig_content_gap
 
         :return: the value of orig_content_gap
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_content_gap
-    def get_orig_retransmitted_payload(self) -> str:
+    def get_orig_retransmitted_payload(self) -> float:
         """Returns the value of this objects orig_retransmitted_payload
 
         :return: the value of orig_retransmitted_payload
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_retransmitted_payload
-    def get_orig_zero_window(self) -> str:
+    def get_orig_zero_window(self) -> float:
         """Returns the value of this objects orig_zero_window
 
         :return: the value of orig_zero_window
-        :rtype: str
+        :rtype: float
         """
         return self.__orig_zero_window
-    def get_resp_bad_checksum(self) -> str:
+    def get_resp_bad_checksum(self) -> float:
         """Returns the value of this objects resp_bad_checksum
 
         :return: the value of resp_bad_checksum
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_bad_checksum
-    def get_resp_content_gap(self) -> str:
+    def get_resp_content_gap(self) -> float:
         """Returns the value of this objects resp_content_gap
 
         :return: the value of resp_content_gap
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_content_gap
-    def get_resp_retransmitted_payload(self) -> str:
+    def get_resp_retransmitted_payload(self) -> float:
         """Returns the value of this objects resp_retransmitted_payload
 
         :return: the value of resp_retransmitted_payload
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_retransmitted_payload
-    def get_resp_zero_window(self) -> str:
+    def get_resp_zero_window(self) -> float:
         """Returns the value of this objects resp_zero_window
 
         :return: the value of resp_zero_window
-        :rtype: str
+        :rtype: float
         """
         return self.__resp_zero_window
 
+    def get_conn_dir_flipped(self) -> bool:
+        """Returns the value of this objects conn_dir_flipped
 
+        :return: the value of conn_dir_flipped
+        :rtype: bool
+        """        
+        return self.__conn_dir_flipped
+
+    ##### DISCRETIZATION #####
 
     def get_discretized_orig_syn(self) -> str:
         """Returns the discretized value of this objects orig_syn
@@ -446,7 +510,6 @@ class EventHistory:
         :rtype: str
         """
         return EventHistory.disc_orig_syn.discretize_attribute(self.__orig_syn)
-
     
     def get_discretized_orig_fin(self) -> str:
         """Returns the discretized value of this objects orig_fin
