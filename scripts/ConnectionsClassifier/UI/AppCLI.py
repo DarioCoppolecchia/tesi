@@ -39,31 +39,54 @@ class MainApplicationCLI:
         config = configparser.ConfigParser()
         config.read(config_path)
 
+        n_bins = 10
         # checks if Discretization is in config.ini file
         if 'Discretization' in config:
             type = config['Discretization']['discretization_type'] if 'discretization_type' in config['Discretization'] else 'equal_frequency'
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY if type == 'equal_frequency' else DISCRETIZATION_TYPE.EQUAL_WIDTH
+            n_bins = int(config['Discretization']['n_bins']) if 'n_bins' in config['Discretization'] else n_bins
         else:
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY
 
         if 'Attributes' in config:
-            attr_2_disc = config['Attributes']['attributes_to_discretize'].split(',') if 'attributes_to_discretize' in config['Attributes'] else ['duration', 'orig_bytes', 'resp_bytes', 'missed_bytes', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window']
-            n_bins = [int(bin) for bin in config['Attributes']['n_bins'].split(',')] if 'n_bins' in config['Attributes'] else [10 for _ in attr_2_disc]
-            if len(attr_2_disc) != len(n_bins):
-                raise ValueError('The length of the attributes to discretize don\it match with the length of the number of bins')
-            else:
-                self.__attr_bins_dict = dict(zip(attr_2_disc, n_bins))
             self.__activity_attr = config['Attributes']['activity_attr'] if 'activity_attr' in config['Attributes'] else 'history'
             self.__attr_to_xes_traces = config['Attributes']['attributes_to_xes_traces'].split(',') if 'attributes_to_xes_traces' in config['Attributes'] else ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
-            self.__attr_to_xes_events = config['Attributes']['attributes_to_xes_events'].split(',') if 'attributes_to_xes_events' in config['Attributes'] else ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','history','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+            self.__attr_to_xes_events = config['Attributes']['attributes_to_xes_events'].split(',') if 'attributes_to_xes_events' in config['Attributes'] else ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window','orig_ack','orig_payload','orig_inconsistent','orig_multi_flag','resp_ack','resp_payload','resp_inconsistent','resp_multi_flag']
             self.__attr_to_xes_events = [attr for attr in self.__attr_to_xes_events if attr != self.__activity_attr]
         else:
-            attr_2_disc = ['duration', 'orig_bytes', 'resp_bytes', 'missed_bytes', 'orig_pkts', 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window']
-            n_bins = [10 for _ in attr_2_disc]
-            self.__attr_bins_dict = dict(zip(attr_2_disc, n_bins))
-            self.__attr_to_xes_events = ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
-            self.__attr_to_xes_traces = ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+            self.__attr_to_xes_traces = ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
+            self.__attr_to_xes_events = ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window','orig_ack','orig_payload','orig_inconsistent','orig_multi_flag','resp_ack','resp_payload','resp_inconsistent','resp_multi_flag']
             self.__activity_attr = 'history'
+
+        discretizable_attrs = {
+            'orig_bytes',
+            'resp_bytes',
+            'missed_bytes',
+            'orig_pkts',
+            'duration',
+            'orig_ip_bytes',
+            'resp_pkts',
+            'resp_ip_bytes',
+            'orig_syn',
+            'orig_fin',
+            'orig_syn_ack',
+            'orig_rst',
+            'resp_syn',
+            'resp_fin',
+            'resp_syn_ack',
+            'resp_rst',
+            'orig_bad_checksum',
+            'orig_content_gap',
+            'orig_retransmitted_payload',
+            'orig_zero_window',
+            'resp_bad_checksum',
+            'resp_content_gap',
+            'resp_retransmitted_payload',
+            'resp_zero_window',
+        }
+        attr_to_discretize = list(set(self.__attr_to_xes_events).intersection(discretizable_attrs))
+        bins_list = [n_bins for _ in range(len(attr_to_discretize))]
+        self.__attr_bins_dict = dict(zip(attr_to_discretize, bins_list))
 
         if 'Print' in config:
             self.__show_examples = bool(int(config['Print']['show_examples'])) if 'show_examples' in config['Print'] else True
