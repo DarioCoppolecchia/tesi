@@ -96,7 +96,7 @@ class TracesController:
         :rtype: list
         """        
         from random import sample
-        return sample(self.__network_traffic, max_n_trace) if randomize else self.__network_traffic[:10]
+        return sample(self.__network_traffic, max_n_trace) if randomize else self.__network_traffic[:max_n_trace]
 
     def read_and_convert_lines(self):
         """
