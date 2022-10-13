@@ -23,7 +23,7 @@ class Discretizer(metaclass=abc.ABCMeta):
     :param __n_bins: number of bins for this discretization
     :type __n_bins: int
     """
-    def __init__(self, n_bins: int=None) -> None:
+    def __init__(self, n_bins: int=10, soglia: int=10) -> None:
         """Constructor that initialize discretized_bins with and empty list
 
         :param n_bins: number of bins, defaults to None
@@ -31,6 +31,7 @@ class Discretizer(metaclass=abc.ABCMeta):
         """
         self._discretized_bins = []
         self._n_bins = n_bins
+        self._SOGLIA = soglia
 
     def get_discretized_bins(self) -> list:
         """Getter of the discretized bins list
@@ -40,13 +41,21 @@ class Discretizer(metaclass=abc.ABCMeta):
         """
         return self._discretized_bins
     
-    def get_n_bins(self) -> list:
+    def get_n_bins(self) -> int:
         """Getter of the number of bins for this discretizer
 
         :return: the number of bins
-        :rtype: list
+        :rtype: int
         """
         return self._n_bins
+
+    def get_soglia(self) -> int:
+        """Getter of the number of bins for this discretizer
+
+        :return: the number of bins
+        :rtype: int
+        """
+        return self._SOGLIA
 
     @abc.abstractmethod
     def discretize(self, values: list) -> None:

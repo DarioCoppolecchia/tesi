@@ -45,8 +45,11 @@ class MainApplicationCLI:
             type = config['Discretization']['discretization_type'] if 'discretization_type' in config['Discretization'] else 'equal_frequency'
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY if type == 'equal_frequency' else DISCRETIZATION_TYPE.EQUAL_WIDTH
             n_bins = int(config['Discretization']['n_bins']) if 'n_bins' in config['Discretization'] else n_bins
+            soglia = int(config['Discretization']['soglia']) if 'soglia' in config['Discretization'] else soglia
         else:
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY
+            n_bins = 5
+            soglia = 10
 
         if 'Attributes' in config:
             self.__activity_attr = config['Attributes']['activity_attr'] if 'activity_attr' in config['Attributes'] else 'history'
@@ -86,7 +89,8 @@ class MainApplicationCLI:
         }
         attr_to_discretize = list(set(self.__attr_to_xes_events).intersection(discretizable_attrs))
         bins_list = [n_bins for _ in range(len(attr_to_discretize))]
-        self.__attr_bins_dict = dict(zip(attr_to_discretize, bins_list))
+        soglia_list = [soglia for _ in range(len(attr_to_discretize))]
+        self.__attr_bins_dict = dict(zip(attr_to_discretize, zip(bins_list, soglia_list)))
 
         if 'Print' in config:
             self.__show_examples = bool(int(config['Print']['show_examples'])) if 'show_examples' in config['Print'] else True
@@ -207,123 +211,99 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
 
         disc_bins = Event.disc_orig_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_bytes')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_resp_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_bytes')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_missed_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('missed_bytes')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['missed_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['missed_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_orig_pkts.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_pkts')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_pkts'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_pkts'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_duration.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('duration')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['duration'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['duration'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_orig_ip_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_ip_bytes')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_ip_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_ip_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_resp_pkts.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_pkts')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_pkts'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_pkts'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = Event.disc_resp_ip_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_ip_bytes')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_ip_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_ip_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_syn.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_syn')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_syn'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_syn'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_fin.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_fin')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_fin'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_fin'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_syn_ack.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_syn_ack')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_syn_ack'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_syn_ack'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_rst.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_rst')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_rst'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_rst'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_syn.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_syn')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_syn'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_syn'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_fin.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_fin')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_fin'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_fin'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_syn_ack.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_syn_ack')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_syn_ack'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_syn_ack'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_rst.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_rst')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_rst'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_rst'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_bad_checksum.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_bad_checksum')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_bad_checksum'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_bad_checksum'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_content_gap.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_content_gap')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_content_gap'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_content_gap'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_retransmitted_payload.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_retransmitted_payload')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_retransmitted_payload'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_retransmitted_payload'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_orig_zero_window.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_zero_window')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['orig_zero_window'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['orig_zero_window'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_bad_checksum.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_bad_checksum')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_bad_checksum'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_bad_checksum'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_content_gap.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_content_gap')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_content_gap'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_content_gap'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_retransmitted_payload.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_retransmitted_payload')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_retransmitted_payload'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_retransmitted_payload'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
         
         disc_bins = EventHistory.disc_resp_zero_window.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_zero_window')
-        if len(set(disc_bins)) < len(disc_bins):
-            redundant_dict['resp_zero_window'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        redundant_dict['resp_zero_window'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
 
         from matplotlib import pyplot as plt
         import numpy as np

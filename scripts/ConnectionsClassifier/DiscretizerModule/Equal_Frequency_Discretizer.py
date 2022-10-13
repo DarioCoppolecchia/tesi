@@ -6,14 +6,14 @@ class Equal_Frequency_Discretizer(Discretizer):
     returns the bin relative to a particulare value
     """    
 
-    def __init__(self, n_bins: int=None):
+    def __init__(self, n_bins: int=None, soglia: int=None):
         """
         Constructor of this class, calls the super constructor
 
         :param n_bins: number of bins, defaults to None
         :type n_bins: int, optional
         """
-        super().__init__(n_bins)
+        super().__init__(n_bins, soglia)
 
     def discretize(self, values: list) -> list:
         """Analizes the list of values in input to create the bins
@@ -25,11 +25,27 @@ class Equal_Frequency_Discretizer(Discretizer):
         """
         from math import inf
         values.sort()
-        value_set_len = len(set(values)) - 1
-        if value_set_len < self._n_bins:
-            self._n_bins = value_set_len
-        step = int(len(values) / self._n_bins)
-        self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
+        val_set = set(values)
+        value_set_len = len(val_set)
+
+        # handling distinct values
+        if value_set_len <= max(self._n_bins, self._SOGLIA):
+            step = int(len(values) / self._n_bins)
+            values = sorted(list(val_set))
+            self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf]
+        else:
+            value_set_len = len(set(values)) - 1
+            if value_set_len < self._n_bins:
+                self._n_bins = value_set_len
+            step = int(len(values) / self._n_bins)
+            self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
+            
+            if len(set(self._discretized_bins)) < len(self._discretized_bins):
+                values = sorted(list(val_set))
+                if value_set_len < self._n_bins:
+                    self._n_bins = value_set_len
+                step = int(len(values) / self._n_bins)
+                self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, self._n_bins)] + [inf]
 
         # from math import inf
         # values_set = set(values)
