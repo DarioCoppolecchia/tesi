@@ -24,13 +24,18 @@ def time_to_str(time):
     return datetime.utcfromtimestamp(time).strftime('%H:%M:%S')
 
 def get_file_dict(log_file_path: str) -> dict:
+    print('getting file dict...')
+    n_lines = 0
+    with open(log_file_path, 'r') as f_log:
+        n_lines = len(f_log.readlines()) - 1
     with open(log_file_path, 'r') as f_log:
         csvr = csv.reader(f_log, delimiter="\t")
         header = next(csvr)
         header_pos = {h: i for i, h in enumerate(header)}
         # filling the dict of connections with packets
         file_dict = {}
-        for i, pkt in enumerate(csvr):
+        for _ in tqdm.tqdm(range(n_lines)):
+            pkt = next(csvr)
             try:
                 id = getId_from_cols(pkt, header_pos, ['id.orig_h', 'id.orig_p', 'id.resp_h', 'id.resp_p', 'proto'])
             except:
@@ -243,10 +248,16 @@ interval_to_label = [
 ]
 '''
 def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, header_pos: list, constraint_to_label: list):
+    print('applying labels...')
+    n_lines = 0
+    with open(input_files_path, 'r') as f_in:
+        n_lines = len(f_in.readlines()) - 1
+
     with open(output_file_path, 'w') as f_out:
         with open(input_files_path, 'r') as f_in:
             next(f_in)
-            for line in f_in:
+            for _ in tqdm.tqdm(range(n_lines)):
+                line = next(f_in)
                 line = line.replace('\n', '')
                 splitted = line.split('\t')
                 ts = splitted[header_pos['ts']]
@@ -254,8 +265,8 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
                 resp_ip = splitted[header_pos['id.resp_h']]
                 for constraints in constraint_to_label:
                     if (float(constraints['lower_bound']) <= float(ts) <= float(constraints['upper_bound']) and 
-                        constraints['ip_attacker'] == orig_ip and
-                        constraints['ip_attacked'] == resp_ip):
+                        (constraints['ip_attacker'] == orig_ip or constraints['ip_attacker'] == 'everyone') and
+                        (constraints['ip_attacked'] == resp_ip or constraints['ip_attacked'] == 'everyone')):
                         line += '\t' + constraints['label']
                         break
                 else:
@@ -272,7 +283,7 @@ def print_file_dict_to_file(output_file_path: str, file_dict: dict, header_pos: 
 
 def read_file_dict_from_file(input_file_path: str):
     import json
-
+    print('reading file from json...')
     with open(input_file_path + '_dict.json') as f:
         file_dict = json.load(f)
     with open(input_file_path + '_header.json') as f:
@@ -282,7 +293,7 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-day = 'total_logs'
+day = 'thursday'
 file_name = 'conn.log'
 conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
@@ -321,9 +332,9 @@ print_list_to_file(f"outputs/correlations_between_files_history/", f"combination
 '''
 
 ################ prendo tutti i valori usati di una variabile
-values = set([v.replace('\t', '') for v in get_all_values_of_columns(['proto'], file_dict_conn, header_pos_conn)])
+#values = set([v.replace('\t', '') for v in get_all_values_of_columns(['proto'], file_dict_conn, header_pos_conn)])
 #all_values = set(['S0','S1','SF','REJ','S2','S3','RSTO','RSTR','RSTOS0','RSTRH','SH','SHR','OTH'])
-print(values)
+#print(values)
 
 ################ discretizzazione
 '''
@@ -383,27 +394,70 @@ for k, v in attributes_to_digitize.items():
 '''
 
 # applico le label agli event nei file
-'''
 import time
 import datetime
 constraint_to_label = [
+    # Morning
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime("2017-07-04 14:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime("2017-07-04 15:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:02:00", '%Y-%m-%d %H:%M:%S').timetuple()),
         'ip_attacker': '172.16.0.1',
         'ip_attacked': '192.168.10.50',
-        'label': 'FTP-Patator',
+        'label': 'Web-Attack-Brute-Force',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime("2017-07-04 19:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime("2017-07-04 20:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:13:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:37:00", '%Y-%m-%d %H:%M:%S').timetuple()),
         'ip_attacker': '172.16.0.1',
         'ip_attacked': '192.168.10.50',
-        'label': 'SSH-Patator',
+        'label': 'Web-Attack-XSS',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:38:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:44:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.1',
+        'ip_attacked': '192.168.10.50',
+        'label': 'Web-Attack-Sql-Injection',
+    },
+
+    # Afternoon
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:17:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:23:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.11',
+        'ip_attacked': '192.168.10.8',
+        'label': 'Meta-exploit-Win-Vista',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:31:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:37:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.11',
+        'ip_attacked': '192.168.10.8',
+        'label': 'Meta-exploit-Win-Vista',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:52:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:02:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.11',
+        'ip_attacked': '192.168.10.25',
+        'label': 'Infiltration-Cool-disk-MAC',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:02:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:47:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '172.16.0.11',
+        'ip_attacked': '192.168.10.8',
+        'label': 'Win-Vista-1',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:02:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:47:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': '192.168.10.8',
+        'ip_attacked': 'everyone',
+        'label': 'Win-Vista-2',
     },
 ]
-apply_label_to_events_in_file(conn_file_path, "./logs/tuesday/conn_labeled.log", header_pos_conn, constraint_to_label)
-'''
+apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label)
 
 ################### controllo che nello stesso trace sono presenti le stesse label
 '''
