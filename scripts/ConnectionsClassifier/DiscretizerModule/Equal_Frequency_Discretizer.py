@@ -30,7 +30,6 @@ class Equal_Frequency_Discretizer(Discretizer):
 
         # handling distinct values
         if value_set_len <= max(self._n_bins, self._SOGLIA):
-            step = int(len(values) / self._n_bins)
             values = sorted(list(val_set))
             self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf]
         else:
