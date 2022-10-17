@@ -325,8 +325,8 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-day = 'friday'
-file_name = 'conn.log'
+day = 'monday'
+file_name = 'conn_labeled.log'
 conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
@@ -338,10 +338,24 @@ import os
 from os.path import exists
 if not(exists(parsed_conn_file_path + '_dict.json') and exists(parsed_conn_file_path + '_header.json')):
     file_dict_conn, header_pos_conn = get_file_dict(conn_file_path)
-    os.mkdir(f'./logs/{day}/parsed/')
+    try:
+        os.mkdir(f'./logs/{day}/parsed/')
+    except:
+        print('folder already present')
     print_file_dict_to_file(parsed_conn_file_path, file_dict_conn, header_pos_conn)
 else:
     file_dict_conn, header_pos_conn = read_file_dict_from_file(parsed_conn_file_path)
+
+################ concateno i benigni di monday e tuesday
+with open('dataset_benign.log', 'w') as f_out:
+    with open(conn_file_path) as f_mon:
+        for line in f_mon:
+            f_out.write(line)
+    with open(f"./logs/tuesday/{file_name}") as f_tue:
+        for line in f_tue:
+            if 'BENIGN' in line:
+                f_out.write(line)
+
 
 ################ frequenza di history
 '''
@@ -426,6 +440,7 @@ for k, v in attributes_to_digitize.items():
 '''
 
 # applico le label agli event nei file
+'''
 import time
 import datetime
 constraint_to_label = [
@@ -762,7 +777,7 @@ constraint_to_label = [
     },
 ]
 apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label)
-
+'''
 ################### controllo che nello stesso trace sono presenti le stesse label
 '''
 print(header_pos_conn)
