@@ -59,7 +59,7 @@ class MainApplicationCLI:
         else:
             self.__attr_to_xes_traces = ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
             self.__attr_to_xes_events = ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window','orig_ack','orig_payload','orig_inconsistent','orig_multi_flag','resp_ack','resp_payload','resp_inconsistent','resp_multi_flag']
-            self.__activity_attr = 'history'
+            self.__activity_attr = 'orig_syn'
 
         discretizable_attrs = {
             'orig_bytes',
@@ -87,7 +87,7 @@ class MainApplicationCLI:
             'resp_retransmitted_payload',
             'resp_zero_window',
         }
-        attr_to_discretize = list(set(self.__attr_to_xes_events).intersection(discretizable_attrs))
+        attr_to_discretize = list(set(self.__attr_to_xes_events).intersection(discretizable_attrs)) + ([self.__activity_attr] if self.__activity_attr in discretizable_attrs else [])
         bins_list = [n_bins for _ in range(len(attr_to_discretize))]
         soglia_list = [soglia for _ in range(len(attr_to_discretize))]
         self.__attr_bins_dict = dict(zip(attr_to_discretize, zip(bins_list, soglia_list)))

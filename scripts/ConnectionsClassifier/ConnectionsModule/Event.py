@@ -522,7 +522,7 @@ class Event:
         :return: the discretized value of orig_syn
         :rtype: str
         """
-        return EventHistory.disc_orig_syn.discretize_attribute(self.__orig_syn)
+        return self.__history.get_discretized_orig_syn()
     
     def get_discretized_orig_fin(self) -> str:
         """Returns the discretized value of this objects __history orig_fin
