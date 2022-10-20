@@ -7,6 +7,59 @@ from ConnectionsModule.PROTO                import PROTO
 from DiscretizerModule.DISCRETIZATION_TYPE  import DISCRETIZATION_TYPE
 from ConnectionsModule.EventHistory         import EventHistory
 
+'''
+def group_by_occ(dict):
+    result = {}
+    for key, val in dict.items():
+        if val in result:
+            result[val] += [key]
+        else:
+            result[val] = [key]
+
+    return result
+
+def to_json(obj: dict, max_element_per_line=15):
+
+    output = '{\n'
+    max_count_desc = len(obj) - 1
+    for j, (attr, descriptor) in enumerate(obj.items()):
+        output += f'\t"{attr}": ' + '{\n'
+        for key, desc in descriptor.items():
+            if isinstance(desc, str):
+                output += f'\t\t"{key}": "{desc}",\n'
+            elif isinstance(desc, list):
+                output += f'\t\t"{key}": {desc},\n'
+            elif isinstance(desc, dict):
+                output += f'\t\t"{key}":' + ' {\n'
+                max_count_occ = len(desc) - 1
+                for i, (occ, values) in enumerate(desc.items()):
+                    if isinstance(values, int):
+                        values = [values]
+                    output += f'\t\t\t"{occ}": [\n'
+                    while len(values) > max_element_per_line:
+                        temp = values[:max_element_per_line]
+                        del values[:max_element_per_line]
+                        output += '\t\t\t\t'
+                        for t in temp[:-1]:
+                            output += f'{t}, '
+                        output += f'{temp[-1]},\n'
+                    output += '\t\t\t\t'
+                    for t in values[:-1]:
+                        output += f'{t}, '
+                    output += f'{values[-1]}\n\t\t\t]'
+                    if i < max_count_occ:
+                        output += ',\n'
+                    else:
+                        output += '\n'
+                output += '\t\t}\n\t}'
+        if j < max_count_desc:
+            output += ',\n'
+        else:
+            output += '\n'
+    output += '}'
+    return output
+'''
+
 class MainApplicationCLI:
     """
     Class that contains the UI and the startup routine of the application
@@ -211,106 +264,417 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
 
         disc_bins = Event.disc_orig_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_bytes')
-        redundant_dict['orig_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_bytes'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_bytes'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = Event.disc_resp_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_bytes')
-        redundant_dict['resp_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_bytes'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_bytes'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = Event.disc_missed_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('missed_bytes')
-        redundant_dict['missed_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['missed_bytes'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['missed_bytes'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': group_by_occ(OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True))),
+            }
         
         disc_bins = Event.disc_orig_pkts.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_pkts')
-        redundant_dict['orig_pkts'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_pkts'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_pkts'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = Event.disc_duration.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('duration')
-        redundant_dict['duration'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['duration'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['duration'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = Event.disc_orig_ip_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_ip_bytes')
-        redundant_dict['orig_ip_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_ip_bytes'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_ip_bytes'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = Event.disc_resp_pkts.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_pkts')
-        redundant_dict['resp_pkts'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_pkts'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_pkts'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = Event.disc_resp_ip_bytes.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_ip_bytes')
-        redundant_dict['resp_ip_bytes'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_ip_bytes'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_ip_bytes'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_syn.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_syn')
-        redundant_dict['orig_syn'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_syn'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_syn'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_fin.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_fin')
-        redundant_dict['orig_fin'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_fin'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_fin'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_syn_ack.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_syn_ack')
-        redundant_dict['orig_syn_ack'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_syn_ack'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_syn_ack'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_rst.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_rst')
-        redundant_dict['orig_rst'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_rst'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_rst'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_syn.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_syn')
-        redundant_dict['resp_syn'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_syn'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_syn'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_fin.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_fin')
-        redundant_dict['resp_fin'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_fin'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_fin'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_syn_ack.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_syn_ack')
-        redundant_dict['resp_syn_ack'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_syn_ack'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_syn_ack'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_rst.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_rst')
-        redundant_dict['resp_rst'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_rst'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_rst'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_bad_checksum.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_bad_checksum')
-        redundant_dict['orig_bad_checksum'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_bad_checksum'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_bad_checksum'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_content_gap.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_content_gap')
-        redundant_dict['orig_content_gap'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_content_gap'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_content_gap'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_retransmitted_payload.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_retransmitted_payload')
-        redundant_dict['orig_retransmitted_payload'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_retransmitted_payload'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_retransmitted_payload'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_orig_zero_window.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('orig_zero_window')
-        redundant_dict['orig_zero_window'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['orig_zero_window'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['orig_zero_window'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_bad_checksum.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_bad_checksum')
-        redundant_dict['resp_bad_checksum'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_bad_checksum'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_bad_checksum'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_content_gap.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_content_gap')
-        redundant_dict['resp_content_gap'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_content_gap'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_content_gap'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_retransmitted_payload.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_retransmitted_payload')
-        redundant_dict['resp_retransmitted_payload'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_retransmitted_payload'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_retransmitted_payload'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
         
         disc_bins = EventHistory.disc_resp_zero_window.get_discretized_bins()
         attr_list = self.traces_controller.get_list_of_attribute('resp_zero_window')
-        redundant_dict['resp_zero_window'] = [disc_bins, OrderedDict(sorted(Counter(attr_list).items()))]
+        if 'soglia' == disc_bins[-1]:
+            disc_bins.remove('soglia')
+            redundant_dict['resp_zero_window'] = {
+                'motivo per essere loggato': 'inferiore a max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
+        elif 'con duplicati' == disc_bins[-1]:
+            disc_bins.remove('con duplicati')
+            redundant_dict['resp_zero_window'] = {
+                'motivo per essere loggato': 'sono presenti duplicati anche se maggiore di max{soglia, n_bins}', 
+                'bins discretizzati': disc_bins, 
+                'occorrenza valori': OrderedDict(sorted(Counter(attr_list).items(), key=lambda row: row[1], reverse=True)),
+            }
 
         from matplotlib import pyplot as plt
         import numpy as np
-        import json
 
         with open('attribute_bins_and_number_of_occurrencies.json', 'w') as f:
-            json.dump(redundant_dict, f)
+            f.write(to_json(redundant_dict, 20))
 
         for attr, arr in redundant_dict.items():
             x = np.array([val for val in arr[1].keys()])
