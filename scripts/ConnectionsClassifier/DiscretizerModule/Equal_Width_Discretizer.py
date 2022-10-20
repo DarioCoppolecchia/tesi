@@ -28,7 +28,7 @@ class Equal_Width_Discretizer(Discretizer):
         value_set_len = len(val_set)
         if value_set_len <= max(self._n_bins, self._SOGLIA):
             values = sorted(list(val_set))
-            self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf]
+            self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf]# + ['soglia']
         else:
             min_val = min(values)
             max_val = max(values)

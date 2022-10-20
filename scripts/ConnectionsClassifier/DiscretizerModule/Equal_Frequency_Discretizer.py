@@ -31,11 +31,11 @@ class Equal_Frequency_Discretizer(Discretizer):
         # handling distinct values
         if value_set_len <= max(self._n_bins, self._SOGLIA):
             values = sorted(list(val_set))
-            self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf] + ['soglia']
+            self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf]# + ['soglia']
         else:
             step = int(len(values) / self._n_bins)
             self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
             
             disc_set = list(set(self._discretized_bins))
             if len(disc_set) < len(self._discretized_bins):
-                self._discretized_bins = sorted(disc_set) + ['con duplicati']
+                self._discretized_bins = sorted(disc_set)# + ['con duplicati']
