@@ -259,7 +259,8 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
     both = []
     with open(output_file_path, 'w') as f_out:
         with open(input_files_path, 'r') as f_in:
-            next(f_in)
+            line = next(f_in)
+            f_out.write(line)
             for _ in tqdm.tqdm(range(n_lines)):
                 line = next(f_in)
                 line = line.replace('\n', '')
@@ -304,6 +305,78 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
     print('\t', set(labels_applied))
     print('\t', len(labels_applied))
     print('\t', Counter(labels_applied))
+
+def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header_pos: list, constraint_to_label: list, sep: str='\t'):
+    print('finding the connections...')
+    n_lines = 0
+    with open(input_files_path, 'r') as f_in:
+        n_lines = len(f_in.readlines()) - 1
+
+    ips = []
+    from datetime import datetime
+    with open(output_file_path, 'w') as f_out:
+        with open(input_files_path, 'r') as f_in:
+            next(f_in)
+            f_out.write(f'ts{sep}parsed ts{sep}orig_ip{sep}resp_ip{sep}label\n')
+            for _ in tqdm.tqdm(range(n_lines)):
+                line = next(f_in)
+                line = line.replace('\n', '')
+                splitted = line.split('\t')
+                ts = splitted[header_pos['ts']]
+                orig_ip = splitted[header_pos['id.orig_h']]
+                resp_ip = splitted[header_pos['id.resp_h']]
+                label = splitted[header_pos['label']]
+                for constraints in constraint_to_label:
+                    attacker = constraints['ip_attacker']
+                    attacked = constraints['ip_attacked']
+                    if ((orig_ip in attacker or attacker == 'everyone') and
+                        (resp_ip in attacked or attacked == 'everyone')):
+                        parsed = datetime.fromtimestamp(float(ts) - (3600 * 5)).strftime('%Y-%m-%d %H:%M:%S'),
+                        ips.append([ts, label])
+                        f_out.write(f'{ts.replace(".", ",")}{sep}{str(parsed)[1:-3].replace(".", ",")}{sep}{orig_ip}{sep}{resp_ip}{sep}{label}\n')
+                        break
+    
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as dates
+    import pandas as pd
+
+    x_ftp = np.array([int(float(d[0])) for d in ips if d[1] == 'FTP-Patator'])
+    x_ssh = np.array([int(float(d[0])) for d in ips if d[1] == 'SSH-Patator'])
+    x_ben = np.array([int(float(d[0])) for d in ips if d[1] == 'BENIGN'])
+
+    y_ftp = np.random.rand(len(x_ftp))
+    y_ssh = np.random.rand(len(x_ssh))
+    y_ben = np.random.rand(len(x_ben))
+
+    group = pd.DataFrame()
+    group['labels'] = ([d[1] for d in ips])
+    #{'FTP-Patator': 'red', 'SSH-Patator': 'blue', 'BENIGN': 'black'}
+
+    fig, ax = plt.subplots()
+
+    ax.scatter(x_ftp, y_ftp, c='red', label='FTP-Patator', s = 2)
+    ax.scatter(x_ssh, y_ssh, c='blue', label='SSH-Patator', s = 2)
+    ax.scatter(x_ben, y_ben, c='black', label='BENIGN', s = 2)
+
+
+    #ax.set_xticklabels([int(float(d[0])) for d in ips], rotation=45)
+    #ax.set_xticklabels([datetime.fromtimestamp(float(d[0]) - (3600 * 5)).strftime('%H:%M:%S') for d in ips], rotation=45)
+    ax.set_title(datetime.fromtimestamp(float(ips[0][0]) - (3600 * 5)).strftime('%D'))
+
+    n = 14
+    every_nth = len(ips) // n
+    for n, label in enumerate(ax.xaxis.get_ticklabels()):
+        if n % every_nth != 0:
+            pass
+            #label.set_visible(False)
+    
+    #ax.xaxis.get_ticklabels()[0].set_visible(True)
+    #ax.xaxis.get_ticklabels()[-1].set_visible(True)
+
+    plt.legend()
+    plt.show()
+
 
 def print_file_dict_to_file(output_file_path: str, file_dict: dict, header_pos: dict):
     import json
@@ -356,6 +429,32 @@ with open('dataset_benign.log', 'w') as f_out:
             if 'BENIGN' in line:
                 f_out.write(line)
 
+################ controllo che i tizi si parlino solo durante gli orari
+
+import time
+import datetime
+constraint_to_label = [
+    # FTP-Patator
+    {
+        'ip_attacker': [
+            '172.16.0.1',
+            ],
+        'ip_attacked': [
+            '192.168.10.50',
+            ],
+    },
+    # SSH-Patator
+    {
+        'ip_attacker': [
+            '172.16.0.1',
+            ],
+        'ip_attacked': [
+            '192.168.10.50',
+            ],
+    },
+]
+start = './logs/tuesday/'
+print_ts_ips_and_attack(start + 'conn_labeled.log', start + 'ts_attacker_defender_label.csv', header_pos_conn, constraint_to_label, ';')
 
 ################ frequenza di history
 '''
