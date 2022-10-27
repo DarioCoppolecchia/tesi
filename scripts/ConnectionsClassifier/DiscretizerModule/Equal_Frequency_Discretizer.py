@@ -24,7 +24,6 @@ class Equal_Frequency_Discretizer(Discretizer):
         :rtype: list
         """
         from math import inf
-        values.sort()
         val_set = set(values)
         value_set_len = len(val_set)
 
@@ -33,6 +32,7 @@ class Equal_Frequency_Discretizer(Discretizer):
             values = sorted(list(val_set))
             self._discretized_bins = [-inf] + [(values[i] + values[i - 1]) / 2 for i in range(1, value_set_len)] + [inf]# + ['soglia']
         else:
+            values.sort()
             step = int(len(values) / self._n_bins)
             self._discretized_bins = [-inf] + [values[step * i] for i in range(1, self._n_bins)] + [inf]
             

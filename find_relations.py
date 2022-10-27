@@ -260,7 +260,8 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
     with open(output_file_path, 'w') as f_out:
         with open(input_files_path, 'r') as f_in:
             line = next(f_in)
-            f_out.write(line)
+            line = line.replace('\n', '')
+            f_out.write(line + '\tlabel\n')
             for _ in tqdm.tqdm(range(n_lines)):
                 line = next(f_in)
                 line = line.replace('\n', '')
@@ -306,7 +307,7 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
     print('\t', len(labels_applied))
     print('\t', Counter(labels_applied))
 
-def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header_pos: list, constraint_to_label: list, sep: str='\t'):
+def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header_pos: list, constraint_to_label: list, colors: dict, sep: str='\t'):
     print('finding the connections...')
     n_lines = 0
     with open(input_files_path, 'r') as f_in:
@@ -321,7 +322,7 @@ def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header
             for _ in tqdm.tqdm(range(n_lines)):
                 line = next(f_in)
                 line = line.replace('\n', '')
-                splitted = line.split('\t')
+                splitted = line.split(sep)
                 ts = splitted[header_pos['ts']]
                 orig_ip = splitted[header_pos['id.orig_h']]
                 resp_ip = splitted[header_pos['id.resp_h']]
@@ -338,43 +339,32 @@ def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header
     
     import numpy as np
     import matplotlib.pyplot as plt
-    import matplotlib.dates as dates
     import pandas as pd
 
-    x_ftp = np.array([int(float(d[0])) for d in ips if d[1] == 'FTP-Patator'])
-    x_ssh = np.array([int(float(d[0])) for d in ips if d[1] == 'SSH-Patator'])
-    x_ben = np.array([int(float(d[0])) for d in ips if d[1] == 'BENIGN'])
+    labels = set(d[1] for d in ips)
 
-    y_ftp = np.random.rand(len(x_ftp))
-    y_ssh = np.random.rand(len(x_ssh))
-    y_ben = np.random.rand(len(x_ben))
+    xs = {}
+    ys = {}
 
-    group = pd.DataFrame()
-    group['labels'] = ([d[1] for d in ips])
-    #{'FTP-Patator': 'red', 'SSH-Patator': 'blue', 'BENIGN': 'black'}
+    for l in labels:
+        xs[l] = np.array([pd.to_datetime(datetime.fromtimestamp(float(d[0]) - (3600 * 5)).strftime('%H:%M:%S')) for d in ips if d[1] == l])
+        ys[l] = np.random.rand(len(xs[l]))
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
-    ax.scatter(x_ftp, y_ftp, c='red', label='FTP-Patator', s = 2)
-    ax.scatter(x_ssh, y_ssh, c='blue', label='SSH-Patator', s = 2)
-    ax.scatter(x_ben, y_ben, c='black', label='BENIGN', s = 2)
-
-
-    #ax.set_xticklabels([int(float(d[0])) for d in ips], rotation=45)
-    #ax.set_xticklabels([datetime.fromtimestamp(float(d[0]) - (3600 * 5)).strftime('%H:%M:%S') for d in ips], rotation=45)
+    for l in labels:
+        ax.scatter(xs[l], ys[l], c=colors[l], label=l, s = 2)
+    
     ax.set_title(datetime.fromtimestamp(float(ips[0][0]) - (3600 * 5)).strftime('%D'))
 
-    n = 14
-    every_nth = len(ips) // n
-    for n, label in enumerate(ax.xaxis.get_ticklabels()):
-        if n % every_nth != 0:
-            pass
-            #label.set_visible(False)
-    
-    #ax.xaxis.get_ticklabels()[0].set_visible(True)
-    #ax.xaxis.get_ticklabels()[-1].set_visible(True)
+    import matplotlib.dates  as mdates
 
-    plt.legend()
+    formatter = mdates.DateFormatter('%H:%M:%S')  
+    ax.xaxis.set_major_formatter(formatter)
+
+    ax.tick_params(labelrotation=45)
+
+    plt.legend(loc='lower left')
     plt.show()
 
 
@@ -398,7 +388,7 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-day = 'monday'
+day = 'wednesday'
 file_name = 'conn_labeled.log'
 conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
@@ -434,7 +424,6 @@ with open('dataset_benign.log', 'w') as f_out:
 import time
 import datetime
 constraint_to_label = [
-    # FTP-Patator
     {
         'ip_attacker': [
             '172.16.0.1',
@@ -443,18 +432,25 @@ constraint_to_label = [
             '192.168.10.50',
             ],
     },
-    # SSH-Patator
     {
         'ip_attacker': [
             '172.16.0.1',
             ],
         'ip_attacked': [
-            '192.168.10.50',
+            '192.168.10.51',
             ],
     },
 ]
-start = './logs/tuesday/'
-print_ts_ips_and_attack(start + 'conn_labeled.log', start + 'ts_attacker_defender_label.csv', header_pos_conn, constraint_to_label, ';')
+start = './logs/wednesday/'
+colors_dict = {
+    'DoS-Slowloris': 'red',
+    'DoS-Slowhttptest': 'blue', 
+    'DoS-Hulk': 'orange',
+    'DoS-GoldenEye': 'purple',
+    'Heartbleed-Port-444': 'pink',
+    'BENIGN': 'black',
+}
+print_ts_ips_and_attack(start + 'conn_labeled.log', start + 'ts_attacker_defender_label.csv', header_pos_conn, constraint_to_label, colors_dict, '\t')
 
 ################ frequenza di history
 '''
@@ -539,9 +535,9 @@ for k, v in attributes_to_digitize.items():
 '''
 
 # applico le label agli event nei file
-'''
 import time
 import datetime
+'''
 constraint_to_label = [
     # Morning
     {
@@ -875,7 +871,34 @@ constraint_to_label = [
         'label': 'DDoS-LOIT',
     },
 ]
-apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label)
+'''
+constraint_to_label = [
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {9 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {10 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': [
+            '172.16.0.1',
+            ],
+        'ip_attacked': [
+            '192.168.10.50',
+            ],
+        'label': 'FTP-Patator',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {15 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': [
+            '172.16.0.1',
+            ],
+        'ip_attacked': [
+            '192.168.10.50',
+            ],
+        'label': 'SSH-Patator',
+    },
+]
+
+#apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label)
+'''
 '''
 ################### controllo che nello stesso trace sono presenti le stesse label
 '''
