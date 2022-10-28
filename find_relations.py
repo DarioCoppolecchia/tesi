@@ -307,7 +307,36 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
     print('\t', len(labels_applied))
     print('\t', Counter(labels_applied))
 
-def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header_pos: list, constraint_to_label: list, colors: dict, sep: str='\t'):
+'''
+time_table = {
+    "non attacking": [
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {7 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:19:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:59:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {19 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+    ],
+    "attacking": [
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:20:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:00:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+    ]
+}
+'''
+
+def print_ts_ips_and_attack(input_files_path: str, output_file_path: str,  attacker, attacked, header_pos: list, time_table: dict, colors: dict, sep: str='\t'):
     print('finding the connections...')
     n_lines = 0
     with open(input_files_path, 'r') as f_in:
@@ -326,15 +355,17 @@ def print_ts_ips_and_attack(input_files_path: str, output_file_path: str, header
                 ts = splitted[header_pos['ts']]
                 orig_ip = splitted[header_pos['id.orig_h']]
                 resp_ip = splitted[header_pos['id.resp_h']]
-                label = splitted[header_pos['label']]
-                for constraints in constraint_to_label:
-                    attacker = constraints['ip_attacker']
-                    attacked = constraints['ip_attacked']
-                    if ((orig_ip in attacker or attacker == 'everyone') and
-                        (resp_ip in attacked or attacked == 'everyone')):
-                        parsed = datetime.fromtimestamp(float(ts) - (3600 * 5)).strftime('%Y-%m-%d %H:%M:%S'),
-                        ips.append([ts, label])
-                        f_out.write(f'{ts.replace(".", ",")}{sep}{str(parsed)[1:-3].replace(".", ",")}{sep}{orig_ip}{sep}{resp_ip}{sep}{label}\n')
+                found = False
+                for label, times in time_table.items():
+                    for time in times:
+                        if ((orig_ip in attacker or attacker == 'everyone') and
+                            (resp_ip in attacked or attacked == 'everyone')):
+                            parsed = datetime.fromtimestamp(float(ts) - (3600 * 5)).strftime('%Y-%m-%d %H:%M:%S'),
+                            ips.append([ts, label])
+                            f_out.write(f'{ts.replace(".", ",")}{sep}{str(parsed)[1:-3].replace(".", ",")}{sep}{orig_ip}{sep}{resp_ip}{sep}{label}\n')
+                            break
+                    if found:
+                        found = True
                         break
     
     import numpy as np
@@ -423,34 +454,43 @@ with open('dataset_benign.log', 'w') as f_out:
 
 import time
 import datetime
-constraint_to_label = [
-    {
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-    },
-    {
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.51',
-            ],
-    },
-]
+
 start = './logs/wednesday/'
 colors_dict = {
-    'DoS-Slowloris': 'red',
-    'DoS-Slowhttptest': 'blue', 
-    'DoS-Hulk': 'orange',
-    'DoS-GoldenEye': 'purple',
-    'Heartbleed-Port-444': 'pink',
-    'BENIGN': 'black',
+    'attacking': 'red',
+    'non attacking': 'black',
 }
-print_ts_ips_and_attack(start + 'conn_labeled.log', start + 'ts_attacker_defender_label.csv', header_pos_conn, constraint_to_label, colors_dict, '\t')
+
+attacker = '172.16.0.1'
+attacked = '192.168.10.50'
+time_table = {
+    "non attacking": [
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {7 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:19:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:59:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {19 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+    ],
+    "attacking": [
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:20:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:00:59", '%Y-%m-%d %H:%M:%S').timetuple())
+        ),
+    ]
+}
+
+print_ts_ips_and_attack(start + 'conn_labeled.log', start + 'ts_attacker_defender_label.csv', attacker, attacked, header_pos_conn, time_table, colors_dict, '\t')
 
 ################ frequenza di history
 '''
