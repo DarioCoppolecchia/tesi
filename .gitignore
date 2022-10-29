@@ -7,6 +7,7 @@
 scripts/ConnectionsAnomalyDetector/ConnectionsModule/__pycache__/*
 scripts/ConnectionsAnomalyDetector/DiscretizerModule/__pycache__/*
 scripts/ConnectionsAnomalyDetector/__pycache__/*
+scripts/ConnectionsAnomalyDetector/MachineLearning/__pycache__/*
 scripts/ConnectionsAnomalyDetector/UI/__pycache__/*
 scripts/ConnectionsAnomalyDetector/docs/_build/*
 outputs/
