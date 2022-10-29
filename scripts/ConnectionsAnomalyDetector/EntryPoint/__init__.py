@@ -1,1 +1,1 @@
-from .MainTraceController import MainApplicationCLI
+from .MainTraceController import MainTraceController

@@ -1,4 +1,4 @@
-from UI.AppCLI import MainApplicationCLI
+from EntryPoint.MainTraceController import MainTraceController
 
 if __name__ == "__main__":
-    MainApplicationCLI('config.ini')
+    MainTraceController('config.ini')

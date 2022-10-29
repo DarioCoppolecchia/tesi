@@ -60,7 +60,7 @@ def to_json(obj: dict, max_element_per_line=15):
     return output
 '''
 
-class MainApplicationCLI:
+class MainTraceController:
     """
     Class that contains the UI and the startup routine of the application
 
@@ -159,7 +159,7 @@ class MainApplicationCLI:
         """        
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def main_loop(self) -> None:
+    def execute_application(self) -> None:
         """
         main loop of the application containig the UI elements that control the TracesController
         for every iteration this allows the user to do one of the following operations:
@@ -687,3 +687,5 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             plt.grid()
             plt.show()
         '''
+
+main = MainTraceController('config.ini')
