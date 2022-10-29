@@ -356,17 +356,18 @@ def print_ts_ips_and_attack(input_files_path: str, output_file_path: str,  attac
                 orig_ip = splitted[header_pos['id.orig_h']]
                 resp_ip = splitted[header_pos['id.resp_h']]
                 found = False
-                for label, times in time_table.items():
-                    for time in times:
-                        if ((orig_ip in attacker or attacker == 'everyone') and
-                            (resp_ip in attacked or attacked == 'everyone')):
-                            parsed = datetime.fromtimestamp(float(ts) - (3600 * 5)).strftime('%Y-%m-%d %H:%M:%S'),
-                            ips.append([ts, label])
-                            f_out.write(f'{ts.replace(".", ",")}{sep}{str(parsed)[1:-3].replace(".", ",")}{sep}{orig_ip}{sep}{resp_ip}{sep}{label}\n')
+                if (orig_ip == attacker) and (resp_ip == attacked):
+                    for label, times in time_table.items():
+                        for time in times:
+                            if (float(time[0]) <= float(ts) <= float(time[1])):
+                                parsed = datetime.fromtimestamp(float(ts) - (3600 * 5)).strftime('%Y-%m-%d %H:%M:%S'),
+                                ips.append([ts, label])
+                                f_out.write(f'{ts.replace(".", ",")}{sep}{str(parsed)[1:-3].replace(".", ",")}{sep}{orig_ip}{sep}{resp_ip}{sep}{label}\n')
+                                found = True
+                                break
+                        if found:
+                            found = False
                             break
-                    if found:
-                        found = True
-                        break
     
     import numpy as np
     import matplotlib.pyplot as plt
@@ -385,8 +386,8 @@ def print_ts_ips_and_attack(input_files_path: str, output_file_path: str,  attac
 
     for l in labels:
         ax.scatter(xs[l], ys[l], c=colors[l], label=l, s = 2)
-    
-    ax.set_title(datetime.fromtimestamp(float(ips[0][0]) - (3600 * 5)).strftime('%D'))
+
+    ax.set_title(f"day: {datetime.fromtimestamp(float(ips[0][0]) - (3600 * 5)).strftime('%D')} - ip attacker: {attacker} - ip attacked: {attacked}")
 
     import matplotlib.dates  as mdates
 
@@ -441,55 +442,89 @@ else:
     file_dict_conn, header_pos_conn = read_file_dict_from_file(parsed_conn_file_path)
 
 ################ concateno i benigni di monday e tuesday
+'''
 with open('dataset_benign.log', 'w') as f_out:
-    with open(conn_file_path) as f_mon:
+    with open(f"./logs/monday/conn_labeled.log") as f_mon:
         for line in f_mon:
             f_out.write(line)
-    with open(f"./logs/tuesday/{file_name}") as f_tue:
+    with open(f"./logs/tuesday/conn_labeled.log") as f_tue:
         for line in f_tue:
             if 'BENIGN' in line:
                 f_out.write(line)
+'''
 
 ################ controllo che i tizi si parlino solo durante gli orari
 
 import time
 import datetime
 
-start = './logs/wednesday/'
 colors_dict = {
     'attacking': 'red',
     'non attacking': 'black',
 }
 
+def conv_time(h: int):
+    return (h + 5) % 24
+
 attacker = '172.16.0.1'
-attacked = '192.168.10.50'
+attacked = '192.168.10.51'
 time_table = {
     "non attacking": [
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {7 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:19:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(7)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(9)}:46:59", '%Y-%m-%d %H:%M:%S').timetuple()),
         ),
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:59:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:11:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:13:59", '%Y-%m-%d %H:%M:%S').timetuple()),
         ),
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {19 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:36:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:42:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(11)}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(11)}:9:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(11)}:24:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(15)}:11:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        ),
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(15)}:33:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(19)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
         ),
     ],
     "attacking": [
+        # DoS slowloris (9:47 – 10:10 a.m.)
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:20:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(9)}:47:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:10:59", '%Y-%m-%d %H:%M:%S').timetuple()),
         ),
+        # DoS Slowhttptest (10:14 – 10:35 a.m.)
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:00:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:14:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:35:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        ),
+        # DoS Hulk (10:43 – 11 a.m.)
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(10)}:43:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(11)}:00:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        ),
+        # DoS GoldenEye (11:10 – 11:23 a.m.)
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(11)}:10:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(11)}:23:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        ),
+        # Heartbleed Port 444 (15:12 - 15:32
+        (
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(15)}:12:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-05 {conv_time(15)}:32:59", '%Y-%m-%d %H:%M:%S').timetuple()),
         ),
     ]
 }
 
+start = f'./logs/{day}/'
 print_ts_ips_and_attack(start + 'conn_labeled.log', start + 'ts_attacker_defender_label.csv', attacker, attacked, header_pos_conn, time_table, colors_dict, '\t')
 
 ################ frequenza di history
