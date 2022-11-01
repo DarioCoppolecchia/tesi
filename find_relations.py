@@ -257,37 +257,39 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
     matched_attacker = []
     matched_attacked = []
     both = []
-    with open(output_file_path, 'w') as f_out:
-        with open(input_files_path, 'r') as f_in:
-            line = next(f_in)
-            line = line.replace('\n', '')
-            f_out.write(line + '\tlabel\n')
-            for _ in tqdm.tqdm(range(n_lines)):
+    with open('bho-vdim.csv', 'w') as f_vdim:
+        with open(output_file_path, 'w') as f_out:
+            with open(input_files_path, 'r') as f_in:
                 line = next(f_in)
                 line = line.replace('\n', '')
-                splitted = line.split('\t')
-                ts = splitted[header_pos['ts']]
-                orig_ip = splitted[header_pos['id.orig_h']]
-                resp_ip = splitted[header_pos['id.resp_h']]
-                for constraints in constraint_to_label:
-                    label = constraints['label']
-                    attacker = constraints['ip_attacker']
-                    attacked = constraints['ip_attacked']
-                    if (orig_ip in attacker):
-                        matched_attacker.append(orig_ip)
-                    if (resp_ip in attacked):
-                        matched_attacked.append(resp_ip)
-                    if (orig_ip in attacker and resp_ip in attacked):
-                        both.append((orig_ip, resp_ip))
-                    if (float(constraints['lower_bound']) <= float(ts) <= float(constraints['upper_bound']) and 
-                        (orig_ip in attacker or attacker == 'everyone') and
-                        (resp_ip in attacked or attacked == 'everyone')):
-                        line += '\t' + label
-                        labels_applied.append(label)
-                        break
-                else:
-                    line += '\t' + 'BENIGN'
-                f_out.write(line + '\n')
+                f_out.write(line + '\tlabel\n')
+                for _ in tqdm.tqdm(range(n_lines)):
+                    line = next(f_in)
+                    line = line.replace('\n', '')
+                    splitted = line.split('\t')
+                    ts = splitted[header_pos['ts']]
+                    orig_ip = splitted[header_pos['id.orig_h']]
+                    resp_ip = splitted[header_pos['id.resp_h']]
+                    for constraints in constraint_to_label:
+                        label = constraints['label']
+                        attacker = constraints['ip_attacker']
+                        attacked = constraints['ip_attacked']
+                        if (orig_ip in attacker):
+                            matched_attacker.append(orig_ip)
+                        if (resp_ip in attacked):
+                            matched_attacked.append(resp_ip)
+                        if (orig_ip in attacker and resp_ip in attacked):
+                            both.append((orig_ip, resp_ip))
+                        if ((orig_ip in attacker) and
+                            (resp_ip in attacked)):
+                            if (float(constraints['lower_bound']) <= float(ts) <= float(constraints['upper_bound'])):
+                                line += '\t' + label
+                                labels_applied.append(label)
+                                f_out.write(f'{line}\n')
+                                break
+                    else:
+                        line += '\t' + 'Normal'
+                        f_out.write(f'{line}\n')
 
     from collections import Counter
     print('attacker:')
@@ -311,26 +313,26 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
 time_table = {
     "non attacking": [
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {7 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:19:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 7 ):00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 9 ):19:59", '%Y-%m-%d %H:%M:%S').timetuple())
         ),
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:59:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 10)}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 13)}:59:59", '%Y-%m-%d %H:%M:%S').timetuple())
         ),
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {19 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 19)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple())
         ),
     ],
     "attacking": [
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {9 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:20:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 9 ):20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 10)}:20:59", '%Y-%m-%d %H:%M:%S').timetuple())
         ),
         (
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:00:59", '%Y-%m-%d %H:%M:%S').timetuple())
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:00:59", '%Y-%m-%d %H:%M:%S').timetuple())
         ),
     ]
 }
@@ -431,8 +433,8 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-day = 'thursday'
-file_name = 'conn_labeled.log'
+day = 'wednesday'
+file_name = 'conn.log'
 conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
 param_to_check = 'proto'
@@ -465,7 +467,7 @@ with open('dataset_benign.log', 'w') as f_out:
 '''
 
 ################ controllo che i tizi si parlino solo durante gli orari
-
+'''
 import time
 import datetime
 
@@ -473,46 +475,12 @@ colors_dict = {
     'attacking': 'red',
     'non attacking': 'black',
 }
-
+'''
 def conv_time(day: int, h: int):
     h_5 = h + 5
     return f"{day + (1 if h_5 > 24 else 0)} {h_5 % 24}"
-
+'''
 time_table = {
-    "non attacking": [
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 7)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 9)}:19:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:14:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:36:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:39:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:43:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:18:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:32:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:36:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:52:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:03:59", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-        (
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:46:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-            time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 19)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        ),
-    ],
     "attacking": [
         (
             time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 9)}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
@@ -545,13 +513,13 @@ time_table = {
     ]
 }
 
-attacker = '205.174.165.73'
-attacked = '192.168.10.8'
+attacker = 'everyone'
+attacked = '192.168.10.50'
 # uncomment if address inverted
 attacker, attacked = attacked, attacker
 start = f'./logs/{day}/'
-print_ts_ips_and_attack(start + 'conn_labeled.log', start + f'ts_attacker_defender_label_{attacker}_{attacked}.csv', attacker, attacked, header_pos_conn, time_table, colors_dict, '\t')
-
+#print_ts_ips_and_attack(start + 'conn_labeled.log', start + f'ts_attacker_defender_label_{attacker}_{attacked}.csv', attacker, attacked, header_pos_conn, time_table, colors_dict, '\t')
+'''
 ################ frequenza di history
 '''
 freq_dict = get_frequency_of_value_of_column_from_file('history', conn_file_path)
@@ -637,369 +605,327 @@ for k, v in attributes_to_digitize.items():
 # applico le label agli event nei file
 import time
 import datetime
-'''
-constraint_to_label = [
+constraint_to_label_monday = []
+
+constraint_to_label_tuesday = [
     # Morning
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {10 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {11 + 5}:04:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(4, 9)}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(4, 10)}:20:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(4, 14)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(4, 15)}:00:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+]
+
+constraint_to_label_wednesday = [
+    # Morning
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 9)}:47:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 10)}:10:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 10)}:14:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 10)}:35:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 10)}:43:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 11)}:00:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 11)}:10:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 11)}:23:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 15)}:12:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(5, 15)}:32:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+]
+
+constraint_to_label_friday = [
+    # Morning
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 10)}:02:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 11)}:02:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '192.168.10.15',
             '192.168.10.9',
             '192.168.10.14',
             '192.168.10.5',
             '192.168.10.8',
-            ],
-        'label': 'Botnet-ARES',
+            },
+        'ip_attacked': {
+            '205.174.165.73',
+            },
+        'label': 'Anomaly',
     },
     # Afternoon
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:55:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:57:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 13)}:55:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:24:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {13 + 5}:58:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:33:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:33:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:01:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:04:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:35:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:35:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:05:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:07:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:08:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:10:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:11:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:13:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:14:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:16:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:17:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:19:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:24:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:33:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:33:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
-    },
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:35:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:35:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-on',
+            },
+        'label': 'Anomaly',
     },
 
 
 
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:51:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:53:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:51:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:53:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sS',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:54:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:56:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:54:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:56:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sT',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:57:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {14 + 5}:59:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:57:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 14)}:59:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sF',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:02:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:02:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sX',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:03:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:05:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:03:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:05:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sN',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:06:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:07:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:06:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:07:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sP',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:08:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:10:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:08:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:10:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sV',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:11:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:12:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:11:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:12:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sU',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:13:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:15:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:13:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:15:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sO',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:16:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:16:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:18:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sA',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:19:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:21:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:19:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:21:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sW',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:24:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:22:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:24:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sR',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:25:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:25:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:25:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:25:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sL',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:26:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:27:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:26:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:27:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-sl',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:28:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:29:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:28:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:29:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'Port-scan-Firewall-Rule-off-b',
-    },
-
-
-
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {15 + 5}:54:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-06 {16 + 5}:18:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'DDoS-LOIT',
-    },
-]
-'''
-constraint_to_label = [
-    {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {9 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {10 + 5}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
-            '172.16.0.1',
-            ],
-        'ip_attacked': [
-            '192.168.10.50',
-            ],
-        'label': 'FTP-Patator',
+            },
+        'label': 'Anomaly',
     },
     {
-        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {14 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-04 {15 + 5}:00:00", '%Y-%m-%d %H:%M:%S').timetuple()),
-        'ip_attacker': [
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 15)}:56:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(7, 16)}:16:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
             '172.16.0.1',
-            ],
-        'ip_attacked': [
+            },
+        'ip_attacked': {
             '192.168.10.50',
-            ],
-        'label': 'SSH-Patator',
+            },
+        'label': 'Anomaly',
     },
 ]
 
-#apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label)
-'''
-'''
+apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label_wednesday)
+
 ################### controllo che nello stesso trace sono presenti le stesse label
 '''
 print(header_pos_conn)
