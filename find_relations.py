@@ -264,6 +264,7 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
                 line = line.replace('\n', '')
                 f_out.write(line + '\tlabel\n')
                 for _ in tqdm.tqdm(range(n_lines)):
+                    found = False # the ips correspond
                     line = next(f_in)
                     line = line.replace('\n', '')
                     splitted = line.split('\t')
@@ -280,16 +281,20 @@ def apply_label_to_events_in_file(input_files_path: str, output_file_path: str, 
                             matched_attacked.append(resp_ip)
                         if (orig_ip in attacker and resp_ip in attacked):
                             both.append((orig_ip, resp_ip))
-                        if ((orig_ip in attacker) and
-                            (resp_ip in attacked)):
+                        if ((orig_ip in attacker or 'everyone' in attacker) and
+                            (resp_ip in attacked or 'everyone' in attacked)):
+                            found = True
                             if (float(constraints['lower_bound']) <= float(ts) <= float(constraints['upper_bound'])):
                                 line += '\t' + label
                                 labels_applied.append(label)
                                 f_out.write(f'{line}\n')
                                 break
-                    else:
-                        line += '\t' + 'Normal'
-                        f_out.write(f'{line}\n')
+                    else: # no break
+                        if not found:
+                            line += '\t' + 'Normal'
+                            f_out.write(f'{line}\n')
+                        else:
+                            found = False
 
     from collections import Counter
     print('attacker:')
@@ -433,7 +438,7 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
-day = 'wednesday'
+day = 'friday'
 file_name = 'conn.log'
 conn_file_path = f"./logs/{day}/{file_name}"
 value_file_path = "./logs/ssl.log"
@@ -605,7 +610,14 @@ for k, v in attributes_to_digitize.items():
 # applico le label agli event nei file
 import time
 import datetime
+
 constraint_to_label_monday = []
+
+
+
+
+
+
 
 constraint_to_label_tuesday = [
     # Morning
@@ -632,6 +644,12 @@ constraint_to_label_tuesday = [
         'label': 'Anomaly',
     },
 ]
+
+
+
+
+
+
 
 constraint_to_label_wednesday = [
     # Morning
@@ -691,6 +709,101 @@ constraint_to_label_wednesday = [
         'label': 'Anomaly',
     },
 ]
+
+
+
+
+
+
+
+constraint_to_label_thursday = [
+    # Morning
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 9)}:20:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:00:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:15:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:35:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:40:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 10)}:42:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '172.16.0.1',
+            },
+        'ip_attacked': {
+            '192.168.10.50',
+            },
+        'label': 'Anomaly',
+    },
+
+    # Afternoon
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:19:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:35:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '192.168.10.8',
+            },
+        'ip_attacked': {
+            '205.174.165.73',
+            },
+        'label': 'Meta exploit',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:53:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:00:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '192.168.10.25',
+            },
+        'ip_attacked': {
+            '205.174.165.73',
+            },
+        'label': 'Infiltration Cool disk',
+    },
+
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:04:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:45:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '192.168.10.8',
+            },
+        'ip_attacked': {
+            '205.174.165.73',
+            },
+        'label': 'Infiltration Dropbox First',
+    },
+    {
+        'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:04:00", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'upper_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:45:59", '%Y-%m-%d %H:%M:%S').timetuple()),
+        'ip_attacker': {
+            '192.168.10.8',
+            },
+        'ip_attacked': {
+            'everyone',
+            },
+        'label': 'Infiltration Dropbox Second',
+    },
+]
+
+
+
+
+
 
 constraint_to_label_friday = [
     # Morning
@@ -924,7 +1037,7 @@ constraint_to_label_friday = [
     },
 ]
 
-apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label_wednesday)
+apply_label_to_events_in_file(conn_file_path, conn_file_path.replace(".log", "_labeled.log"), header_pos_conn, constraint_to_label_friday)
 
 ################### controllo che nello stesso trace sono presenti le stesse label
 '''
