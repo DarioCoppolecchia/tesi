@@ -7,59 +7,6 @@ from ConnectionsModule.PROTO                import PROTO
 from DiscretizerModule.DISCRETIZATION_TYPE  import DISCRETIZATION_TYPE
 from ConnectionsModule.EventHistory         import EventHistory
 
-'''
-def group_by_occ(dict):
-    result = {}
-    for key, val in dict.items():
-        if val in result:
-            result[val] += [key]
-        else:
-            result[val] = [key]
-
-    return result
-
-def to_json(obj: dict, max_element_per_line=15):
-
-    output = '{\n'
-    max_count_desc = len(obj) - 1
-    for j, (attr, descriptor) in enumerate(obj.items()):
-        output += f'\t"{attr}": ' + '{\n'
-        for key, desc in descriptor.items():
-            if isinstance(desc, str):
-                output += f'\t\t"{key}": "{desc}",\n'
-            elif isinstance(desc, list):
-                output += f'\t\t"{key}": {desc},\n'
-            elif isinstance(desc, dict):
-                output += f'\t\t"{key}":' + ' {\n'
-                max_count_occ = len(desc) - 1
-                for i, (occ, values) in enumerate(desc.items()):
-                    if isinstance(values, int):
-                        values = [values]
-                    output += f'\t\t\t"{occ}": [\n'
-                    while len(values) > max_element_per_line:
-                        temp = values[:max_element_per_line]
-                        del values[:max_element_per_line]
-                        output += '\t\t\t\t'
-                        for t in temp[:-1]:
-                            output += f'{t}, '
-                        output += f'{temp[-1]},\n'
-                    output += '\t\t\t\t'
-                    for t in values[:-1]:
-                        output += f'{t}, '
-                    output += f'{values[-1]}\n\t\t\t]'
-                    if i < max_count_occ:
-                        output += ',\n'
-                    else:
-                        output += '\n'
-                output += '\t\t}\n\t}'
-        if j < max_count_desc:
-            output += ',\n'
-        else:
-            output += '\n'
-    output += '}'
-    return output
-'''
-
 class MainTraceController:
     """
     Class that contains the UI and the startup routine of the application

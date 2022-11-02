@@ -5,14 +5,24 @@ import pickle
 
 class AnomalyDetector:
     def __init__(self) -> None:
-        self.__model = IsolationForest()
+        hyperparameters = {
+            "n_estimetors": 100,
+            "max_samples": 'auto', # può anche essere un intero o un float
+            "contamination": 'auto', # può anche essere un float
+            "max_features": 1.0, 
+            "bootstrap": True,
+            "n_jobs": -1, # multiprocessing
+            "random_state": 42,
+            "verbose": 10,
+            "warm_start": False,
+        }
+
+        self.__model = IsolationForest(**hyperparameters)
 
     def train(self, dataset: DataFrame):
-        # TODO
         self.__model.fit(dataset)
 
     def test(self, dataset: DataFrame) -> DataFrame:
-        # TODO
         return self.__model.predict(dataset)
 
     def create_confusion_matrix(self, Y: DataFrame, y_pred: DataFrame ) -> str:
