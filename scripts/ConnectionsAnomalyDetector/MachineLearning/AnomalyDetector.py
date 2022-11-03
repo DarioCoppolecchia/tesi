@@ -10,7 +10,7 @@ class AnomalyDetector:
             "max_samples": 'auto', # può anche essere un intero o un float
             "contamination": 'auto', # può anche essere un float
             "max_features": 1.0, 
-            "bootstrap": True,
+            "bootstrap": False,
             "n_jobs": -1, # multiprocessing
             "random_state": 42,
             "verbose": 10,

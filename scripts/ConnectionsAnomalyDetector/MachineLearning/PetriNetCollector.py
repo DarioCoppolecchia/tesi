@@ -17,5 +17,4 @@ class PetriNetCollector:
             pn.train(self.__data_log, self.__delta, attr)
 
     def create_PetriNet_dataset(self) -> DataFrame:
-        # TODO
         return DataFrame()
