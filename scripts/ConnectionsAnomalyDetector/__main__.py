@@ -3,12 +3,11 @@ from EntryPoint.MainMachineLearning import MainMachineLearning
 import sys
 
 if __name__ == "__main__":
-    print('modificato')
-    input()
+    # TODO: da fixare il fatto che non sembra essersi aggiornato
     operation = sys.argv[1]
     if operation == 'dataset':
-        MainTraceController('config.ini')
-    elif operation == 'ml':
         MainMachineLearning('config.ini')
+    elif operation == 'ml':
+        MainTraceController('config.ini')
     else:
         print('!!!!operation invalid!!!!\nvalid operations:\n- dataset\n- ml\n')
