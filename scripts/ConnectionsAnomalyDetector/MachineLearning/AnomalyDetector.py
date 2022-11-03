@@ -25,7 +25,7 @@ class AnomalyDetector:
     def test(self, dataset: DataFrame) -> DataFrame:
         return self.__model.predict(dataset)
 
-    def create_confusion_matrix(self, Y: DataFrame, y_pred: DataFrame ) -> str:
+    def create_confusion_matrix(self, Y: DataFrame, y_pred: DataFrame) -> str:
         # TODO
         classification_report(Y, y_pred)
 

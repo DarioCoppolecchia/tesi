@@ -245,15 +245,13 @@ class TracesController:
         print('...label application completed')
     '''
         
-    def print_Trace_list_to_xes_file(self, attr_trace: list, attr_event: list, activity_attr: str) -> None:
-        """prints all the Traces list to a xes file according the the attr_trace and attr_event list of attributes, and the activity_attr that is used to indicate the attribute selected as the Activity
+    def print_Trace_list_to_xes_file(self, attr_trace: list, attr_event: list) -> None:
+        """prints all the Traces list to a xes file according the the attr_trace and attr_event list of attributes
 
         :param attr_trace: list of the attributes to select for the traces
         :type attr_trace: list[str]
         :param attr_event: list of the attributes to select for the events
         :type attr_event: list[str]
-        :param activity_attr: attribute selected as the Activity
-        :type activity_attr: str
         """
         from xml.etree.ElementTree import Element, SubElement, tostring
 
@@ -321,45 +319,6 @@ class TracesController:
             'resp_zero_window' in attr_event,
         ]
 
-        activity_attr_presence = [
-            'ts' == activity_attr,
-            'service' == activity_attr,
-            'duration' == activity_attr,
-            'orig_bytes' == activity_attr,
-            'resp_bytes' == activity_attr,
-            'conn_state' == activity_attr,
-            'missed_bytes' == activity_attr,
-            'orig_pkts' == activity_attr,
-            'orig_ip_bytes' == activity_attr,
-            'resp_pkts' == activity_attr,
-            'resp_ip_bytes' == activity_attr,
-
-            'orig_syn' == activity_attr,
-            'orig_fin' == activity_attr,
-            'orig_syn_ack' == activity_attr,
-            'orig_rst' == activity_attr,
-            'resp_syn' == activity_attr,
-            'resp_fin' == activity_attr,
-            'resp_syn_ack' == activity_attr,
-            'resp_rst' == activity_attr,
-            'orig_ack' == activity_attr,
-            'orig_payload' == activity_attr,
-            'orig_inconsistent' == activity_attr,
-            'orig_multi_flag' == activity_attr,
-            'resp_ack' == activity_attr,
-            'resp_payload' == activity_attr,
-            'resp_inconsistent' == activity_attr,
-            'resp_multi_flag' == activity_attr,
-            'orig_bad_checksum' == activity_attr,
-            'orig_content_gap' == activity_attr,
-            'orig_retransmitted_payload' == activity_attr,
-            'orig_zero_window' == activity_attr,
-            'resp_bad_checksum' == activity_attr,
-            'resp_content_gap' == activity_attr,
-            'resp_retransmitted_payload' == activity_attr,
-            'resp_zero_window' == activity_attr,
-        ]
-
         if event_attr_presence[0]:
             SubElement(globalTagEvent, 'string', {'key': 'time:ts', 'value':'ts'})
 
@@ -407,153 +366,77 @@ class TracesController:
                 if event_attr_presence[0]:
                     SubElement(eventTag, 'string', {'key': 'time:ts', 'value': event.get_ts()})
                 if event_attr_presence[1]:
-                    SubElement(eventTag, 'string', {'key': 'service', 'value': event.get_service()})
+                    SubElement(eventTag, 'string', {'key': 'concept:service', 'value': event.get_service()})
                 if event_attr_presence[2]:
-                    SubElement(eventTag, 'string', {'key': 'duration', 'value': event.get_discretized_duration()})
+                    SubElement(eventTag, 'string', {'key': 'concept:duration', 'value': event.get_discretized_duration()})
                 if event_attr_presence[3]:
-                    SubElement(eventTag, 'string', {'key': 'orig_bytes', 'value': event.get_discretized_orig_bytes()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_bytes', 'value': event.get_discretized_orig_bytes()})
                 if event_attr_presence[4]:
-                    SubElement(eventTag, 'string', {'key': 'resp_bytes', 'value': event.get_discretized_resp_bytes()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_bytes', 'value': event.get_discretized_resp_bytes()})
                 if event_attr_presence[5]:
-                    SubElement(eventTag, 'string', {'key': 'conn_state', 'value': CONN_STATE.state_to_str(event.get_conn_state())})
+                    SubElement(eventTag, 'string', {'key': 'concept:conn_state', 'value': CONN_STATE.state_to_str(event.get_conn_state())})
                 if event_attr_presence[6]:
-                    SubElement(eventTag, 'string', {'key': 'missed_bytes', 'value': event.get_discretized_missed_bytes()})
+                    SubElement(eventTag, 'string', {'key': 'concept:missed_bytes', 'value': event.get_discretized_missed_bytes()})
                 if event_attr_presence[7]:
-                    SubElement(eventTag, 'string', {'key': 'orig_pkts', 'value': event.get_discretized_orig_pkts()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_pkts', 'value': event.get_discretized_orig_pkts()})
                 if event_attr_presence[8]:
-                    SubElement(eventTag, 'string', {'key': 'orig_ip_bytes', 'value': event.get_discretized_orig_ip_bytes()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_ip_bytes', 'value': event.get_discretized_orig_ip_bytes()})
                 if event_attr_presence[9]:
-                    SubElement(eventTag, 'string', {'key': 'resp_pkts', 'value': event.get_discretized_resp_pkts()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_pkts', 'value': event.get_discretized_resp_pkts()})
                 if event_attr_presence[10]:
-                    SubElement(eventTag, 'string', {'key': 'resp_ip_bytes', 'value': event.get_discretized_resp_ip_bytes()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_ip_bytes', 'value': event.get_discretized_resp_ip_bytes()})
                 
                 if event_attr_presence[11]:
-                    SubElement(eventTag, 'string', {'key': 'orig_syn', 'value': event.get_discretized_orig_syn()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_syn', 'value': event.get_discretized_orig_syn()})
                 if event_attr_presence[12]:
-                    SubElement(eventTag, 'string', {'key': 'orig_fin', 'value': event.get_discretized_orig_fin()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_fin', 'value': event.get_discretized_orig_fin()})
                 if event_attr_presence[13]:
-                    SubElement(eventTag, 'string', {'key': 'orig_syn_ack', 'value': event.get_discretized_orig_syn_ack()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_syn_ack', 'value': event.get_discretized_orig_syn_ack()})
                 if event_attr_presence[14]:
-                    SubElement(eventTag, 'string', {'key': 'orig_rst', 'value': event.get_discretized_orig_rst()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_rst', 'value': event.get_discretized_orig_rst()})
                 if event_attr_presence[15]:
-                    SubElement(eventTag, 'string', {'key': 'resp_syn', 'value': event.get_discretized_resp_syn()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_syn', 'value': event.get_discretized_resp_syn()})
                 if event_attr_presence[16]:
-                    SubElement(eventTag, 'string', {'key': 'resp_fin', 'value': event.get_discretized_resp_fin()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_fin', 'value': event.get_discretized_resp_fin()})
                 if event_attr_presence[17]:
-                    SubElement(eventTag, 'string', {'key': 'resp_syn_ack', 'value': event.get_discretized_resp_syn_ack()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_syn_ack', 'value': event.get_discretized_resp_syn_ack()})
                 if event_attr_presence[18]:
-                    SubElement(eventTag, 'string', {'key': 'resp_rst', 'value': event.get_discretized_resp_rst()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_rst', 'value': event.get_discretized_resp_rst()})
                 
                 if event_attr_presence[19]:
-                    SubElement(eventTag, 'string', {'key': 'orig_ack', 'value': str(event.get_orig_ack())})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_ack', 'value': str(event.get_orig_ack())})
                 if event_attr_presence[20]:
-                    SubElement(eventTag, 'string', {'key': 'orig_payload', 'value': str(event.get_orig_payload())})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_payload', 'value': str(event.get_orig_payload())})
                 if event_attr_presence[21]:
-                    SubElement(eventTag, 'string', {'key': 'orig_inconsistent', 'value': str(event.get_orig_inconsistent())})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_inconsistent', 'value': str(event.get_orig_inconsistent())})
                 if event_attr_presence[22]:
-                    SubElement(eventTag, 'string', {'key': 'orig_multi_flag', 'value': str(event.get_orig_multi_flag())})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_multi_flag', 'value': str(event.get_orig_multi_flag())})
                 if event_attr_presence[23]:
-                    SubElement(eventTag, 'string', {'key': 'resp_ack', 'value': str(event.get_resp_ack())})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_ack', 'value': str(event.get_resp_ack())})
                 if event_attr_presence[24]:
-                    SubElement(eventTag, 'string', {'key': 'resp_payload', 'value': str(event.get_resp_payload())})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_payload', 'value': str(event.get_resp_payload())})
                 if event_attr_presence[25]:
-                    SubElement(eventTag, 'string', {'key': 'resp_inconsistent', 'value': str(event.get_resp_inconsistent())})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_inconsistent', 'value': str(event.get_resp_inconsistent())})
                 if event_attr_presence[26]:
-                    SubElement(eventTag, 'string', {'key': 'resp_multi_flag', 'value': str(event.get_resp_multi_flag())})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_multi_flag', 'value': str(event.get_resp_multi_flag())})
 
                 if event_attr_presence[27]:
-                    SubElement(eventTag, 'string', {'key': 'orig_bad_checksum', 'value': event.get_discretized_orig_bad_checksum()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_bad_checksum', 'value': event.get_discretized_orig_bad_checksum()})
                 if event_attr_presence[28]:
-                    SubElement(eventTag, 'string', {'key': 'orig_content_gap', 'value': event.get_discretized_orig_content_gap()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_content_gap', 'value': event.get_discretized_orig_content_gap()})
                 if event_attr_presence[29]:
-                    SubElement(eventTag, 'string', {'key': 'orig_retransmitted_payload', 'value': event.get_discretized_orig_retransmitted_payload()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_retransmitted_payload', 'value': event.get_discretized_orig_retransmitted_payload()})
                 if event_attr_presence[30]:
-                    SubElement(eventTag, 'string', {'key': 'orig_zero_window', 'value': event.get_discretized_orig_zero_window()})
+                    SubElement(eventTag, 'string', {'key': 'concept:orig_zero_window', 'value': event.get_discretized_orig_zero_window()})
                 if event_attr_presence[31]:
-                    SubElement(eventTag, 'string', {'key': 'resp_bad_checksum', 'value': event.get_discretized_resp_bad_checksum()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_bad_checksum', 'value': event.get_discretized_resp_bad_checksum()})
                 if event_attr_presence[32]:
-                    SubElement(eventTag, 'string', {'key': 'resp_content_gap', 'value': event.get_discretized_resp_content_gap()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_content_gap', 'value': event.get_discretized_resp_content_gap()})
                 if event_attr_presence[33]:
-                    SubElement(eventTag, 'string', {'key': 'resp_retransmitted_payload', 'value': event.get_discretized_resp_retransmitted_payload()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_retransmitted_payload', 'value': event.get_discretized_resp_retransmitted_payload()})
                 if event_attr_presence[34]:
-                    SubElement(eventTag, 'string', {'key': 'resp_zero_window', 'value': event.get_discretized_resp_zero_window()})
+                    SubElement(eventTag, 'string', {'key': 'concept:resp_zero_window', 'value': event.get_discretized_resp_zero_window()})
                 
-
-                # handling the activity
-                if activity_attr_presence[0]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_ts()})
-                elif activity_attr_presence[1]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_service()})
-                elif activity_attr_presence[2]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_duration()})
-                elif activity_attr_presence[3]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_bytes()})
-                elif activity_attr_presence[4]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_bytes()})
-                elif activity_attr_presence[5]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': CONN_STATE.state_to_str(event.get_conn_state())})
-                elif activity_attr_presence[6]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_missed_bytes()})
-                elif activity_attr_presence[7]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_pkts()})
-                elif activity_attr_presence[8]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_ip_bytes()})
-                elif activity_attr_presence[9]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_pkts()})
-                elif activity_attr_presence[10]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_ip_bytes()})
-
-                elif activity_attr_presence[11]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_syn()})
-                elif activity_attr_presence[12]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_fin()})
-                elif activity_attr_presence[13]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_syn_ack()})
-                elif activity_attr_presence[14]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_rst()})
-                elif activity_attr_presence[15]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_syn()})
-                elif activity_attr_presence[16]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_fin()})
-                elif activity_attr_presence[17]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_syn_ack()})
-                elif activity_attr_presence[18]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_rst()})
-                
-                elif activity_attr_presence[19]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_orig_ack())})
-                elif activity_attr_presence[20]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_orig_payload())})
-                elif activity_attr_presence[21]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_orig_inconsistent())})
-                elif activity_attr_presence[22]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_orig_multi_flag())})
-                elif activity_attr_presence[23]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_resp_ack())})
-                elif activity_attr_presence[24]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_resp_payload())})
-                elif activity_attr_presence[25]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_resp_inconsistent())})
-                elif activity_attr_presence[26]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': str(event.get_resp_multi_flag())})
-
-                elif activity_attr_presence[27]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_bad_checksum()})
-                elif activity_attr_presence[28]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_content_gap()})
-                elif activity_attr_presence[29]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_retransmitted_payload()})
-                elif activity_attr_presence[30]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_orig_zero_window()})
-                elif activity_attr_presence[31]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_bad_checksum()})
-                elif activity_attr_presence[32]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_content_gap()})
-                elif activity_attr_presence[33]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_retransmitted_payload()})
-                elif activity_attr_presence[34]:
-                    SubElement(eventTag, 'string', {'key': 'Activity', 'value': event.get_discretized_resp_zero_window()})
-
         # rough_string = tostring(tree, 'utf-8')
         # print('finito rough_string')
         # reparsed = minidom.parseString(rough_string)
