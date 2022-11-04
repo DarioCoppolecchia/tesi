@@ -631,5 +631,3 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             plt.grid()
             plt.show()
         '''
-
-main = MainTraceController('config.ini')

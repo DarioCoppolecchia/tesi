@@ -48,5 +48,3 @@ class MainMachineLearning:
     def __test_model():
         # TODO: eseguire il testing 
         pass
-
-main = MainMachineLearning('config.ini')

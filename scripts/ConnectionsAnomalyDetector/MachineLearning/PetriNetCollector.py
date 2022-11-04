@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from PetriNet import PetriNet
+from .PetriNet import PetriNet
 import pm4py
 
 class PetriNetCollector:
