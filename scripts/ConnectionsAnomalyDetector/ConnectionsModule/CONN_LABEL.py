@@ -4,12 +4,10 @@ class CONN_LABEL(Enum):
     """
     Possible labels that a Connection can have
         #. NULL
-        #. FTP_PATATOR
-        #. SSH_PATATOR
+        #. ANOMALY
     """    
-    NULL = auto()
-    FTP_PATATOR = auto()
-    SSH_PATATOR = auto()
+    NORMAL = auto()
+    ANOMALY = auto()
 
     @classmethod
     def str_to_conn_label(cls, val: str) -> int:
@@ -20,12 +18,10 @@ class CONN_LABEL(Enum):
         :return: the value relative to the string
         :rtype: int
         """        
-        if val == 'BENIGN':
-            return cls.NULL
-        elif val == 'FTP-Patator':
-            return cls.FTP_PATATOR
-        elif val == 'SSH-Patator':
-            return cls.SSH_PATATOR
+        if val == 'Normal':
+            return cls.NORMAL
+        elif val == 'Anomaly':
+            return cls.ANOMALY
     
     @classmethod
     def conn_label_to_str(cls, conn_label: int) -> str:
@@ -36,9 +32,7 @@ class CONN_LABEL(Enum):
         :return: the string relative to the value
         :rtype: str
         """  
-        if conn_label == cls.NULL:
-            return 'BENIGN'
-        if conn_label == cls.FTP_PATATOR:
-            return 'FTP-Patator'
-        if conn_label == cls.SSH_PATATOR:
-            return 'SSH-Patator'
+        if conn_label == cls.NORMAL:
+            return 'Normal'
+        if conn_label == cls.ANOMALY:
+            return 'Anomaly'

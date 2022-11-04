@@ -332,7 +332,7 @@ class TracesController:
         SubElement(tree, 'classifier', {'name': 'activity classifier', 'keys':'Activity'})
 
 
-        for trace in tqdm(self.__network_traffic[:100]):
+        for trace in tqdm(self.__network_traffic):
             traceTag = SubElement(tree, 'trace')
             
             if trace_attr_presence[0]:
