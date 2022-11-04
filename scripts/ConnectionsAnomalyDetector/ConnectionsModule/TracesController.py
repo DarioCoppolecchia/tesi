@@ -266,7 +266,7 @@ class TracesController:
         SubElement(tree, 'extension', {'name': "Time", 'prefix': "time", 'uri': "http://code.deckfour.org/xes/time.xesext"})
         globalTagTrace = SubElement(tree, 'global', {'scope': 'trace'})
         for attr in attr_trace:
-            SubElement(globalTagTrace, 'string', {'key': f'concept:{attr}', 'value': f'{attr}'})
+            SubElement(globalTagTrace, 'string', {'key': f'concept:{attr}', 'value': f'string'})
 
         globalTagEvent = SubElement(tree, 'global', {'scope': 'event'})
 
@@ -325,14 +325,13 @@ class TracesController:
         attr_event = [attr for attr in attr_event if attr != 'ts']
 
         for attr in attr_event:
-            SubElement(globalTagEvent, 'string', {'key': attr, 'value':attr})
-        SubElement(globalTagEvent, 'string', {'key': 'Activity', 'value':'string'})
+            SubElement(globalTagEvent, 'string', {'key': f'concept:{attr}', 'value': f'string'})
         
         SubElement(tree, 'classifier', {'name': 'Activity', 'keys':'Activity'})
         SubElement(tree, 'classifier', {'name': 'activity classifier', 'keys':'Activity'})
 
 
-        for trace in tqdm(self.__network_traffic):
+        for trace in tqdm(self.__network_traffic[:100]):
             traceTag = SubElement(tree, 'trace')
             
             if trace_attr_presence[0]:
@@ -350,18 +349,6 @@ class TracesController:
 
             for event in trace.get_events():
                 eventTag = SubElement(traceTag, 'event')
-                if trace_attr_presence[0]:
-                    SubElement(eventTag, 'string', {'key': 'concept:orig_ip', 'value': trace.get_orig_ip()})
-                if trace_attr_presence[1]:
-                    SubElement(eventTag, 'string', {'key': 'concept:orig_port', 'value': str(trace.get_orig_port())})
-                if trace_attr_presence[2]:
-                    SubElement(eventTag, 'string', {'key': 'concept:resp_ip', 'value': trace.get_resp_ip()})
-                if trace_attr_presence[3]:
-                    SubElement(eventTag, 'string', {'key': 'concept:resp_port', 'value': str(trace.get_resp_port())})
-                if trace_attr_presence[4]:
-                    SubElement(eventTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
-                if trace_attr_presence[5]:
-                    SubElement(eventTag, 'string', {'key': 'concept:label', 'value': CONN_LABEL.conn_label_to_str(trace.get_label())})
 
                 if event_attr_presence[0]:
                     SubElement(eventTag, 'string', {'key': 'time:ts', 'value': event.get_ts()})
@@ -436,14 +423,18 @@ class TracesController:
                     SubElement(eventTag, 'string', {'key': 'concept:resp_retransmitted_payload', 'value': event.get_discretized_resp_retransmitted_payload()})
                 if event_attr_presence[34]:
                     SubElement(eventTag, 'string', {'key': 'concept:resp_zero_window', 'value': event.get_discretized_resp_zero_window()})
-                
-        # rough_string = tostring(tree, 'utf-8')
-        # print('finito rough_string')
-        # reparsed = minidom.parseString(rough_string)
-        # print('finito reparsed')
+        
+        from xml.dom import minidom
+        rough_string = tostring(tree, 'utf-8')
+        print('finito rough_string')
+        reparsed = minidom.parseString(rough_string)
+        print('finito reparsed')
         with open(self.__path_of_file_xes, 'w') as f:
             print(f'started writing to xes file named {self.__path_of_file_xes}')
-            f.write(str(tostring(tree, 'utf-8'))[2:-1])
+            if reparsed:
+                f.write(reparsed.toprettyxml())
+            else:
+                f.write(str(tostring(tree, 'utf-8'))[2:-1])
             print('...writing the list of Traces to a xes file completed')
         
     def __get_list_of_attribute(self, attribute: str) -> list:

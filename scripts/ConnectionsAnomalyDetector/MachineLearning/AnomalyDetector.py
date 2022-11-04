@@ -6,7 +6,7 @@ import pickle
 class AnomalyDetector:
     def __init__(self) -> None:
         hyperparameters = {
-            "n_estimetors": 100,
+            "n_estimators": 100,
             "max_samples": 'auto', # può anche essere un intero o un float
             "contamination": 'auto', # può anche essere un float
             "max_features": 1.0, 
@@ -22,7 +22,7 @@ class AnomalyDetector:
     def train(self, dataset: DataFrame):
         self.__model.fit(dataset)
 
-    def test(self, dataset: DataFrame) -> DataFrame:
+    def predict(self, dataset: DataFrame) -> DataFrame:
         return self.__model.predict(dataset)
 
     def create_confusion_matrix(self, Y: DataFrame, y_pred: DataFrame) -> str:

@@ -4,7 +4,6 @@ import sys
 
 if __name__ == "__main__":
     #try:
-        print(sys.argv[1])
         operation = sys.argv[1]
         if operation == 'dataset':
             MainTraceController('config.ini')
