@@ -426,15 +426,13 @@ class TracesController:
         
         from xml.dom import minidom
         rough_string = tostring(tree, 'utf-8')
-        print('finito rough_string')
         reparsed = minidom.parseString(rough_string)
-        print('finito reparsed')
         with open(self.__path_of_file_xes, 'w') as f:
             print(f'started writing to xes file named {self.__path_of_file_xes}')
             if reparsed:
                 f.write(reparsed.toprettyxml())
             else:
-                f.write(str(tostring(tree, 'utf-8'))[2:-1])
+                f.write(str(rough_string)[2:-1])
             print('...writing the list of Traces to a xes file completed')
         
     def __get_list_of_attribute(self, attribute: str) -> list:

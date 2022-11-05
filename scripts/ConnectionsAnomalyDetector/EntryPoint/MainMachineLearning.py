@@ -13,7 +13,7 @@ class MainMachineLearning:
         config.read(config_path)
 
         if 'ML' in config:
-            delta = config['ML']['delta'] if 'delta' in config['ML'] else 0.0
+            delta = float(config['ML']['delta']) if 'delta' in config['ML'] else 0.0
         else:
             delta = 0.0
 
@@ -22,7 +22,7 @@ class MainMachineLearning:
         else:
             attrs = ['ts','service','duration','orig_bytes','resp_bytes','conn_state','missed_bytes','orig_syn','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes','orig_syn','orig_fin','orig_syn_ack','orig_rst','resp_syn','resp_fin','resp_syn_ack','resp_rst','orig_bad_checksum','orig_content_gap','orig_retransmitted_payload','orig_zero_window','resp_bad_checksum','resp_content_gap','resp_retransmitted_payload','resp_zero_window','orig_ack','orig_payload','orig_inconsistent','orig_multi_flag','resp_ack','resp_payload','resp_inconsistent','resp_multi_flag']
 
-        self.__petriNetCollector = PetriNetCollector(attrs, delta)
+        self.__petriNetCollector = PetriNetCollector(attrs.split(','), delta)
         self.__anomalyDetector = AnomalyDetector()
 
     def execute_application(self, config_path: str='') -> None:
