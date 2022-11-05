@@ -265,8 +265,9 @@ class TracesController:
         SubElement(tree, 'extension', {'name': "Concept", 'prefix': "concept", 'uri': "http://code.deckfour.org/xes/concept.xesext"})
         SubElement(tree, 'extension', {'name': "Time", 'prefix': "time", 'uri': "http://code.deckfour.org/xes/time.xesext"})
         globalTagTrace = SubElement(tree, 'global', {'scope': 'trace'})
-        for attr in attr_trace:
-            SubElement(globalTagTrace, 'string', {'key': f'concept:{attr}', 'value': f'string'})
+        SubElement(globalTagTrace, 'string', {'key': f'concept:name', 'value': f'string'})
+        SubElement(globalTagTrace, 'string', {'key': f'concept:proto', 'value': f'string'})
+        SubElement(globalTagTrace, 'string', {'key': f'concept:label', 'value': f'string'})
 
         globalTagEvent = SubElement(tree, 'global', {'scope': 'event'})
 
@@ -324,6 +325,10 @@ class TracesController:
 
         attr_event = [attr for attr in attr_event if attr != 'ts']
 
+        SubElement(globalTagEvent, 'string', {'key': f'concept:name', 'value': f'string'})
+        SubElement(globalTagEvent, 'string', {'key': f'concept:proto', 'value': f'string'})
+        SubElement(globalTagEvent, 'string', {'key': f'concept:label', 'value': f'string'})
+
         for attr in attr_event:
             SubElement(globalTagEvent, 'string', {'key': f'concept:{attr}', 'value': f'string'})
         
@@ -334,14 +339,8 @@ class TracesController:
         for trace in tqdm(self.__network_traffic[:100]):
             traceTag = SubElement(tree, 'trace')
             
-            if trace_attr_presence[0]:
-                SubElement(traceTag, 'string', {'key': 'concept:orig_ip', 'value': trace.get_orig_ip()})
-            if trace_attr_presence[1]:
-                SubElement(traceTag, 'string', {'key': 'concept:orig_port', 'value': str(trace.get_orig_port())})
-            if trace_attr_presence[2]:
-                SubElement(traceTag, 'string', {'key': 'concept:resp_ip', 'value': trace.get_resp_ip()})
-            if trace_attr_presence[3]:
-                SubElement(traceTag, 'string', {'key': 'concept:resp_port', 'value': str(trace.get_resp_port())})
+            if trace_attr_presence[0] and trace_attr_presence[1] and trace_attr_presence[2] and trace_attr_presence[3]:
+                SubElement(traceTag, 'string', {'key': 'concept:name', 'value': f'{trace.get_orig_ip()}-{trace.get_orig_port()},{trace.get_resp_ip()}-{str(trace.get_resp_port())}'})
             if trace_attr_presence[4]:
                 SubElement(traceTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
             if trace_attr_presence[5]:
@@ -349,6 +348,13 @@ class TracesController:
 
             for event in trace.get_events():
                 eventTag = SubElement(traceTag, 'event')
+
+                if trace_attr_presence[0] and trace_attr_presence[1] and trace_attr_presence[2] and trace_attr_presence[3]:
+                    SubElement(eventTag, 'string', {'key': 'concept:name', 'value': f'{trace.get_orig_ip()}-{trace.get_orig_port()},{trace.get_resp_ip()}-{str(trace.get_resp_port())}'})
+                if trace_attr_presence[4]:
+                    SubElement(eventTag, 'string', {'key': 'concept:proto', 'value': PROTO.proto_to_str(trace.get_proto())})
+                if trace_attr_presence[5]:
+                    SubElement(eventTag, 'string', {'key': 'concept:label', 'value': CONN_LABEL.conn_label_to_str(trace.get_label())})
 
                 if event_attr_presence[0]:
                     SubElement(eventTag, 'string', {'key': 'time:ts', 'value': event.get_ts()})
