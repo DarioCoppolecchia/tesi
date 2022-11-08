@@ -438,6 +438,10 @@ def read_file_dict_from_file(input_file_path: str):
 
 column = 'version'
 value_to_check = '-'
+#day = 'monday'
+#day = 'tuesday'
+#day = 'wednesday'
+#day = 'thursday'
 day = 'friday'
 file_name = 'conn.log'
 conn_file_path = f"./logs/{day}/{file_name}"
@@ -762,7 +766,7 @@ constraint_to_label_thursday = [
         'ip_attacked': {
             '205.174.165.73',
             },
-        'label': 'Meta exploit',
+        'label': 'Anomaly',
     },
     {
         'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 14)}:53:00", '%Y-%m-%d %H:%M:%S').timetuple()),
@@ -773,7 +777,7 @@ constraint_to_label_thursday = [
         'ip_attacked': {
             '205.174.165.73',
             },
-        'label': 'Infiltration Cool disk',
+        'label': 'Anomaly',
     },
 
     {
@@ -785,7 +789,7 @@ constraint_to_label_thursday = [
         'ip_attacked': {
             '205.174.165.73',
             },
-        'label': 'Infiltration Dropbox First',
+        'label': 'Anomaly',
     },
     {
         'lower_bound': time.mktime(datetime.datetime.strptime(f"2017-07-{conv_time(6, 15)}:04:00", '%Y-%m-%d %H:%M:%S').timetuple()),
@@ -796,7 +800,7 @@ constraint_to_label_thursday = [
         'ip_attacked': {
             'everyone',
             },
-        'label': 'Infiltration Dropbox Second',
+        'label': 'Anomaly',
     },
 ]
 

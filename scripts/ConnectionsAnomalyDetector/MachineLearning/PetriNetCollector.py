@@ -17,14 +17,15 @@ class PetriNetCollector:
         self.__data_log = pm4py.read_xes(file_name)
 
     def train(self) -> None:
-        for attr, pn in self.__dict_petriNet.items():
+        for attr, pn in tqdm.tqdm(self.__dict_petriNet.items()):
             pn.train(self.__data_log, self.__delta, attr)
 
     def create_PetriNet_dataset(self) -> DataFrame:
         df = DataFrame()
-        res = [0 for _ in self.__dict_petriNet.values()]
-        for i, (attr, pn) in enumerate(tqdm.tqdm(self.__dict_petriNet.items())):
-            for trace in self.__data_log:
+        res = [0 for _ in self.__data_log]
+        for attr, pn in self.__dict_petriNet.items():
+            print(f'Creating PetriNet Dataset for the attribute {attr}')
+            for i, trace in enumerate(tqdm.tqdm(self.__data_log)):
                 trace_temp = Trace()
                 #trace_temp.attributes = copy.deepcopy(trace.attributes)
                 for event in trace:
@@ -38,4 +39,5 @@ class PetriNetCollector:
                 log = EventLog([trace_temp])
                 res[i] = pn.calc_conformance(log)['average_trace_fitness']
             df[attr] = res
+            print('')
         return df

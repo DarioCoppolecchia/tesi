@@ -40,9 +40,13 @@ class MainMachineLearning:
         else:
             path_of_file_xes_train = '../logs/ML/conn_train.xes'
         
+        print('loading the xes train file...')
         self.__petriNetCollector.load_xes(path_of_file_xes_train)
+        print('training the petriNet...')
         self.__petriNetCollector.train()
+        print('creating the dataset for the Anomaly Detector...')
         dataset = self.__petriNetCollector.create_PetriNet_dataset()
+        print('training the Anomaly Detector...')
         self.__anomalyDetector.train(dataset)
 
     def __test_model(self, config_path: str=''):
@@ -56,6 +60,9 @@ class MainMachineLearning:
         else:
             path_of_file_xes_test = '../logs/ML/conn_test.xes'
         
+        print('loading the xes test file...')
         self.__petriNetCollector.load_xes(path_of_file_xes_test)
+        print('creating the dataset for the Anomaly Detector...')
         dataset = self.__petriNetCollector.create_PetriNet_dataset()
-        self.__anomalyDetector.predict(dataset)
+        print('predicting with Anomaly Detector...')
+        print(self.__anomalyDetector.predict(dataset))

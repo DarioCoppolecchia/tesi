@@ -2,6 +2,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.metrics import classification_report
 from pandas import DataFrame
 import pickle
+import numpy as np
 
 class AnomalyDetector:
     def __init__(self) -> None:
@@ -13,17 +14,23 @@ class AnomalyDetector:
             "bootstrap": False,
             "n_jobs": -1, # multiprocessing
             "random_state": 42,
-            "verbose": 10,
+            "verbose": 2,
             "warm_start": False,
         }
 
         self.__model = IsolationForest(**hyperparameters)
 
     def train(self, dataset: DataFrame):
-        self.__model.fit(dataset)
+        for attr in dataset:
+            temp = np.array(dataset[attr])
+            self.__model.fit(temp.reshape(-1, 1))
 
     def predict(self, dataset: DataFrame) -> DataFrame:
-        return self.__model.predict(dataset)
+        preds = DataFrame()
+        for attr in dataset:
+            temp = np.array(dataset[attr])
+            preds[attr] = self.__model.predict(temp.reshape(-1, 1))
+        return preds
 
     def create_confusion_matrix(self, Y: DataFrame, y_pred: DataFrame) -> str:
         # TODO

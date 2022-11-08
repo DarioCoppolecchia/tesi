@@ -432,7 +432,8 @@ class TracesController:
         
         from xml.dom import minidom
         rough_string = tostring(tree, 'utf-8')
-        reparsed = minidom.parseString(rough_string)
+        reparsed = False
+        #reparsed = minidom.parseString(rough_string)
         with open(self.__path_of_file_xes, 'w') as f:
             print(f'started writing to xes file named {self.__path_of_file_xes}')
             if reparsed:
