@@ -20,7 +20,7 @@ class AnomalyDetector:
 
         self.__model = IsolationForest(**hyperparameters)
 
-    def train(self, dataset: DataFrame, file_name) -> bool:
+    def train(self, dataset: DataFrame, file_name: str) -> None:
         import os
         from os.path import exists
         if not exists(file_name): # train the model only if isn't already present in the folder
@@ -30,9 +30,9 @@ class AnomalyDetector:
                 os.mkdir(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
             except:
                 pass
-            return False
+            self.save_model(file_name)
         else:
-            return True
+            self.__model = AnomalyDetector.load_model(file_name).__model
 
     def predict(self, dataset: DataFrame) -> DataFrame:
         preds = DataFrame()
