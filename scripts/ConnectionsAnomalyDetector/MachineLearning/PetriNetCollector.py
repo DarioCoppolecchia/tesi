@@ -23,15 +23,18 @@ class PetriNetCollector:
         saved = [] # list of the saved model attributes
         not_saved = [] # list of the not saved model attributes
 
+        import sys
+
+        try:
+            os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
+        except:
+            pass
+
         for attr, pn in tqdm.tqdm(self.__dict_petriNet.items()):
             file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.pnml'
             if not exists(file_name_complete): # train the model only if isn't already present in the folder
                 saved.append(attr)
-                pn.train(self.__data_log, self.__delta, attr)
-                try:
-                    os.mkdir(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
-                except:
-                    pass
+                pn.train(self.__data_log, self.__delta, attr)                
             else:
                 not_saved.append(attr)
 
@@ -44,10 +47,14 @@ class PetriNetCollector:
         res = [0 for _ in self.__data_log]
         y_res = [0 for _ in self.__data_log]
 
+        try:
+            os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
+        except:
+            pass
+
         for attr, pn in self.__dict_petriNet.items():    
             file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.csv'
             if not exists(file_name_complete):
-                print(f'Creating PetriNet Dataset for the attribute {attr}')
                 for i, trace in enumerate(tqdm.tqdm(self.__data_log)):
                     trace_temp = Trace()
                     y_res[i] = 1 if trace.attributes['concept:label'] == 'Normal' else -1
@@ -62,10 +69,6 @@ class PetriNetCollector:
                     log = EventLog([trace_temp])
                     res[i] = pn.calc_conformance(log)['average_trace_fitness']
 
-                try:
-                    os.mkdir(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
-                except:
-                    pass
                 DataFrame({attr: res}).to_csv(file_name_complete)
             else:
                 res = pd.read_csv(file_name_complete)[attr]

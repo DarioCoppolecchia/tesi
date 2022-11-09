@@ -23,15 +23,19 @@ class AnomalyDetector:
     def train(self, dataset: DataFrame, file_name: str) -> None:
         import os
         from os.path import exists
+
+        try:
+            os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
+        except:
+            pass
+
         if not exists(file_name): # train the model only if isn't already present in the folder
+            print('Creating the model...')
             for attr in dataset:
                 self.__model.fit(np.array(dataset[attr]).reshape(-1, 1))
-            try:
-                os.mkdir(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
-            except:
-                pass
             self.save_model(file_name)
         else:
+            print('Loading the model...')
             self.__model = AnomalyDetector.load_model(file_name).__model
 
     def predict(self, dataset: DataFrame) -> DataFrame:
