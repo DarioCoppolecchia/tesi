@@ -19,7 +19,7 @@ class PetriNet:
         pm4py.write_pnml(self.__model[0], self.__model[1], self.__model[2], file_name)
 
     @classmethod
-    def load_model(file_name: str):
+    def load_model(cls, file_name: str):
         temp = PetriNet()
         temp.__model = pm4py.read_pnml(file_name)
         return temp

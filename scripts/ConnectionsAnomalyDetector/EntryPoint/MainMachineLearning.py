@@ -35,19 +35,33 @@ class MainMachineLearning:
         config = configparser.ConfigParser()
         config.read(config_path)
 
+        # TODO: gestione del salvataggio o caricamento del dataset
+
         if 'Files' in config:
             path_of_file_xes_train = config['Files']['path_of_file_xes_train'] if 'path_of_file_xes_train' in config['Files'] else '../logs/ML/conn_train.xes'
+            path_of_petriNet_models_train = config['Files']['path_of_petriNet_models_train'] if 'path_of_petriNet_models_train' in config['Files'] else '../models/PetriNets/train/pn'
+            path_of_anomalyDetector_models_train = config['Files']['path_of_anomalyDetector_models_train'] if 'path_of_anomalyDetector_models_train' in config['Files'] else '../models/anomalyDetector/train/anomalyDetector'
+            path_of_petriNet_models_dataset_train = config['Files']['path_of_petriNet_models_dataset_train'] if 'path_of_petriNet_models_dataset_train' in config['Files'] else '../models/PetriNets/dataset_train/pn'
         else:
             path_of_file_xes_train = '../logs/ML/conn_train.xes'
-        
+            path_of_petriNet_models_train = '../models/PetriNets/train/pn'
+            path_of_anomalyDetector_models_train = '../models/anomalyDetector/train/anomalyDetector'
+            path_of_petriNet_models_dataset_train = '../models/PetriNets/dataset_train/pn'
+
         print('loading the xes train file...')
         self.__petriNetCollector.load_xes(path_of_file_xes_train)
         print('training the petriNet...')
-        self.__petriNetCollector.train()
+        saved = self.__petriNetCollector.train(path_of_petriNet_models_train)
+        if not saved: # check if model was already trained, if wasn't trained than it saves the model trained
+            self.__petriNetCollector.save_model(path_of_petriNet_models_train)
         print('creating the dataset for the Anomaly Detector...')
-        dataset = self.__petriNetCollector.create_PetriNet_dataset()
+        dataset, _ = self.__petriNetCollector.create_PetriNet_dataset()
         print('training the Anomaly Detector...')
-        self.__anomalyDetector.train(dataset)
+        saved = self.__anomalyDetector.train(dataset, path_of_anomalyDetector_models_train)
+        if not saved: # check if model was already trained, if wasn't trained than it saves the model trained
+            self.__anomalyDetector.save_model(path_of_anomalyDetector_models_train)
+        else:
+            self.__anomalyDetector = AnomalyDetector.load_model(path_of_anomalyDetector_models_train)
 
     def __test_model(self, config_path: str=''):
         import configparser
@@ -55,14 +69,20 @@ class MainMachineLearning:
         config = configparser.ConfigParser()
         config.read(config_path)
 
+        # TODO: gestione del salvataggio o caricamento del dataset
+
         if 'Files' in config:
+            path_of_petriNet_models_dataset_test = config['Files']['path_of_petriNet_models_dataset_test'] if 'path_of_petriNet_models_dataset_test' in config['Files'] else '../models/PetriNets/dataset_test/pn'
             path_of_file_xes_test = config['Files']['path_of_file_xes_test'] if 'path_of_file_xes_test' in config['Files'] else '../logs/ML/conn_test.xes'
         else:
+            path_of_petriNet_models_dataset_test = '../models/PetriNets/dataset_test/pn'
             path_of_file_xes_test = '../logs/ML/conn_test.xes'
         
         print('loading the xes test file...')
         self.__petriNetCollector.load_xes(path_of_file_xes_test)
         print('creating the dataset for the Anomaly Detector...')
-        dataset = self.__petriNetCollector.create_PetriNet_dataset()
+        dataset, Y = self.__petriNetCollector.create_PetriNet_dataset()
         print('predicting with Anomaly Detector...')
-        print(self.__anomalyDetector.predict(dataset))
+        y_pred = self.__anomalyDetector.predict(dataset)
+        print('printing the results...')
+        self.__anomalyDetector.create_confusion_matrix(Y, y_pred)

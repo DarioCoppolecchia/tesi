@@ -20,10 +20,19 @@ class AnomalyDetector:
 
         self.__model = IsolationForest(**hyperparameters)
 
-    def train(self, dataset: DataFrame):
-        for attr in dataset:
-            temp = np.array(dataset[attr])
-            self.__model.fit(temp.reshape(-1, 1))
+    def train(self, dataset: DataFrame, file_name) -> bool:
+        import os
+        from os.path import exists
+        if not exists(file_name): # train the model only if isn't already present in the folder
+            for attr in dataset:
+                self.__model.fit(np.array(dataset[attr]).reshape(-1, 1))
+            try:
+                os.mkdir(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
+            except:
+                pass
+            return False
+        else:
+            return True
 
     def predict(self, dataset: DataFrame) -> DataFrame:
         preds = DataFrame()
@@ -32,9 +41,8 @@ class AnomalyDetector:
             preds[attr] = self.__model.predict(temp.reshape(-1, 1))
         return preds
 
-    def create_confusion_matrix(self, Y: DataFrame, y_pred: DataFrame) -> str:
-        # TODO
-        classification_report(Y, y_pred)
+    def create_confusion_matrix(self, Y: np.ndarray, y_pred: DataFrame) -> str:
+        print(classification_report(Y, y_pred))
 
     def save_model(self, file_name: str):
         with open(file_name,'wb') as f:
