@@ -52,8 +52,10 @@ class PetriNetCollector:
         except:
             pass
 
-        for attr, pn in self.__dict_petriNet.items():    
+        tot = len(self.__dict_petriNet)
+        for j, (attr, pn) in enumerate(self.__dict_petriNet.items()):
             file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.csv'
+            print(f'{j + 1}/{tot}) Creo Dataset per attributo {attr} ({(j + 1) / tot * 100})')
             if not exists(file_name_complete):
                 for i, trace in enumerate(tqdm.tqdm(self.__data_log)):
                     trace_temp = Trace()
@@ -69,9 +71,11 @@ class PetriNetCollector:
                     log = EventLog([trace_temp])
                     res[i] = pn.calc_conformance(log)['average_trace_fitness']
 
-                DataFrame({attr: res}).to_csv(file_name_complete)
+                DataFrame({'conformance': res, 'label': y_res}).to_csv(file_name_complete)
             else:
-                res = pd.read_csv(file_name_complete)[attr]
+                df_from_file = pd.read_csv(file_name_complete)
+                res = df_from_file['conformance']
+                y_res = df_from_file['label']
             df[attr] = res
             Y[attr] = y_res
             print('')
