@@ -1,13 +1,18 @@
-from pandas import DataFrame
 from .PetriNet import PetriNet
-import pm4py
-from pm4py.objects.log.obj import EventLog
-from pm4py.objects.log.obj import Trace
-from pm4py.objects.log.obj import Event
-from tqdm.auto import tqdm
+
 import pandas as pd
+from pandas import DataFrame
+
+import pm4py
+from pm4py.objects.log.obj import EventLog, Trace, Event
+from tqdm.auto import tqdm
+
 import os
 from os.path import exists
+
+from multiprocessing import current_process, Pool
+
+from pm4py.algo.discovery.inductive.variants.im_f.algorithm import Parameters
 
 class PetriNetCollector:
     def __init__(self, attrs: list, delta: float) -> None:
@@ -23,44 +28,39 @@ class PetriNetCollector:
         saved = [] # list of the saved model attributes
         not_saved = [] # list of the not saved model attributes
 
-        import sys
-
         try:
             os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
         except:
             pass
 
+        log = EventLog([Trace() for _ in self.__data_log])
         for attr, pn in tqdm(self.__dict_petriNet.items()):
             file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.pnml'
+            for i, trace in enumerate(self.__data_log):
+                log[i] = Trace({'concept:name': activity[attr]} for activity in trace)
             if not exists(file_name_complete): # train the model only if isn't already present in the folder
                 saved.append(attr)
-                pn.train(self.__data_log, self.__delta, attr)                
+                pn.train(log, self.__delta, 'concept:name')
             else:
                 not_saved.append(attr)
 
         self.load_model(file_name, not_saved) # load stored models
         self.save_model(file_name, saved) # saving not stored models
 
-    def __create_dataset(self, file_name: str, attr: str, pn: PetriNet) -> tuple[list[float], list[int]]:
+    def create_dataset(self, args: tuple[str, str, PetriNet, int]) -> tuple[list[float], list[int]]:
+        file_name, attr, pn, pos = args
         res = [0 for _ in self.__data_log]
         y_res = [0 for _ in self.__data_log]
 
         file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.csv'
 
         if not exists(file_name_complete):
-            for i, trace in enumerate(tqdm(self.__data_log, desc=f'{attr} :: ')):
-                trace_temp = Trace()
-                y_res[i] = 1 if trace.attributes['concept:label'] == 'Normal' else -1
-                for event in trace:
-                    event_temp = Event()
-                    for key in event:
-                        if key != attr:
-                            event_temp[key] = event[key]
-                        else:
-                            event_temp['Activity'] = event[key]
-                    trace_temp.append(event_temp)
-                log = EventLog([trace_temp])
-                res[i] = pn.calc_conformance(log)['average_trace_fitness']
+            with tqdm(total=len(self.__data_log), desc=f'{attr} :: ', position=pos) as pbar:
+                for i, trace in enumerate(self.__data_log):
+                    y_res[i] = 1 if trace.attributes['concept:label'] == 'Normal' else -1
+                    log= EventLog([Trace({'concept:name': activity[attr]} for activity in trace)])
+                    res[i] = pn.calc_conformance(log, attr)['average_trace_fitness']
+                    pbar.update(1)
 
             DataFrame({'conformance': res, 'label': y_res}).to_csv(file_name_complete)
         else:
@@ -71,8 +71,6 @@ class PetriNetCollector:
         return res, y_res
 
     def create_PetriNet_dataset(self, file_name: str) -> tuple[DataFrame, DataFrame]:
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-
         df = DataFrame()
         Y = DataFrame()
 
@@ -80,17 +78,16 @@ class PetriNetCollector:
             os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
         except:
             pass
+        
+        args = [(file_name, attr, pn, i) for i, (attr, pn) in enumerate(self.__dict_petriNet.items())]
 
-        tot = len(self.__dict_petriNet)
-        with ThreadPoolExecutor(max_workers=8) as ex:
-            futures = []
-            for j, (attr, pn) in enumerate(self.__dict_petriNet.items()):
-                futures.append(ex.submit(self.__create_dataset, file_name, attr, pn))
+        pool = Pool()
+        results = pool.map(self.create_dataset, args)
 
-            for future in as_completed(futures):
-                res, y_res = future.result()
-                df[attr] = res
-                Y[attr] = y_res
+        for i, (res, y_res) in enumerate(results):
+            attr = args[i][1]
+            df[attr] = res
+            Y[attr] = y_res
         return df, Y
 
     def save_model(self, file_name: str, attrs_to_save: list) -> None:

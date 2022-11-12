@@ -14,7 +14,7 @@ class AnomalyDetector:
             "bootstrap": False,
             "n_jobs": -1, # multiprocessing
             "random_state": 42,
-            "verbose": 2,
+            "verbose": 0,
             "warm_start": False,
         }
 
@@ -23,6 +23,8 @@ class AnomalyDetector:
     def train(self, dataset: DataFrame, file_name: str) -> None:
         import os
         from os.path import exists
+
+        print(dataset)
 
         try:
             os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
@@ -40,13 +42,20 @@ class AnomalyDetector:
 
     def predict(self, dataset: DataFrame) -> DataFrame:
         preds = DataFrame()
+        print(dataset)
         for attr in dataset:
             temp = np.array(dataset[attr])
             preds[attr] = self.__model.predict(temp.reshape(-1, 1))
         return preds
 
     def create_confusion_matrix(self, Y: np.ndarray, y_pred: DataFrame) -> str:
-        print(classification_report(Y, y_pred))
+        print(Y)
+        print(y_pred)
+        tot_len = Y.shape[0]
+        for attr in Y:
+            tot_pred_corr = sum([y == y_0 for y, y_0 in zip(Y[attr], y_pred[attr])])
+            print(f'Classification report per attr: {attr}, accuracy: {tot_pred_corr}/{tot_len} ({tot_pred_corr / tot_len * 100})')
+            #print(classification_report(Y[attr], y_pred[attr]))
 
     def save_model(self, file_name: str):
         with open(file_name,'wb') as f:
