@@ -1,5 +1,7 @@
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 from pandas import DataFrame
 import pickle
 import numpy as np
@@ -44,12 +46,25 @@ class AnomalyDetector:
         return self.__model.predict(dataset)
 
     def create_confusion_matrix(self, Y: np.ndarray, y_pred: DataFrame) -> str:
-        print(Y)
-        print(y_pred)
+        Y = np.array(Y)
+        y_pred = np.array(y_pred)
         tot_len = len(Y)
         tot_pred_corr = sum([y == y_0 for y, y_0 in zip(Y, y_pred)])
         print(f'Classification report accuracy: {tot_pred_corr}/{tot_len} ({tot_pred_corr / tot_len * 100})')
-            #print(classification_report(Y[attr], y_pred[attr]))
+        print(classification_report(Y, y_pred))
+
+        cm = confusion_matrix(Y, y_pred)
+        cm_display = ConfusionMatrixDisplay(confusion_matrix = cm)
+        cm_display.plot()
+        plt.show()
+
+        val_to_labels = {-1: 'Anomaly', 1: 'Normal'}
+        Y = np.vectorize(val_to_labels.get)(Y)
+        y_pred = np.vectorize(val_to_labels.get)(y_pred)
+        cm = confusion_matrix(Y, y_pred, labels=['Anomaly', 'Normal'])
+        cm_display = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels=['Anomaly', 'Normal'])
+        cm_display.plot()
+        plt.show()
 
     def save_model(self, file_name: str):
         with open(file_name,'wb') as f:
