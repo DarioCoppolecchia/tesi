@@ -50,25 +50,22 @@ class PetriNetCollector:
     def create_dataset(self, args: tuple[str, str, PetriNet, int]) -> tuple[list[float], list[int]]:
         file_name, attr, pn, pos = args
         res = [0 for _ in self.__data_log]
-        y_res = [0 for _ in self.__data_log]
 
         file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.csv'
 
         if not exists(file_name_complete):
             with tqdm(total=len(self.__data_log), desc=f'{attr} :: ', position=pos) as pbar:
                 for i, trace in enumerate(self.__data_log):
-                    y_res[i] = 1 if trace.attributes['concept:label'] == 'Normal' else -1
                     log= EventLog([Trace({'concept:name': activity[attr]} for activity in trace)])
                     res[i] = pn.calc_conformance(log, attr)['average_trace_fitness']
                     pbar.update(1)
 
-            DataFrame({'conformance': res, 'label': y_res}).to_csv(file_name_complete)
+            DataFrame({'conformance': res}).to_csv(file_name_complete)
         else:
             df_from_file = pd.read_csv(file_name_complete)
             res = df_from_file['conformance']
-            y_res = df_from_file['label']
 
-        return res, y_res
+        return res
 
     def create_PetriNet_dataset(self, file_name: str) -> tuple[DataFrame, DataFrame]:
         df = DataFrame()
@@ -84,11 +81,11 @@ class PetriNetCollector:
         pool = Pool()
         results = pool.map(self.create_dataset, args)
 
-        for i, (res, y_res) in enumerate(results):
+        for i, res in enumerate(results):
             attr = args[i][1]
             df[attr] = res
-            Y[attr] = y_res
-        return df, Y
+
+        return df, [1 if trace.attributes['concept:label'] == 'Normal' else -1 for trace in self.__data_log]
 
     def save_model(self, file_name: str, attrs_to_save: list) -> None:
         for attr in attrs_to_save:

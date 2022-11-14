@@ -24,7 +24,7 @@ class AnomalyDetector:
         import os
         from os.path import exists
 
-        print(dataset)
+        print('Dataset Training:\n', dataset)
 
         try:
             os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present
@@ -33,28 +33,22 @@ class AnomalyDetector:
 
         if not exists(file_name): # train the model only if isn't already present in the folder
             print('Creating the model...')
-            for attr in dataset:
-                self.__model.fit(np.array(dataset[attr]).reshape(-1, 1))
+            self.__model.fit(dataset)
             self.save_model(file_name)
         else:
             print('Loading the model...')
             self.__model = AnomalyDetector.load_model(file_name).__model
 
     def predict(self, dataset: DataFrame) -> DataFrame:
-        preds = DataFrame()
-        print(dataset)
-        for attr in dataset:
-            temp = np.array(dataset[attr])
-            preds[attr] = self.__model.predict(temp.reshape(-1, 1))
-        return preds
+        print('Dataset predizione:\n', dataset)
+        return self.__model.predict(dataset)
 
     def create_confusion_matrix(self, Y: np.ndarray, y_pred: DataFrame) -> str:
         print(Y)
         print(y_pred)
-        tot_len = Y.shape[0]
-        for attr in Y:
-            tot_pred_corr = sum([y == y_0 for y, y_0 in zip(Y[attr], y_pred[attr])])
-            print(f'Classification report per attr: {attr}, accuracy: {tot_pred_corr}/{tot_len} ({tot_pred_corr / tot_len * 100})')
+        tot_len = len(Y)
+        tot_pred_corr = sum([y == y_0 for y, y_0 in zip(Y, y_pred)])
+        print(f'Classification report accuracy: {tot_pred_corr}/{tot_len} ({tot_pred_corr / tot_len * 100})')
             #print(classification_report(Y[attr], y_pred[attr]))
 
     def save_model(self, file_name: str):
