@@ -7,19 +7,13 @@ from pm4py.objects.log.obj import EventLog
 
 class PetriNet:
     def train(self, xes_log: EventLog, delta: float, activity: str) -> None:
-        self.__activity = activity
         ptree = ind_miner.apply_tree(xes_log, parameters={Parameters.NOISE_THRESHOLD: delta, Parameters.ACTIVITY_KEY: activity}, variant=ind_miner.Variants.IMf)
         self.__model = converter.apply(ptree)
+        pm4py.view_petri_net(self.__model[0], self.__model[1], self.__model[2])
+        input('digita per fare la prossima rete')
 
     def calc_conformance(self, xes_log: EventLog, attr) -> DataFrame:
-        #if type(self.__model) == tuple: # check if the model has been created
-        val = pm4py.fitness_alignments(xes_log, self.__model[0], self.__model[1], self.__model[2])
-        # print(xes_log, '\n\n\n')
-        # print(val)
-        # print(self.__activity, ',', attr)
-        # input()
-        return val 
-        #raise TypeError('The petri net has not been discovered yet, or is not a tuple')
+        return pm4py.fitness_alignments(xes_log, self.__model[0], self.__model[1], self.__model[2])
 
     def save_model(self, file_name: str) -> None:
         pm4py.write_pnml(self.__model[0], self.__model[1], self.__model[2], file_name)

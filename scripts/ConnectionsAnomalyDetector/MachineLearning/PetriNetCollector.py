@@ -4,13 +4,13 @@ import pandas as pd
 from pandas import DataFrame
 
 import pm4py
-from pm4py.objects.log.obj import EventLog, Trace, Event
+from pm4py.objects.log.obj import EventLog, Trace
 from tqdm.auto import tqdm
 
 import os
 from os.path import exists
 
-from multiprocessing import current_process, Pool
+from multiprocessing import Pool
 
 from pm4py.algo.discovery.inductive.variants.im_f.algorithm import Parameters
 
@@ -40,6 +40,7 @@ class PetriNetCollector:
                 log[i] = Trace({'concept:name': activity[attr]} for activity in trace)
             if not exists(file_name_complete): # train the model only if isn't already present in the folder
                 saved.append(attr)
+                print(f'petri_net_{attr.replace("concept:", "")}.png')
                 pn.train(log, self.__delta, 'concept:name')
             else:
                 not_saved.append(attr)

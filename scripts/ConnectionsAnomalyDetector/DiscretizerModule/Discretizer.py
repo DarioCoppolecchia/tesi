@@ -23,7 +23,7 @@ class Discretizer(metaclass=abc.ABCMeta):
     :param __n_bins: number of bins for this discretization
     :type __n_bins: int
     """
-    def __init__(self, n_bins: int=10, soglia: int=10) -> None:
+    def __init__(self, n_bins: int=10, soglia: int=10, filepath: str='', save: bool=False) -> None:
         """Constructor that initialize discretized_bins with and empty list
 
         :param n_bins: number of bins, defaults to None
@@ -32,6 +32,8 @@ class Discretizer(metaclass=abc.ABCMeta):
         self._discretized_bins = []
         self._n_bins = n_bins
         self._SOGLIA = soglia
+        self._filepath = filepath
+        self._save = save
 
     def get_discretized_bins(self) -> list:
         """Getter of the discretized bins list

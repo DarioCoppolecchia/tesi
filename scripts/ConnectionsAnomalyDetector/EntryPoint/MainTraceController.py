@@ -33,6 +33,7 @@ class MainTraceController:
         :type config_path: str, optional
         """
         import configparser
+
         self.traces_controller = TracesController()
         self.traces_controller.load_paths_and_filters_from_config_file(config_path)
 
@@ -46,10 +47,14 @@ class MainTraceController:
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY if type == 'equal_frequency' else DISCRETIZATION_TYPE.EQUAL_WIDTH
             n_bins = int(config['Discretization']['n_bins']) if 'n_bins' in config['Discretization'] else n_bins
             soglia = int(config['Discretization']['soglia']) if 'soglia' in config['Discretization'] else soglia
+            self.__filepath_discretization = config['Discretization']['filepath'] if 'filepath' in config['Discretization'] else '../logs/ML/discretized_bins.bin'
+            self.__save_discretization = bool(int(config['Discretization']['save'])) if 'save' in config['Discretization'] else True
         else:
             self.__discretization_type = DISCRETIZATION_TYPE.EQUAL_FREQUENCY
             n_bins = 5
             soglia = 10
+            self.__filepath_discretization = '../logs/ML/discretized_bins.bin'
+            self.__save_discretization = True
 
         if 'Attributes' in config:
             self.__attr_to_xes_traces = config['Attributes']['attributes_to_xes_traces'].split(',') if 'attributes_to_xes_traces' in config['Attributes'] else ['orig_ip','orig_port','resp_ip','resp_port','proto','label']
@@ -118,7 +123,7 @@ class MainTraceController:
         self.__cls()
         self.traces_controller.read_and_convert_lines()
         self.__print_n_traces_and_events() if self.__show_examples else ''
-        self.traces_controller.discretize_attributes(self.__discretization_type, self.__attr_bins_dict)
+        self.traces_controller.discretize_attributes(self.__discretization_type, self.__attr_bins_dict, self.__filepath_discretization, self.__save_discretization)
         self.__print_n_discretized_traces_and_events() if self.__show_examples else ''
         self.traces_controller.print_Trace_list_to_xes_file(self.__attr_to_xes_traces, self.__attr_to_xes_events)
     
