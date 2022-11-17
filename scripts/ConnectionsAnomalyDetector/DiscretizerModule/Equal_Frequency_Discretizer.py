@@ -53,8 +53,15 @@ class Equal_Frequency_Discretizer(Discretizer):
                 pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
         else:
             with open(self._filepath, 'rb') as f:
-                obj = pickle.dump(f)
+                obj = pickle.load(f)
 
             self._n_bins = obj['_n_bins']
             self._SOGLIA = obj['_SOGLIA']
             self._discretized_bins = obj['_discretized_bins']
+            
+            import numpy as np
+            print(self._filepath.split('/')[-1])
+            print(self._n_bins)
+            print(self._SOGLIA)
+            print(np.array(self._discretized_bins))
+            print('\n')

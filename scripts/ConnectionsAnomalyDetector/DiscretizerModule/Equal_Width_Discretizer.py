@@ -48,7 +48,7 @@ class Equal_Width_Discretizer(Discretizer):
                 pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
         else:
             with open(self._filepath, 'rb') as f:
-                obj = pickle.dump(f)
+                obj = pickle.load(f)
 
             self._n_bins = obj['_n_bins']
             self._SOGLIA = obj['_SOGLIA']

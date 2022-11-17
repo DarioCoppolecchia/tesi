@@ -534,110 +534,116 @@ class TracesController:
         :type n_bins_dict: dict
         :raises ValueError: raised if the disc_type is not either EQUAL_WIDTH or EQUAL_FREQUENCY
         """
+        import os
+
         attributes_to_discretize = list(n_bins_dict.keys())
+        try:
+            os.makedirs(filepath_discretization)
+        except:
+            pass
         
         if disc_type == DISCRETIZATION_TYPE.EQUAL_WIDTH:
             if 'orig_bytes' in attributes_to_discretize:
-                Event.disc_orig_bytes = Equal_Width_Discretizer(n_bins_dict['orig_bytes'][0], n_bins_dict['orig_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_orig_bytes = Equal_Width_Discretizer(n_bins_dict['orig_bytes'][0], n_bins_dict['orig_bytes'][1], f'{filepath_discretization}/orig_bytes.bin', save_discretization)
             if 'resp_bytes' in attributes_to_discretize:
-                Event.disc_resp_bytes = Equal_Width_Discretizer(n_bins_dict['resp_bytes'][0], n_bins_dict['resp_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_resp_bytes = Equal_Width_Discretizer(n_bins_dict['resp_bytes'][0], n_bins_dict['resp_bytes'][1], f'{filepath_discretization}/resp_bytes.bin', save_discretization)
             if 'missed_bytes' in attributes_to_discretize:
-                Event.disc_missed_bytes = Equal_Width_Discretizer(n_bins_dict['missed_bytes'][0], n_bins_dict['missed_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_missed_bytes = Equal_Width_Discretizer(n_bins_dict['missed_bytes'][0], n_bins_dict['missed_bytes'][1], f'{filepath_discretization}/missed_bytes.bin', save_discretization)
             if 'orig_pkts' in attributes_to_discretize:
-                Event.disc_orig_pkts = Equal_Width_Discretizer(n_bins_dict['orig_pkts'][0], n_bins_dict['orig_pkts'][1], filepath_discretization, save_discretization)
+                Event.disc_orig_pkts = Equal_Width_Discretizer(n_bins_dict['orig_pkts'][0], n_bins_dict['orig_pkts'][1], f'{filepath_discretization}/orig_pkts.bin', save_discretization)
             if 'duration' in attributes_to_discretize:
-                Event.disc_duration = Equal_Width_Discretizer(n_bins_dict['duration'][0], n_bins_dict['duration'][1], filepath_discretization, save_discretization)
+                Event.disc_duration = Equal_Width_Discretizer(n_bins_dict['duration'][0], n_bins_dict['duration'][1], f'{filepath_discretization}/duration.bin', save_discretization)
             if 'orig_ip_bytes' in attributes_to_discretize:
-                Event.disc_orig_ip_bytes = Equal_Width_Discretizer(n_bins_dict['orig_ip_bytes'][0], n_bins_dict['orig_ip_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_orig_ip_bytes = Equal_Width_Discretizer(n_bins_dict['orig_ip_bytes'][0], n_bins_dict['orig_ip_bytes'][1], f'{filepath_discretization}/orig_ip_bytes.bin', save_discretization)
             if 'resp_pkts' in attributes_to_discretize:
-                Event.disc_resp_pkts = Equal_Width_Discretizer(n_bins_dict['resp_pkts'][0], n_bins_dict['resp_pkts'][1], filepath_discretization, save_discretization)
+                Event.disc_resp_pkts = Equal_Width_Discretizer(n_bins_dict['resp_pkts'][0], n_bins_dict['resp_pkts'][1], f'{filepath_discretization}/resp_pkts.bin', save_discretization)
             if 'resp_ip_bytes' in attributes_to_discretize: 
-                Event.disc_resp_ip_bytes = Equal_Width_Discretizer(n_bins_dict['resp_ip_bytes'][0], n_bins_dict['resp_ip_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_resp_ip_bytes = Equal_Width_Discretizer(n_bins_dict['resp_ip_bytes'][0], n_bins_dict['resp_ip_bytes'][1], f'{filepath_discretization}/resp_ip_bytes.bin', save_discretization)
                 
             if 'orig_syn' in attributes_to_discretize: 
-                EventHistory.disc_orig_syn = Equal_Width_Discretizer(n_bins_dict['orig_syn'][0], n_bins_dict['orig_syn'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_syn = Equal_Width_Discretizer(n_bins_dict['orig_syn'][0], n_bins_dict['orig_syn'][1], f'{filepath_discretization}/orig_syn.bin', save_discretization)
             if 'orig_fin' in attributes_to_discretize: 
-                EventHistory.disc_orig_fin = Equal_Width_Discretizer(n_bins_dict['orig_fin'][0], n_bins_dict['orig_fin'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_fin = Equal_Width_Discretizer(n_bins_dict['orig_fin'][0], n_bins_dict['orig_fin'][1], f'{filepath_discretization}/orig_fin.bin', save_discretization)
             if 'orig_syn_ack' in attributes_to_discretize: 
-                EventHistory.disc_orig_syn_ack = Equal_Width_Discretizer(n_bins_dict['orig_syn_ack'][0], n_bins_dict['orig_syn_ack'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_syn_ack = Equal_Width_Discretizer(n_bins_dict['orig_syn_ack'][0], n_bins_dict['orig_syn_ack'][1], f'{filepath_discretization}/orig_syn_ack.bin', save_discretization)
             if 'orig_rst' in attributes_to_discretize: 
-                EventHistory.disc_orig_rst = Equal_Width_Discretizer(n_bins_dict['orig_rst'][0], n_bins_dict['orig_rst'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_rst = Equal_Width_Discretizer(n_bins_dict['orig_rst'][0], n_bins_dict['orig_rst'][1], f'{filepath_discretization}/orig_rst.bin', save_discretization)
             if 'resp_syn' in attributes_to_discretize: 
-                EventHistory.disc_resp_syn = Equal_Width_Discretizer(n_bins_dict['resp_syn'][0], n_bins_dict['resp_syn'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_syn = Equal_Width_Discretizer(n_bins_dict['resp_syn'][0], n_bins_dict['resp_syn'][1], f'{filepath_discretization}/resp_syn.bin', save_discretization)
             if 'resp_fin' in attributes_to_discretize: 
-                EventHistory.disc_resp_fin = Equal_Width_Discretizer(n_bins_dict['resp_fin'][0], n_bins_dict['resp_fin'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_fin = Equal_Width_Discretizer(n_bins_dict['resp_fin'][0], n_bins_dict['resp_fin'][1], f'{filepath_discretization}/resp_fin.bin', save_discretization)
             if 'resp_syn_ack' in attributes_to_discretize: 
-                EventHistory.disc_resp_syn_ack = Equal_Width_Discretizer(n_bins_dict['resp_syn_ack'][0], n_bins_dict['resp_syn_ack'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_syn_ack = Equal_Width_Discretizer(n_bins_dict['resp_syn_ack'][0], n_bins_dict['resp_syn_ack'][1], f'{filepath_discretization}/resp_syn_ack.bin', save_discretization)
             if 'resp_rst' in attributes_to_discretize: 
-                EventHistory.disc_resp_rst = Equal_Width_Discretizer(n_bins_dict['resp_rst'][0], n_bins_dict['resp_rst'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_rst = Equal_Width_Discretizer(n_bins_dict['resp_rst'][0], n_bins_dict['resp_rst'][1], f'{filepath_discretization}/resp_rst.bin', save_discretization)
             if 'orig_bad_checksum' in attributes_to_discretize: 
-                EventHistory.disc_orig_bad_checksum = Equal_Width_Discretizer(n_bins_dict['orig_bad_checksum'][0], n_bins_dict['orig_bad_checksum'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_bad_checksum = Equal_Width_Discretizer(n_bins_dict['orig_bad_checksum'][0], n_bins_dict['orig_bad_checksum'][1], f'{filepath_discretization}/orig_bad_checksum.bin', save_discretization)
             if 'orig_content_gap' in attributes_to_discretize: 
-                EventHistory.disc_orig_content_gap = Equal_Width_Discretizer(n_bins_dict['orig_content_gap'][0], n_bins_dict['orig_content_gap'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_content_gap = Equal_Width_Discretizer(n_bins_dict['orig_content_gap'][0], n_bins_dict['orig_content_gap'][1], f'{filepath_discretization}/orig_content_gap.bin', save_discretization)
             if 'orig_retransmitted_payload' in attributes_to_discretize: 
-                EventHistory.disc_orig_retransmitted_payload = Equal_Width_Discretizer(n_bins_dict['orig_retransmitted_payload'][0], n_bins_dict['orig_retransmitted_payload'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_retransmitted_payload = Equal_Width_Discretizer(n_bins_dict['orig_retransmitted_payload'][0], n_bins_dict['orig_retransmitted_payload'][1], f'{filepath_discretization}/orig_retransmitted_payload.bin', save_discretization)
             if 'orig_zero_window' in attributes_to_discretize: 
-                EventHistory.disc_orig_zero_window = Equal_Width_Discretizer(n_bins_dict['orig_zero_window'][0], n_bins_dict['orig_zero_window'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_zero_window = Equal_Width_Discretizer(n_bins_dict['orig_zero_window'][0], n_bins_dict['orig_zero_window'][1], f'{filepath_discretization}/orig_zero_window.bin', save_discretization)
             if 'resp_bad_checksum' in attributes_to_discretize: 
-                EventHistory.disc_resp_bad_checksum = Equal_Width_Discretizer(n_bins_dict['resp_bad_checksum'][0], n_bins_dict['resp_bad_checksum'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_bad_checksum = Equal_Width_Discretizer(n_bins_dict['resp_bad_checksum'][0], n_bins_dict['resp_bad_checksum'][1], f'{filepath_discretization}/resp_bad_checksum.bin', save_discretization)
             if 'resp_content_gap' in attributes_to_discretize: 
-                EventHistory.disc_resp_content_gap = Equal_Width_Discretizer(n_bins_dict['resp_content_gap'][0], n_bins_dict['resp_content_gap'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_content_gap = Equal_Width_Discretizer(n_bins_dict['resp_content_gap'][0], n_bins_dict['resp_content_gap'][1], f'{filepath_discretization}/resp_content_gap.bin', save_discretization)
             if 'resp_retransmitted_payload' in attributes_to_discretize: 
-                EventHistory.disc_resp_retransmitted_payload = Equal_Width_Discretizer(n_bins_dict['resp_retransmitted_payload'][0], n_bins_dict['resp_retransmitted_payload'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_retransmitted_payload = Equal_Width_Discretizer(n_bins_dict['resp_retransmitted_payload'][0], n_bins_dict['resp_retransmitted_payload'][1], f'{filepath_discretization}/resp_retransmitted_payload.bin', save_discretization)
             if 'resp_zero_window' in attributes_to_discretize: 
-                EventHistory.disc_resp_zero_window = Equal_Width_Discretizer(n_bins_dict['resp_zero_window'][0], n_bins_dict['resp_zero_window'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_zero_window = Equal_Width_Discretizer(n_bins_dict['resp_zero_window'][0], n_bins_dict['resp_zero_window'][1], f'{filepath_discretization}/resp_zero_window.bin', save_discretization)
 
 
         elif disc_type == DISCRETIZATION_TYPE.EQUAL_FREQUENCY:
             if 'orig_bytes' in attributes_to_discretize:
-                Event.disc_orig_bytes = Equal_Frequency_Discretizer(n_bins_dict['orig_bytes'][0], n_bins_dict['orig_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_orig_bytes = Equal_Frequency_Discretizer(n_bins_dict['orig_bytes'][0], n_bins_dict['orig_bytes'][1], f'{filepath_discretization}/orig_bytes.bin', save_discretization)
             if 'resp_bytes' in attributes_to_discretize:
-                Event.disc_resp_bytes = Equal_Frequency_Discretizer(n_bins_dict['resp_bytes'][0], n_bins_dict['resp_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_resp_bytes = Equal_Frequency_Discretizer(n_bins_dict['resp_bytes'][0], n_bins_dict['resp_bytes'][1], f'{filepath_discretization}/resp_bytes.bin', save_discretization)
             if 'missed_bytes' in attributes_to_discretize:
-                Event.disc_missed_bytes = Equal_Frequency_Discretizer(n_bins_dict['missed_bytes'][0], n_bins_dict['missed_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_missed_bytes = Equal_Frequency_Discretizer(n_bins_dict['missed_bytes'][0], n_bins_dict['missed_bytes'][1], f'{filepath_discretization}/missed_bytes.bin', save_discretization)
             if 'orig_pkts' in attributes_to_discretize:
-                Event.disc_orig_pkts = Equal_Frequency_Discretizer(n_bins_dict['orig_pkts'][0], n_bins_dict['orig_pkts'][1], filepath_discretization, save_discretization)
+                Event.disc_orig_pkts = Equal_Frequency_Discretizer(n_bins_dict['orig_pkts'][0], n_bins_dict['orig_pkts'][1], f'{filepath_discretization}/orig_pkts.bin', save_discretization)
             if 'duration' in attributes_to_discretize:
-                Event.disc_duration = Equal_Frequency_Discretizer(n_bins_dict['duration'][0], n_bins_dict['duration'][1], filepath_discretization, save_discretization)
+                Event.disc_duration = Equal_Frequency_Discretizer(n_bins_dict['duration'][0], n_bins_dict['duration'][1], f'{filepath_discretization}/duration.bin', save_discretization)
             if 'orig_ip_bytes' in attributes_to_discretize:
-                Event.disc_orig_ip_bytes = Equal_Frequency_Discretizer(n_bins_dict['orig_ip_bytes'][0], n_bins_dict['orig_ip_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_orig_ip_bytes = Equal_Frequency_Discretizer(n_bins_dict['orig_ip_bytes'][0], n_bins_dict['orig_ip_bytes'][1], f'{filepath_discretization}/orig_ip_bytes.bin', save_discretization)
             if 'resp_pkts' in attributes_to_discretize:
-                Event.disc_resp_pkts = Equal_Frequency_Discretizer(n_bins_dict['resp_pkts'][0], n_bins_dict['resp_pkts'][1], filepath_discretization, save_discretization)
+                Event.disc_resp_pkts = Equal_Frequency_Discretizer(n_bins_dict['resp_pkts'][0], n_bins_dict['resp_pkts'][1], f'{filepath_discretization}/resp_pkts.bin', save_discretization)
             if 'resp_ip_bytes' in attributes_to_discretize: 
-                Event.disc_resp_ip_bytes = Equal_Frequency_Discretizer(n_bins_dict['resp_ip_bytes'][0], n_bins_dict['resp_ip_bytes'][1], filepath_discretization, save_discretization)
+                Event.disc_resp_ip_bytes = Equal_Frequency_Discretizer(n_bins_dict['resp_ip_bytes'][0], n_bins_dict['resp_ip_bytes'][1], f'{filepath_discretization}/resp_ip_bytes.bin', save_discretization)
 
             if 'orig_syn' in attributes_to_discretize: 
-                EventHistory.disc_orig_syn = Equal_Frequency_Discretizer(n_bins_dict['orig_syn'][0], n_bins_dict['orig_syn'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_syn = Equal_Frequency_Discretizer(n_bins_dict['orig_syn'][0], n_bins_dict['orig_syn'][1], f'{filepath_discretization}/orig_syn.bin', save_discretization)
             if 'orig_fin' in attributes_to_discretize: 
-                EventHistory.disc_orig_fin = Equal_Frequency_Discretizer(n_bins_dict['orig_fin'][0], n_bins_dict['orig_fin'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_fin = Equal_Frequency_Discretizer(n_bins_dict['orig_fin'][0], n_bins_dict['orig_fin'][1], f'{filepath_discretization}/orig_fin.bin', save_discretization)
             if 'orig_syn_ack' in attributes_to_discretize: 
-                EventHistory.disc_orig_syn_ack = Equal_Frequency_Discretizer(n_bins_dict['orig_syn_ack'][0], n_bins_dict['orig_syn_ack'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_syn_ack = Equal_Frequency_Discretizer(n_bins_dict['orig_syn_ack'][0], n_bins_dict['orig_syn_ack'][1], f'{filepath_discretization}/orig_syn_ack.bin', save_discretization)
             if 'orig_rst' in attributes_to_discretize: 
-                EventHistory.disc_orig_rst = Equal_Frequency_Discretizer(n_bins_dict['orig_rst'][0], n_bins_dict['orig_rst'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_rst = Equal_Frequency_Discretizer(n_bins_dict['orig_rst'][0], n_bins_dict['orig_rst'][1], f'{filepath_discretization}/orig_rst.bin', save_discretization)
             if 'resp_syn' in attributes_to_discretize: 
-                EventHistory.disc_resp_syn = Equal_Frequency_Discretizer(n_bins_dict['resp_syn'][0], n_bins_dict['resp_syn'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_syn = Equal_Frequency_Discretizer(n_bins_dict['resp_syn'][0], n_bins_dict['resp_syn'][1], f'{filepath_discretization}/resp_syn.bin', save_discretization)
             if 'resp_fin' in attributes_to_discretize: 
-                EventHistory.disc_resp_fin = Equal_Frequency_Discretizer(n_bins_dict['resp_fin'][0], n_bins_dict['resp_fin'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_fin = Equal_Frequency_Discretizer(n_bins_dict['resp_fin'][0], n_bins_dict['resp_fin'][1], f'{filepath_discretization}/resp_fin.bin', save_discretization)
             if 'resp_syn_ack' in attributes_to_discretize: 
-                EventHistory.disc_resp_syn_ack = Equal_Frequency_Discretizer(n_bins_dict['resp_syn_ack'][0], n_bins_dict['resp_syn_ack'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_syn_ack = Equal_Frequency_Discretizer(n_bins_dict['resp_syn_ack'][0], n_bins_dict['resp_syn_ack'][1], f'{filepath_discretization}/resp_syn_ack.bin', save_discretization)
             if 'resp_rst' in attributes_to_discretize: 
-                EventHistory.disc_resp_rst = Equal_Frequency_Discretizer(n_bins_dict['resp_rst'][0], n_bins_dict['resp_rst'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_rst = Equal_Frequency_Discretizer(n_bins_dict['resp_rst'][0], n_bins_dict['resp_rst'][1], f'{filepath_discretization}/resp_rst.bin', save_discretization)
             if 'orig_bad_checksum' in attributes_to_discretize: 
-                EventHistory.disc_orig_bad_checksum = Equal_Frequency_Discretizer(n_bins_dict['orig_bad_checksum'][0], n_bins_dict['orig_bad_checksum'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_bad_checksum = Equal_Frequency_Discretizer(n_bins_dict['orig_bad_checksum'][0], n_bins_dict['orig_bad_checksum'][1], f'{filepath_discretization}/orig_bad_checksum.bin', save_discretization)
             if 'orig_content_gap' in attributes_to_discretize: 
-                EventHistory.disc_orig_content_gap = Equal_Frequency_Discretizer(n_bins_dict['orig_content_gap'][0], n_bins_dict['orig_content_gap'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_content_gap = Equal_Frequency_Discretizer(n_bins_dict['orig_content_gap'][0], n_bins_dict['orig_content_gap'][1], f'{filepath_discretization}/orig_content_gap.bin', save_discretization)
             if 'orig_retransmitted_payload' in attributes_to_discretize: 
-                EventHistory.disc_orig_retransmitted_payload = Equal_Frequency_Discretizer(n_bins_dict['orig_retransmitted_payload'][0], n_bins_dict['orig_retransmitted_payload'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_retransmitted_payload = Equal_Frequency_Discretizer(n_bins_dict['orig_retransmitted_payload'][0], n_bins_dict['orig_retransmitted_payload'][1], f'{filepath_discretization}/orig_retransmitted_payload.bin', save_discretization)
             if 'orig_zero_window' in attributes_to_discretize: 
-                EventHistory.disc_orig_zero_window = Equal_Frequency_Discretizer(n_bins_dict['orig_zero_window'][0], n_bins_dict['orig_zero_window'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_orig_zero_window = Equal_Frequency_Discretizer(n_bins_dict['orig_zero_window'][0], n_bins_dict['orig_zero_window'][1], f'{filepath_discretization}/orig_zero_window.bin', save_discretization)
             if 'resp_bad_checksum' in attributes_to_discretize: 
-                EventHistory.disc_resp_bad_checksum = Equal_Frequency_Discretizer(n_bins_dict['resp_bad_checksum'][0], n_bins_dict['resp_bad_checksum'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_bad_checksum = Equal_Frequency_Discretizer(n_bins_dict['resp_bad_checksum'][0], n_bins_dict['resp_bad_checksum'][1], f'{filepath_discretization}/resp_bad_checksum.bin', save_discretization)
             if 'resp_content_gap' in attributes_to_discretize: 
-                EventHistory.disc_resp_content_gap = Equal_Frequency_Discretizer(n_bins_dict['resp_content_gap'][0], n_bins_dict['resp_content_gap'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_content_gap = Equal_Frequency_Discretizer(n_bins_dict['resp_content_gap'][0], n_bins_dict['resp_content_gap'][1], f'{filepath_discretization}/resp_content_gap.bin', save_discretization)
             if 'resp_retransmitted_payload' in attributes_to_discretize: 
-                EventHistory.disc_resp_retransmitted_payload = Equal_Frequency_Discretizer(n_bins_dict['resp_retransmitted_payload'][0], n_bins_dict['resp_retransmitted_payload'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_retransmitted_payload = Equal_Frequency_Discretizer(n_bins_dict['resp_retransmitted_payload'][0], n_bins_dict['resp_retransmitted_payload'][1], f'{filepath_discretization}/resp_retransmitted_payload.bin', save_discretization)
             if 'resp_zero_window' in attributes_to_discretize: 
-                EventHistory.disc_resp_zero_window = Equal_Frequency_Discretizer(n_bins_dict['resp_zero_window'][0], n_bins_dict['resp_zero_window'][1], filepath_discretization, save_discretization)
+                EventHistory.disc_resp_zero_window = Equal_Frequency_Discretizer(n_bins_dict['resp_zero_window'][0], n_bins_dict['resp_zero_window'][1], f'{filepath_discretization}/resp_zero_window.bin', save_discretization)
         else:
             raise ValueError('the type of discretization is not valid')
         
