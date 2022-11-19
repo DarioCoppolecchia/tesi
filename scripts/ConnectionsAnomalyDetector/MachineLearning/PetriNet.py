@@ -9,8 +9,8 @@ class PetriNet:
     def train(self, xes_log: EventLog, delta: float, activity: str) -> None:
         ptree = ind_miner.apply_tree(xes_log, parameters={Parameters.NOISE_THRESHOLD: delta, Parameters.ACTIVITY_KEY: activity}, variant=ind_miner.Variants.IMf)
         self.__model = converter.apply(ptree)
-        pm4py.view_petri_net(self.__model[0], self.__model[1], self.__model[2])
-        input('digita per fare la prossima rete')
+        #pm4py.view_petri_net(self.__model[0], self.__model[1], self.__model[2])
+        #input('digita per fare la prossima rete')
 
     def calc_conformance(self, xes_log: EventLog, attr) -> DataFrame:
         return pm4py.fitness_alignments(xes_log, self.__model[0], self.__model[1], self.__model[2])

@@ -40,7 +40,7 @@ class PetriNetCollector:
                 log[i] = Trace({'concept:name': activity[attr]} for activity in trace)
             if not exists(file_name_complete): # train the model only if isn't already present in the folder
                 saved.append(attr)
-                print(f'petri_net_{attr.replace("concept:", "")}.png')
+                #print(f'\npetri_net_{attr.replace("concept:", "")}.png')
                 pn.train(log, self.__delta, 'concept:name')
             else:
                 not_saved.append(attr)
@@ -54,12 +54,18 @@ class PetriNetCollector:
 
         file_name_complete = f'{file_name}_{attr.replace("concept:", "")}.csv'
 
+        tot = len(self.__data_log)
         if not exists(file_name_complete):
-            with tqdm(total=len(self.__data_log), desc=f'{attr} :: ', position=pos) as pbar:
-                for i, trace in enumerate(self.__data_log):
-                    log= EventLog([Trace({'concept:name': activity[attr]} for activity in trace)])
-                    res[i] = pn.calc_conformance(log, attr)['average_trace_fitness']
-                    pbar.update(1)
+            next_perc = 10
+            for i, trace in enumerate(self.__data_log):
+                log= EventLog([Trace({'concept:name': activity[attr]} for activity in trace)])
+                res[i] = pn.calc_conformance(log, attr)['average_trace_fitness']
+                
+                perc = int(((i / tot) * 100))
+                if perc == next_perc:
+                    print(f'{attr} :: {perc} %')
+                    next_perc += 10
+            print(f'{attr} :: 100 % - completato')
 
             DataFrame({'conformance': res}).to_csv(file_name_complete)
         else:
@@ -70,7 +76,6 @@ class PetriNetCollector:
 
     def create_PetriNet_dataset(self, file_name: str) -> tuple[DataFrame, DataFrame]:
         df = DataFrame()
-        Y = DataFrame()
 
         try:
             os.makedirs(file_name[:file_name.rfind('/')+1]) # create the folder if isn't already present

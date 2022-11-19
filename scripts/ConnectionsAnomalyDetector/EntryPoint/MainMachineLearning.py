@@ -58,7 +58,9 @@ class MainMachineLearning:
         print('loading the xes train file for dataset...')
         self.__petriNetCollector.load_xes(path_of_file_xes_train_dataset)
         print('creating the dataset for the Anomaly Detector...')
-        dataset, _ = self.__petriNetCollector.create_PetriNet_dataset(path_of_petriNet_models_dataset_train)
+        dataset, Y = self.__petriNetCollector.create_PetriNet_dataset(path_of_petriNet_models_dataset_train)
+        dataset['label'] = Y
+        dataset.to_csv('../models/PetriNets/dataset_train.csv')
         print('training the Anomaly Detector...')
         self.__anomalyDetector.train(dataset, path_of_anomalyDetector_models_train)
 
@@ -67,8 +69,6 @@ class MainMachineLearning:
 
         config = configparser.ConfigParser()
         config.read(config_path)
-
-        # TODO: gestione del salvataggio o caricamento del dataset
 
         if 'Files' in config:
             path_of_petriNet_models_dataset_test = config['Files']['path_of_petriNet_models_dataset_test'] if 'path_of_petriNet_models_dataset_test' in config['Files'] else '../models/PetriNets/dataset_test/pn'
@@ -81,6 +81,8 @@ class MainMachineLearning:
         self.__petriNetCollector.load_xes(path_of_file_xes_test)
         print('creating the dataset for the Anomaly Detector...')
         dataset, Y = self.__petriNetCollector.create_PetriNet_dataset(path_of_petriNet_models_dataset_test)
+        dataset['label'] = Y
+        dataset.to_csv('../models/PetriNets/dataset_test.csv')
         print('predicting with Anomaly Detector...')
         y_pred = self.__anomalyDetector.predict(dataset)
         print('printing the results...')
