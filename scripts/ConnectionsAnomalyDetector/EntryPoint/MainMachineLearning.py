@@ -52,9 +52,9 @@ class MainMachineLearning:
         path_of_file_xes_train_dataset = '../logs/ML/conn_train_dataset.xes'
 
         print('loading the xes train file...')
-        self.__petriNetCollector.load_xes(path_of_file_xes_train)
+        #self.__petriNetCollector.load_xes(path_of_file_xes_train)
         print('training the petriNet...')
-        self.__petriNetCollector.train(path_of_petriNet_models_train)
+        #self.__petriNetCollector.train(path_of_petriNet_models_train)
         print('loading the xes train file for dataset...')
         self.__petriNetCollector.load_xes(path_of_file_xes_train_dataset)
         print('creating the dataset for the Anomaly Detector...')
@@ -62,7 +62,20 @@ class MainMachineLearning:
         dataset['label'] = Y
         dataset.to_csv('../models/PetriNets/dataset_train.csv')
         print('training the Anomaly Detector...')
-        self.__anomalyDetector.train(dataset, path_of_anomalyDetector_models_train)
+        import pandas as pd
+        columns = [
+            'concept:duration',
+            'concept:orig_bytes',
+            'concept:conn_state',
+            'concept:orig_syn',
+            'concept:orig_content_gap',
+            'concept:orig_retransmitted_payload',
+        ]
+        new_dataset = pd.DataFrame()
+        for col in columns:
+            new_dataset[col] = dataset[col]
+        print(new_dataset.value_counts())
+        self.__anomalyDetector.train(new_dataset, path_of_anomalyDetector_models_train)
 
     def __test_model(self, config_path: str=''):
         import configparser
@@ -84,6 +97,19 @@ class MainMachineLearning:
         dataset['label'] = Y
         dataset.to_csv('../models/PetriNets/dataset_test.csv')
         print('predicting with Anomaly Detector...')
-        y_pred = self.__anomalyDetector.predict(dataset)
+        import pandas as pd
+        columns = [
+            'concept:duration',
+            'concept:orig_bytes',
+            'concept:conn_state',
+            'concept:orig_syn',
+            'concept:orig_content_gap',
+            'concept:orig_retransmitted_payload',
+        ]
+        new_dataset = pd.DataFrame()
+        for col in columns:
+            new_dataset[col] = dataset[col]
+        print(new_dataset.value_counts())
+        y_pred = self.__anomalyDetector.predict(new_dataset)
         print('printing the results...')
         self.__anomalyDetector.create_confusion_matrix(Y, y_pred)
