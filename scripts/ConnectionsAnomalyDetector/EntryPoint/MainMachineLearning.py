@@ -1,5 +1,6 @@
 from MachineLearning.AnomalyDetector    import AnomalyDetector
 from MachineLearning.PetriNetCollector  import PetriNetCollector
+import pandas as pd
 
 class MainMachineLearning:
     def __init__(self, config_path: str='') -> None:
@@ -36,8 +37,6 @@ class MainMachineLearning:
         config = configparser.ConfigParser()
         config.read(config_path)
 
-        # TODO: gestione del salvataggio o caricamento del dataset
-
         if 'Files' in config:
             path_of_file_xes_train = config['Files']['path_of_file_xes_train'] if 'path_of_file_xes_train' in config['Files'] else '../logs/ML/conn_train_pn.xes'
             path_of_petriNet_models_train = config['Files']['path_of_petriNet_models_train'] if 'path_of_petriNet_models_train' in config['Files'] else '../models/PetriNets/train/pn'
@@ -52,30 +51,15 @@ class MainMachineLearning:
         path_of_file_xes_train_dataset = '../logs/ML/conn_train_dataset.xes'
 
         print('loading the xes train file...')
-        #self.__petriNetCollector.load_xes(path_of_file_xes_train)
+        self.__petriNetCollector.load_xes(path_of_file_xes_train)
         print('training the petriNet...')
-        #self.__petriNetCollector.train(path_of_petriNet_models_train)
-        print('loading the xes train file for dataset...')
-        self.__petriNetCollector.load_xes(path_of_file_xes_train_dataset)
-        print('creating the dataset for the Anomaly Detector...')
-        dataset, Y = self.__petriNetCollector.create_PetriNet_dataset(path_of_petriNet_models_dataset_train)
-        dataset['label'] = Y
-        dataset.to_csv('../models/PetriNets/dataset_train.csv')
-        print('training the Anomaly Detector...')
-        import pandas as pd
-        columns = [
-            'concept:duration',
-            'concept:orig_bytes',
-            'concept:conn_state',
-            'concept:orig_syn',
-            'concept:orig_content_gap',
-            'concept:orig_retransmitted_payload',
-        ]
-        new_dataset = pd.DataFrame()
-        for col in columns:
-            new_dataset[col] = dataset[col]
-        print(new_dataset.value_counts())
-        self.__anomalyDetector.train(new_dataset, path_of_anomalyDetector_models_train)
+        self.__petriNetCollector.train(path_of_petriNet_models_train)
+        #print('loading the xes train file for dataset...')
+        #self.__petriNetCollector.load_xes(path_of_file_xes_train_dataset)
+        #print('creating the dataset for the Anomaly Detector...')
+        #dataset, _ = self.__petriNetCollector.create_PetriNet_dataset(path_of_petriNet_models_dataset_train)
+        #print('training the Anomaly Detector...')
+        #self.__anomalyDetector.train(dataset, path_of_anomalyDetector_models_train)
 
     def __test_model(self, config_path: str=''):
         import configparser
@@ -96,20 +80,18 @@ class MainMachineLearning:
         dataset, Y = self.__petriNetCollector.create_PetriNet_dataset(path_of_petriNet_models_dataset_test)
         dataset['label'] = Y
         dataset.to_csv('../models/PetriNets/dataset_test.csv')
-        print('predicting with Anomaly Detector...')
-        import pandas as pd
-        columns = [
-            'concept:duration',
-            'concept:orig_bytes',
-            'concept:conn_state',
-            'concept:orig_syn',
-            'concept:orig_content_gap',
-            'concept:orig_retransmitted_payload',
-        ]
-        new_dataset = pd.DataFrame()
-        for col in columns:
-            new_dataset[col] = dataset[col]
-        print(new_dataset.value_counts())
-        y_pred = self.__anomalyDetector.predict(new_dataset)
-        print('printing the results...')
-        self.__anomalyDetector.create_confusion_matrix(Y, y_pred)
+        #print('predicting with Anomaly Detector...')
+        #y_pred = self.__anomalyDetector.predict(dataset)
+        #for i in range(1, len(dataset.columns) + 1):
+        #    y_pred = self.predizione(dataset, i)
+        #    print(f'printing the results conf matrix {i}...')
+        #    self.__anomalyDetector.create_confusion_matrix(Y, y_pred, i)
+
+    def predizione(self, X: pd.DataFrame, soglia: int):
+        y_pred = []
+        for _, x in X.iterrows():
+            if sum([1 if attr != 1 else 0 for attr in x]) >= soglia:
+                y_pred.append(-1)
+            else:
+                y_pred.append(1)
+        return y_pred
