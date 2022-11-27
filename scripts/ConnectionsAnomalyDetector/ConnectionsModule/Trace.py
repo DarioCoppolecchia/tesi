@@ -122,11 +122,11 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
         """        
         return self.__ts_on_open
 
-    def get_label(self) -> str:
+    def get_label(self) -> CONN_LABEL:
         """Getter of label
 
         :return: the value of label
-        :rtype: str
+        :rtype: CONN_LABEL
         """
         return self.__label
 
