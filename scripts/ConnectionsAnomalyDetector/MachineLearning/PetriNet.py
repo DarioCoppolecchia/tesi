@@ -12,7 +12,7 @@ class PetriNet:
         #pm4py.view_petri_net(self.__model[0], self.__model[1], self.__model[2])
         #input('digita per fare la prossima rete')
 
-    def calc_conformance(self, xes_log: EventLog, attr) -> DataFrame:
+    def calc_conformance(self, xes_log: EventLog) -> DataFrame:
         return pm4py.fitness_alignments(xes_log, self.__model[0], self.__model[1], self.__model[2])
 
     def save_model(self, file_name: str) -> None:
