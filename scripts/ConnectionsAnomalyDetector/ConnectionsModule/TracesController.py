@@ -430,7 +430,7 @@ class TracesController:
                 if event_attr_presence[34]:
                     SubElement(eventTag, 'string', {'key': 'concept:resp_zero_window', 'value': event.get_discretized_resp_zero_window()})
         
-        from xml.dom import minidom
+        #from xml.dom import minidom
         rough_string = tostring(tree, 'utf-8')
         reparsed = False
         #reparsed = minidom.parseString(rough_string)
