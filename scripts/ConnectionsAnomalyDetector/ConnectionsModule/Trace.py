@@ -203,7 +203,7 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
         :return: the list of all the value of service
         :rtype: list[str]
         """
-        return [float(event.get_service()) if event.get_service() != '-' else 0 for event in self.__events]
+        return [event.get_service() if event.get_service() != '-' else 0 for event in self.__events]
 
     def get_list_of_duration(self) -> list:
         """Getter of the duration of the events in this trace
@@ -235,7 +235,7 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
         :return: the list of all the value of conn_state
         :rtype: list[CONN_STATE]
         """
-        return [float(event.get_conn_state()) if event.get_conn_state() != '-' else 0 for event in self.__events]
+        return [event.get_conn_state() if event.get_conn_state() != '-' else 0 for event in self.__events]
 
     def get_list_of_missed_bytes(self) -> list:
         """Getter of the missed_bytes of the events in this trace
@@ -251,7 +251,7 @@ with label: {CONN_LABEL.conn_label_to_str(self.__label)}
         :return: the list of all the value of history
         :rtype: list[EventHistory]
         """
-        return [float(event.get_history()) if event.get_history() != '-' else 0 for event in self.__events]
+        return [event.get_history() if event.get_history() != '-' else 0 for event in self.__events]
 
     def get_list_of_orig_pkts(self) -> list:
         """Getter of the orig_pkts of the events in this trace

@@ -34,8 +34,8 @@ class MainTraceController:
         """
         import configparser
 
-        self.traces_controller = TracesController()
-        self.traces_controller.load_paths_and_filters_from_config_file(config_path)
+        self.__traces_controller = TracesController()
+        self.__traces_controller.load_paths_and_filters_from_config_file(config_path)
 
         config = configparser.ConfigParser()
         config.read(config_path)
@@ -121,16 +121,16 @@ class MainTraceController:
             #. exit program
         """
         self.__cls()
-        self.traces_controller.read_and_convert_lines()
+        self.__traces_controller.read_and_convert_lines()
         self.__print_n_traces_and_events() if self.__show_examples else ''
-        self.traces_controller.discretize_attributes(self.__discretization_type, self.__attr_bins_dict, self.__filepath_discretization, self.__save_discretization)
+        self.__traces_controller.discretize_attributes(self.__discretization_type, self.__attr_bins_dict, self.__filepath_discretization, self.__save_discretization)
         self.__print_n_discretized_traces_and_events() if self.__show_examples else ''
-        self.traces_controller.print_Trace_list_to_xes_file(self.__attr_to_xes_traces, self.__attr_to_xes_events)
+        self.__traces_controller.print_Trace_list_to_xes_file(self.__attr_to_xes_traces, self.__attr_to_xes_events)
     
     def __print_n_traces_and_events(self) -> None:
         """prints n random or non random traces and all the events of those traces
         """
-        for trace in self.traces_controller.get_n_traces_and_event(max_n_trace=self.__n_trace_to_print, randomize=self.__randomize_print):
+        for trace in self.__traces_controller.get_n_traces_and_event(max_n_trace=self.__n_trace_to_print, randomize=self.__randomize_print):
             print(trace)
 
     def __print_n_discretized_traces_and_events(self) -> None:
@@ -188,7 +188,7 @@ class MainTraceController:
         if EventHistory.disc_resp_zero_window is not None:
             print(f'responder zero window discretization:\n\tnumber of bins: {EventHistory.disc_resp_zero_window.get_n_bins()}\n\tbins: {EventHistory.disc_resp_zero_window.get_discretized_bins()}')
 
-        for trace in self.traces_controller.get_n_traces_and_event(randomize=True):
+        for trace in self.__traces_controller.get_n_traces_and_event(randomize=True):
             print(f'''
 traces of connection {trace.get_orig_ip()}:{trace.get_orig_port()} {trace.get_resp_ip()}:{trace.get_resp_port()}
 with protocol: {PROTO.proto_to_str(trace.get_proto())}
@@ -212,7 +212,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
         redundant_dict = {}
 
         disc_bins = Event.disc_orig_bytes.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_bytes')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_bytes')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_bytes'] = {
@@ -229,7 +229,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_resp_bytes.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_bytes')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_bytes')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_bytes'] = {
@@ -246,7 +246,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_missed_bytes.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('missed_bytes')
+        attr_list = self.__traces_controller.get_list_of_attribute('missed_bytes')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['missed_bytes'] = {
@@ -263,7 +263,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_orig_pkts.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_pkts')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_pkts')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_pkts'] = {
@@ -280,7 +280,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_duration.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('duration')
+        attr_list = self.__traces_controller.get_list_of_attribute('duration')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['duration'] = {
@@ -297,7 +297,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_orig_ip_bytes.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_ip_bytes')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_ip_bytes')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_ip_bytes'] = {
@@ -314,7 +314,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_resp_pkts.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_pkts')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_pkts')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_pkts'] = {
@@ -331,7 +331,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = Event.disc_resp_ip_bytes.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_ip_bytes')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_ip_bytes')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_ip_bytes'] = {
@@ -348,7 +348,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_syn.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_syn')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_syn')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_syn'] = {
@@ -365,7 +365,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_fin.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_fin')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_fin')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_fin'] = {
@@ -382,7 +382,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_syn_ack.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_syn_ack')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_syn_ack')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_syn_ack'] = {
@@ -399,7 +399,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_rst.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_rst')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_rst')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_rst'] = {
@@ -416,7 +416,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_syn.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_syn')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_syn')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_syn'] = {
@@ -433,7 +433,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_fin.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_fin')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_fin')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_fin'] = {
@@ -450,7 +450,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_syn_ack.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_syn_ack')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_syn_ack')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_syn_ack'] = {
@@ -467,7 +467,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_rst.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_rst')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_rst')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_rst'] = {
@@ -484,7 +484,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_bad_checksum.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_bad_checksum')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_bad_checksum')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_bad_checksum'] = {
@@ -501,7 +501,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_content_gap.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_content_gap')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_content_gap')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_content_gap'] = {
@@ -518,7 +518,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_retransmitted_payload.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_retransmitted_payload')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_retransmitted_payload')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_retransmitted_payload'] = {
@@ -535,7 +535,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_orig_zero_window.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('orig_zero_window')
+        attr_list = self.__traces_controller.get_list_of_attribute('orig_zero_window')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['orig_zero_window'] = {
@@ -552,7 +552,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_bad_checksum.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_bad_checksum')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_bad_checksum')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_bad_checksum'] = {
@@ -569,7 +569,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_content_gap.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_content_gap')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_content_gap')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_content_gap'] = {
@@ -586,7 +586,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_retransmitted_payload.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_retransmitted_payload')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_retransmitted_payload')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_retransmitted_payload'] = {
@@ -603,7 +603,7 @@ with label: {CONN_LABEL.conn_label_to_str(trace.get_label())}
             }
         
         disc_bins = EventHistory.disc_resp_zero_window.get_discretized_bins()
-        attr_list = self.traces_controller.get_list_of_attribute('resp_zero_window')
+        attr_list = self.__traces_controller.get_list_of_attribute('resp_zero_window')
         if 'soglia' == disc_bins[-1]:
             disc_bins.remove('soglia')
             redundant_dict['resp_zero_window'] = {

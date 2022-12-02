@@ -15,7 +15,7 @@ class Equal_Frequency_Discretizer(Discretizer):
         """
         super().__init__(n_bins, soglia, filepath, save)
 
-    def discretize(self, values: list) -> list:
+    def discretize(self, values: list) -> None:
         """Analizes the list of values in input to create the bins
 
         :param values: list of values to discretize with equal Frequency
